@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 
 
-class Importances:
+class DTreeClassifier:
     def __init__(self, data_df, target, train_split):
         self.data_df = data_df
         self.data_len = len(self.data_df)
@@ -40,7 +40,6 @@ class Importances:
                                          criterion=best_params_['criterion'],
                                          random_state=13)
         self.dt.fit(self.X_train, self.Y_train)
-
 
     def get_feature_importances(self):
         self.importance = {}
