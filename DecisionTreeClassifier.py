@@ -8,11 +8,18 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.tree import DecisionTreeClassifier
 
 
-class DTreeClassifier:
-    def __init__(self, data_df, target, train_split, show=False):
+class DTClassifier:
+    def __init__(self, data_df, target, train_split: int, show: int = False):
+        """
+        About: This method is the initiator of the DTClassifier class
+        :param data_df:
+        :param target:
+        :param train_split: The coefficient of splitting into training and training samples
+        :param show: The parameter responsible for displaying the progress of work
+        """
         self.importance = {}
-        self.is_grif_fit = False
         self.is_model_fit = False
+        self.is_grif_fit = False
         self.grid_best_params = None
         self.show = show
         self.data_len = len(data_df)
@@ -73,7 +80,7 @@ class DTreeClassifier:
         self.is_grif_fit = True
 
     def fit(self, grid_params=False, params=None, max_depth=None, max_features=None, min_samples_leaf=None,
-                 min_samples_split=None, criterion=None):
+            min_samples_split=None, criterion=None):
         print("Learning DecisionTreeClassifier...")
         is_params_none = max_depth is None and max_features is None and min_samples_leaf is None and \
                          min_samples_split is None and criterion is None
@@ -168,4 +175,3 @@ class DTreeClassifier:
                                     format(param, types[param], type(p)))
         else:
             raise Exception('The value of the "{0}" parameter must be a non-empty list'.format(param))
-
