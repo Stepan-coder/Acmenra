@@ -1,30 +1,33 @@
 import math
+import pandas as pd
 
 
 class DataSetFieldAnalytics:
     def __init__(self,
                  column_name: str,
-                 values: list,
+                 values: list = None,
                  normal_distribution: bool = False,
                  rounding_factor: int = 2):
         self.column_name = column_name
         self.values = values
         self.normal_distribution = normal_distribution
         self.rounding_factor = rounding_factor
-        self.field_type = type(values[0]).__name__
-        self.count = len(values)
-        self.count_unique = len(list(set(values)))
-        self.nan_count = self._get_nan_count()
-        if self.field_type.startswith("int") or self.field_type == "float":
-            self.min = min(values)
-            self.max = max(values)
-            self.average = sum(values) / self.count
-            if self.normal_distribution:  # Exporting additional statistics
-                math_rasp = self._get_math_rasp()
-                self.math_moda = self._get_math_moda(math_rasp)
-                self.math_wait = self._get_math_wait(math_rasp)
-                self.math_dispersion = self._get_math_dispersion(math_rasp)
-                self.math_sigma = math.sqrt(self.math_dispersion)
+        if values is not None:  # If we have received the values, then we count the statistics
+            self.field_type = type(values[0]).__name__
+            print(self.field_type, self.field_type == "float64", self.field_type.startswith("float"))
+            self.count = len(values)
+            self.count_unique = len(list(set(values)))
+            self.nan_count = self._get_nan_count()
+            if self.field_type.startswith("int") or self.field_type.startswith("float"):  # If it is a numeric format
+                self.min = min(values)
+                self.max = max(values)
+                self.average = sum(values) / self.count
+                if self.normal_distribution:  # Exporting additional statistics
+                    math_rasp = self._get_math_rasp()
+                    self.math_moda = self._get_math_moda(math_rasp)
+                    self.math_wait = self._get_math_wait(math_rasp)
+                    self.math_dispersion = self._get_math_dispersion(math_rasp)
+                    self.math_sigma = math.sqrt(self.math_dispersion)
 
     def __str__(self):
         """
@@ -36,7 +39,7 @@ class DataSetFieldAnalytics:
         text += f"  -Count: {self.count}\n"
         text += f"  -Count unique: {self.count_unique}\n"
         text += f"  -Count NaN: {self.nan_count}\n"
-        if self.field_type.startswith("int") or self.field_type == "float":
+        if self.field_type.startswith("int") or self.field_type.startswith("float"):
             text += f"  Numerical indicators:\n"
             text += f"      -Min: {self.min}\n"
             text += f"      -Max: {self.max}\n"
@@ -61,6 +64,22 @@ class DataSetFieldAnalytics:
                                                                 self.rounding_factor)
         return text
 
+    def get_from_json(self, data):
+        self.column_name = data["column_name"]
+        self.field_type = data["type"]
+        self.count = data["count"]
+        self.count_unique = data["count_unique"]
+        self.nan_count = data["count_NaN"]
+        if "numerical_indicators" in data:
+            self.min = data["numerical_indicators"]["min"]
+            self.max = data["numerical_indicators"]["max"]
+            self.average = data["numerical_indicators"]["average"]
+        if "normal_distribution" in data:
+            self.math_moda = data["normal_distribution"]["moda"]
+            self.math_wait = data["normal_distribution"]["wait"]
+            self.math_dispersion = data["normal_distribution"]["dispersion"]
+            self.math_sigma = data["normal_distribution"]["sigma"]
+
     def to_json(self) -> dict:
         """
         This method export DataSet statistics as json
@@ -72,7 +91,7 @@ class DataSetFieldAnalytics:
                 "count_unique": self.count_unique,
                 "count_NaN": self.nan_count
                 }
-        if self.field_type.startswith("int") or self.field_type == "float":
+        if self.field_type.startswith("int") or self.field_type.startswith("float"):
             data["numerical_indicators"] = {"min": self.min,
                                             "max": self.max,
                                             "average": self.average
