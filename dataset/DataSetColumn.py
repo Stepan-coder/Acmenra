@@ -12,22 +12,8 @@ class DataSetFieldAnalytics:
         self.values = values
         self.normal_distribution = normal_distribution
         self.rounding_factor = rounding_factor
-        if values is not None:  # If we have received the values, then we count the statistics
-            self.field_type = type(values[0]).__name__
-            print(self.field_type, self.field_type == "float64", self.field_type.startswith("float"))
-            self.count = len(values)
-            self.count_unique = len(list(set(values)))
-            self.nan_count = self._get_nan_count()
-            if self.field_type.startswith("int") or self.field_type.startswith("float"):  # If it is a numeric format
-                self.min = min(values)
-                self.max = max(values)
-                self.average = sum(values) / self.count
-                if self.normal_distribution:  # Exporting additional statistics
-                    math_rasp = self._get_math_rasp()
-                    self.math_moda = self._get_math_moda(math_rasp)
-                    self.math_wait = self._get_math_wait(math_rasp)
-                    self.math_dispersion = self._get_math_dispersion(math_rasp)
-                    self.math_sigma = math.sqrt(self.math_dispersion)
+        if self.values is not None:  # If we have received the values, then we count the statistics
+            self.get_column_info()
 
     def __str__(self):
         """
@@ -63,6 +49,23 @@ class DataSetFieldAnalytics:
                 text += "      -Moda + 3 * Sigma: {0}\n".format(round(self.math_wait + 3 * self.math_sigma),
                                                                 self.rounding_factor)
         return text
+
+    def get_column_info(self):
+        if self.values is not None:  # If we have received the values, then we count the statistics
+            self.field_type = type(self.values[0]).__name__
+            self.count = len(self.values)
+            self.count_unique = len(list(set(self.values)))
+            self.nan_count = self._get_nan_count()
+            if self.field_type.startswith("int") or self.field_type.startswith("float"):  # If it is a numeric format
+                self.min = min(self.values)
+                self.max = max(self.values)
+                self.average = sum(self.values) / self.count
+                if self.normal_distribution:  # Exporting additional statistics
+                    math_rasp = self._get_math_rasp()
+                    self.math_moda = self._get_math_moda(math_rasp)
+                    self.math_wait = self._get_math_wait(math_rasp)
+                    self.math_dispersion = self._get_math_dispersion(math_rasp)
+                    self.math_sigma = math.sqrt(self.math_dispersion)
 
     def get_from_json(self, data):
         self.column_name = data["column_name"]

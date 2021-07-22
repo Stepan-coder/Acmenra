@@ -24,21 +24,102 @@ class DataSet:
         self.dataset_keys_count = None  # Number of columns in the dataset
         self.dataset_file = None
         self.delimiter = ","
+        self.encoding = 'utf-8'
         self.dataset_analytics = {}
 
     def __len__(self):
         return len(self.dataset)
+
+    def set_delimiter(self, delimiter: str):
+        self.delimiter = delimiter
+
+    def get_delimiter(self):
+        return self.delimiter
+
+    def set_encoding(self, encoding: str):
+        self.encoding = encoding
+
+    def get_encoding(self):
+        return self.encoding
+
+    def add_row(self, new_row: dict):
+        if len(set(new_row.keys())) != len(new_row.keys()):
+            raise Exception(f"Column names should not be repeated!")
+        for column in new_row:
+            if column not in self.dataset_keys:
+                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        for column in self.dataset_keys:
+            if column not in new_row.keys():
+                raise Exception(f"The \"{column}\"  column is missing!")
+        self.dataset.loc[len(self.dataset)] = [new_row[d] for d in self.dataset_keys]
+
+    def get_row(self, row: int) -> Dict:
+        """
+        This method returns a row of the dataset in dictionary format, where the keys are the column names and the
+        values are the values in the columns
+        :param row:
+        :return:
+        """
+        if row < 0:
+            raise Exception("The string value must be greater than 0!")
+        if row >= self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        result = {}
+        for column in self.dataset_keys:
+            if column not in result:
+                result[column] = self.get_from_field(column=column,
+                                                     row=row)
+        return result
+
+    def get_columns(self, columns: list) -> list:
+        """
+        This method summarizes the values from the columns of the dataset and returns them as a list of tuples
+        :param columns: List of column names
+        :return:
+        """
+        for column in columns:
+            if column not in self.dataset_keys:
+                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        result = []
+        for i in range(self.dataset_len):
+            if len(columns) > 1:
+                row = []
+                for column in columns:
+                    if column in self.dataset_keys:
+                        row.append(self.get_from_field(row=i,
+                                                       column=column))
+                result.append(row)
+            else:
+                result.append(self.get_from_field(row=i,
+                                                  column=str(columns)))
+        return result
+
+    def get_from_field(self, column: str, row: int):
+        """
+        This method gets the value from the dataset cell
+        :param column: The name of the dataset column
+        :param row: Индекс строки датасета
+        :return: value
+        """
+        if row < 0:
+            raise Exception("The string value must be greater than 0!")
+        if row >= self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        if column not in self.dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        return self.dataset.at[row, column]
 
     def get_dataset_analytics(self, normal_distribution: bool = False):
         """
         This method calculates column metrics
         :return:
         """
-        if self.dataset is not None:
+        if self.dataset is not None and len(self.dataset) > 0:
             for key in self.dataset_keys:
                 self.dataset_analytics[key] = DataSetFieldAnalytics(column_name=key,
                                                                     values=self.dataset[key],
                                                                     normal_distribution=normal_distribution)
+            self._update_dataset_base_info()
 
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
         """
@@ -82,8 +163,24 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def load_dataset(self,
-                     dataset: pd.DataFrame):
+    def create_empty_dataset(self,
+                             columns: list,
+                             delimiter: str,
+                             encoding: str = 'utf-8'):
+        """
+        This method creates an empty dataset
+        columns: List of column names
+        :return:
+        """
+        if len(set(columns)) != len(columns):
+            raise Exception(f"Column names should not be repeated!")
+        self.delimiter = delimiter
+        self.encoding = encoding
+        self.dataset = pd.DataFrame(columns=columns)
+        self.is_dataset_loaded = True
+        self._update_dataset_base_info()
+
+    def load_dataset(self, dataset: pd.DataFrame):
         """
         This method loads the dataset into the DataSet class
         :param dataset: Explicitly specifying pd. DataFrame as a dataset
@@ -135,11 +232,13 @@ class DataSet:
         if not os.path.exists(dataset_project_folder):
             raise Exception("The specified path was not found!")
 
-        self.dataset = None
         with open(f"{dataset_project_folder}\\{json_config_filename}", 'r') as jsonfile:
             dataset_info = json.load(jsonfile)
             jsonfile.close()
             self._read_dataset_info_from_json(dataset_info)
+        self.dataset = self._read_from_csv(filename=f"{dataset_project_folder}\\{self.dataset_file}",
+                                           delimiter=self.delimiter,
+                                           encoding=self.encoding)
         self.is_dataset_loaded = True
 
     def export(self,
@@ -176,6 +275,7 @@ class DataSet:
                            "columns_count": self.dataset_keys_count,
                            "rows": self.dataset_len,
                            "delimiter": self.delimiter,
+                           "encoding": self.encoding,
                            "columns": {}}
             if self.dataset is not None:
                 for key in self.dataset_keys:
@@ -183,7 +283,10 @@ class DataSet:
                                                              self.dataset_analytics[key].to_json())
                 with open(f"{folder}{dataset_filename}\\{dataset_filename}.json", 'w') as jsonfile:
                     json.dump(json_config, jsonfile, indent=4)
-        self.dataset.to_csv(f"{folder}{dataset_filename}\\{dataset_filename}.csv", index=False)
+        self.dataset.to_csv(f"{folder}{dataset_filename}\\{dataset_filename}.csv",
+                            index=False,
+                            sep=self.delimiter,
+                            encoding=self.encoding)
 
     def _read_dataset_info_from_json(self, data):
         self.dataset_file = data["dataset_filename"]
@@ -191,6 +294,7 @@ class DataSet:
         self.dataset_keys_count = data["columns_count"]
         self.dataset_len = data["rows"]
         self.delimiter = data["delimiter"]
+        self.encoding = data["encoding"]
         for dk in self.dataset_keys:
             self.dataset_analytics[dk] = DataSetFieldAnalytics(column_name=dk)
             self.dataset_analytics[dk].get_from_json(data=data["columns"][dk])
