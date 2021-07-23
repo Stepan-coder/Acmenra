@@ -31,12 +31,21 @@ class DataSet:
         return len(self.dataset)
 
     def set_delimiter(self, delimiter: str):
+        """
+        This method sets the delimiter character
+        :param delimiter: Symbol-split in a .csv file
+        """
         self.delimiter = delimiter
 
-    def get_delimiter(self):
+    def get_delimiter(self) -> str:
+        """
+        This method returns a delimiter character
+        :return Symbol-split in a .csv file
+        """
         return self.delimiter
 
     def set_encoding(self, encoding: str):
+
         self.encoding = encoding
 
     def get_encoding(self):
@@ -57,7 +66,7 @@ class DataSet:
         """
         This method returns a row of the dataset in dictionary format, where the keys are the column names and the
         values are the values in the columns
-        :param row:
+        :param row: Index of the dataset string
         :return:
         """
         if row < 0:
@@ -98,7 +107,7 @@ class DataSet:
         """
         This method gets the value from the dataset cell
         :param column: The name of the dataset column
-        :param row: Индекс строки датасета
+        :param row: Index of the dataset string
         :return: value
         """
         if row < 0:
@@ -109,17 +118,45 @@ class DataSet:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return self.dataset.at[row, column]
 
-    def get_dataset_analytics(self, normal_distribution: bool = False):
+    def set_to_field(self, column: str, row: int, value):
+        """
+        This method gets the value from the dataset cell
+        :param column: The name of the dataset column
+        :param row: Index of the dataset string
+        :param value: The value that we want to write
+        """
+        if row < 0:
+            raise Exception("The string value must be greater than 0!")
+        if row >= self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        if column not in self.dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        self.dataset.loc[row, column] = value
+
+    def get_column_analytics(self, column_name: str,  normal_distribution: bool = False) -> DataSetFieldAnalytics:
+        """
+        This method returns statistical analytics for a given column
+        :param column_name: The name of the dataset column for which we output statistics
+        :param normal_distribution: Responsible for calculating additional parameters
+        :return:
+        """
+        if column_name not in self.dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        if column_name not in self.dataset_analytics:
+            self.update_dataset_analytics(normal_distribution=normal_distribution)
+        return self.dataset_analytics[column_name]
+
+    def update_dataset_analytics(self, normal_distribution: bool = False):
         """
         This method calculates column metrics
-        :return:
+        :param normal_distribution: Responsible for calculating additional parameters
         """
         if self.dataset is not None and len(self.dataset) > 0:
             for key in self.dataset_keys:
                 self.dataset_analytics[key] = DataSetFieldAnalytics(column_name=key,
                                                                     values=self.dataset[key],
                                                                     normal_distribution=normal_distribution)
-            self._update_dataset_base_info()
+        self._update_dataset_base_info()
 
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
         """
@@ -246,7 +283,7 @@ class DataSet:
                dataset_folder: str = None,
                including_json: bool = True):
         """
-        This method exports the dataset
+        This method exports the dataset as DataSet Project
         :param dataset_name: New dataset name (if the user wants to specify another one)
         :param dataset_folder: The folder to place the dataset files in
         :param including_json: Responsible for the export .the json config file together with the dataset
@@ -279,6 +316,8 @@ class DataSet:
                            "columns": {}}
             if self.dataset is not None:
                 for key in self.dataset_keys:
+                    if key not in self.dataset_analytics:
+                        self.update_dataset_analytics()
                     json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                              self.dataset_analytics[key].to_json())
                 with open(f"{folder}{dataset_filename}\\{dataset_filename}.json", 'w') as jsonfile:
@@ -289,6 +328,10 @@ class DataSet:
                             encoding=self.encoding)
 
     def _read_dataset_info_from_json(self, data):
+        """
+        This method reads config and statistics info from .json file
+        :param data: json data
+        """
         self.dataset_file = data["dataset_filename"]
         self.dataset_keys = data["columns_names"]
         self.dataset_keys_count = data["columns_count"]
@@ -303,6 +346,8 @@ class DataSet:
         """
         This method updates the basic information about the dataset
         """
+        if self.dataset is None:
+            print("dataset is None")
         if self.dataset is not None:
             self.dataset_len = len(self.dataset)
             self.dataset_keys = self.dataset.keys()
@@ -311,20 +356,20 @@ class DataSet:
     @staticmethod
     def _read_from_csv(filename: str,
                        delimiter: str,
-                       encoding: str = 'utf-8'):
+                       encoding: str = 'utf-8') -> pd.DataFrame:
         """
         This method reads the dataset from a .csv file
         :param filename: The name of the .csv file
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return: pd.DataFrame
+        :return: The dataframe read from the file
         """
         return pd.read_csv(filename,
                            encoding=encoding,
                            delimiter=delimiter)
 
 
-def merge_two_dicts(dict1, dict2):
+def merge_two_dicts(dict1: dict, dict2: dict) -> dict:
     """
     This method merge two dicts
     :param dict1: First dict to merge
