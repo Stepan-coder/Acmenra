@@ -91,7 +91,7 @@ class DataSet:
                 result.append(row)
             else:
                 result.append(self.get_from_field(row=i,
-                                                  column=str(columns)))
+                                                  column=str(columns[0])))
         return result
 
     def get_from_field(self, column: str, row: int):
@@ -266,8 +266,8 @@ class DataSet:
             else:
                 raise Exception("The specified path was not found!")
 
-        if not os.path.exists(f"{dataset_filename}"):
-            os.makedirs(f"{dataset_filename}")
+        if not os.path.exists(f"{folder}{dataset_filename}"):
+            os.makedirs(f"{folder}{dataset_filename}")
 
         if including_json:
             json_config = {"dataset_filename": f"{dataset_filename}.csv",
