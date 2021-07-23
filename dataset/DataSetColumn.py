@@ -65,7 +65,10 @@ class DataSetFieldAnalytics:
                     self.math_moda = self._get_math_moda(math_rasp)
                     self.math_wait = self._get_math_wait(math_rasp)
                     self.math_dispersion = self._get_math_dispersion(math_rasp)
-                    self.math_sigma = math.sqrt(self.math_dispersion)
+                    if self.math_dispersion >= 0:
+                        self.math_sigma = math.sqrt(self.math_dispersion)
+                    else:
+                        self.math_sigma = -1 * math.sqrt(abs(self.math_dispersion))
 
     def get_from_json(self, data):
         self.column_name = data["column_name"]
