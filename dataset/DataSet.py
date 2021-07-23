@@ -51,6 +51,36 @@ class DataSet:
     def get_encoding(self):
         return self.encoding
 
+    def get_from_field(self, column: str, index: int):
+        """
+        This method gets the value from the dataset cell
+        :param column: The name of the dataset column
+        :param index: Index of the dataset string
+        :return: value
+        """
+        if index < 0:
+            raise Exception("The string value must be greater than 0!")
+        if index > self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        if column not in self.dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        return self.dataset.at[index, column]
+
+    def set_to_field(self, column: str, index: int, value):
+        """
+        This method gets the value from the dataset cell
+        :param column: The name of the dataset column
+        :param index: Index of the dataset string
+        :param value: The value that we want to write
+        """
+        if index < 0:
+            raise Exception("The string value must be greater than 0!")
+        if index > self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        if column not in self.dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        self.dataset.loc[index, column] = value
+
     def add_row(self, new_row: dict):
         if len(set(new_row.keys())) != len(new_row.keys()):
             raise Exception(f"Column names should not be repeated!")
@@ -59,79 +89,74 @@ class DataSet:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         for column in self.dataset_keys:
             if column not in new_row.keys():
-                raise Exception(f"The \"{column}\"  column is missing!")
+                raise Exception(f"The \"{column}\" column is missing!")
         self.dataset.loc[len(self.dataset)] = [new_row[d] for d in self.dataset_keys]
 
-    def get_row(self, row: int) -> Dict:
+    def get_row(self, index: int) -> Dict:
         """
         This method returns a row of the dataset in dictionary format, where the keys are the column names and the
         values are the values in the columns
-        :param row: Index of the dataset string
+        :param index: Index of the dataset string
         :return:
         """
-        if row < 0:
+        if index < 0:
             raise Exception("The string value must be greater than 0!")
-        if row >= self.dataset_len:
+        if index > self.dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
         result = {}
         for column in self.dataset_keys:
             if column not in result:
                 result[column] = self.get_from_field(column=column,
-                                                     row=row)
+                                                     index=index)
         return result
 
-    def get_columns(self, columns: list) -> list:
+    def delete_row(self, index):
+        """
+        This method delete row from dataset
+        :param index: Index of the dataset string
+        """
+        if index < 0:
+            raise Exception("The string value must be greater than 0!")
+        if index > self.dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        self.dataset = self.dataset.drop(index=index)
+        self._update_dataset_base_info()
+
+    def get_columns(self, columns: list) -> pd.DataFrame:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param columns: List of column names
-        :return:
+        :return: Returns the selected columns
         """
         for column in columns:
             if column not in self.dataset_keys:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        result = []
-        for i in range(self.dataset_len):
-            if len(columns) > 1:
-                row = []
-                for column in columns:
-                    if column in self.dataset_keys:
-                        row.append(self.get_from_field(row=i,
-                                                       column=column))
-                result.append(row)
-            else:
-                result.append(self.get_from_field(row=i,
-                                                  column=str(columns[0])))
-        return result
+        return self.dataset[columns]
 
-    def get_from_field(self, column: str, row: int):
+    def get_dataset(self) -> pd.DataFrame:
         """
-        This method gets the value from the dataset cell
-        :param column: The name of the dataset column
-        :param row: Index of the dataset string
-        :return: value
+        This method return dataset as pd.DataFrame
+        :return: dataset as pd.DataFrame
         """
-        if row < 0:
-            raise Exception("The string value must be greater than 0!")
-        if row >= self.dataset_len:
-            raise Exception("The row value must be less than the number of rows in the dataset!")
-        if column not in self.dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        return self.dataset.at[row, column]
+        return self.dataset
 
-    def set_to_field(self, column: str, row: int, value):
+    def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
         """
-        This method gets the value from the dataset cell
-        :param column: The name of the dataset column
-        :param row: Index of the dataset string
-        :param value: The value that we want to write
+        This method attaches a new dataset to the current one
+        :param dataset: The dataset to be attached to the current one
+        :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         """
-        if row < 0:
-            raise Exception("The string value must be greater than 0!")
-        if row >= self.dataset_len:
-            raise Exception("The row value must be less than the number of rows in the dataset!")
-        if column not in self.dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        self.dataset.loc[row, column] = value
+        if len(dataset) == 0:
+            raise Exception("You are trying to add an empty dataset")
+        if len(self.dataset) != len(dataset):
+            if not dif_len:
+                raise Exception("The pd.DataFrames must have the same size!")
+        columnns_names = list(self.dataset.keys()) + list(dataset.keys())
+        if len(set(columnns_names)) != len(columnns_names):
+            raise Exception("The current dataset and the new dataset have the same column names!")
+        self.dataset = self.dataset.join(dataset)
+        self._update_dataset_base_info()
+
 
     def get_column_analytics(self, column_name: str,  normal_distribution: bool = False) -> DataSetFieldAnalytics:
         """
@@ -201,19 +226,21 @@ class DataSet:
             raise Exception("There is no such column in the presented dataset!")
 
     def create_empty_dataset(self,
-                             columns: list,
-                             delimiter: str,
+                             columns_names: list,
+                             delimiter: str = ",",
                              encoding: str = 'utf-8'):
         """
         This method creates an empty dataset
-        columns: List of column names
+        :param columns_names: List of column names
+        :param delimiter: Symbol-split in a .csv file
+        :param encoding: Explicit indication of the .csv file encoding
         :return:
         """
-        if len(set(columns)) != len(columns):
+        if len(set(columns_names)) != len(columns_names):
             raise Exception(f"Column names should not be repeated!")
         self.delimiter = delimiter
         self.encoding = encoding
-        self.dataset = pd.DataFrame(columns=columns)
+        self.dataset = pd.DataFrame(columns=columns_names)
         self.is_dataset_loaded = True
         self._update_dataset_base_info()
 
