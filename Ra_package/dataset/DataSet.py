@@ -11,7 +11,7 @@ from DataSetColumn import *
 class DataSet:
     def __init__(self, dataset_project_name: str, show: bool = False):
         """
-        This is an init methon
+        This is an init method
         :param dataset_project_name: User nickname of dataset
         :param show: Do I need to show what is happening
         """
@@ -30,6 +30,28 @@ class DataSet:
     def __len__(self):
         return len(self.dataset)
 
+    def get_keys(self) -> list:
+        """
+        This method return column names of dataset pd.DataFrame
+        :return: Column names of dataset pd.DataFrame
+        """
+        if self.dataset is not None:
+            self._update_dataset_base_info()
+            return list(self.dataset_keys)
+        else:
+            raise Exception("The dataset has not been loaded yet")
+
+    def get_keys_count(self) -> int:
+        """
+        This method return count of column names of dataset pd.DataFrame
+        :return: Count of column names of dataset pd.DataFrame
+        """
+        if self.dataset is not None:
+            self._update_dataset_base_info()
+            return self.dataset_keys_count
+        else:
+            raise Exception("The dataset has not been loaded yet")
+
     def set_delimiter(self, delimiter: str):
         """
         This method sets the delimiter character
@@ -45,10 +67,17 @@ class DataSet:
         return self.delimiter
 
     def set_encoding(self, encoding: str):
-
+        """
+        This method sets the encoding for the future export of the dataset
+        :param encoding: Encoding for the dataset. Example: 'utf-8', 'windows1232'
+        """
         self.encoding = encoding
 
-    def get_encoding(self):
+    def get_encoding(self) -> str:
+        """
+        This method returns the encoding of the current dataset file
+        :return: Encoding for the dataset. Example: 'utf-8', 'windows1232'
+        """
         return self.encoding
 
     def get_from_field(self, column: str, index: int):
@@ -131,14 +160,17 @@ class DataSet:
         for column in columns:
             if column not in self.dataset_keys:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        return self.dataset[columns]
+        return pd.DataFrame(self.dataset[columns])
 
     def get_dataset(self) -> pd.DataFrame:
         """
         This method return dataset as pd.DataFrame
         :return: dataset as pd.DataFrame
         """
-        return self.dataset
+        if self.dataset is not None:
+            return self.dataset
+        else:
+            raise Exception("The dataset has not been uploaded yet!")
 
     def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
         """
@@ -151,14 +183,13 @@ class DataSet:
         if len(self.dataset) != len(dataset):
             if not dif_len:
                 raise Exception("The pd.DataFrames must have the same size!")
-        columnns_names = list(self.dataset.keys()) + list(dataset.keys())
-        if len(set(columnns_names)) != len(columnns_names):
+        columns_names = list(self.dataset.keys()) + list(dataset.keys())
+        if len(set(columns_names)) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the same column names!")
         self.dataset = self.dataset.join(dataset)
         self._update_dataset_base_info()
 
-
-    def get_column_analytics(self, column_name: str,  normal_distribution: bool = False) -> DataSetFieldAnalytics:
+    def get_column_analytics(self, column_name: str, normal_distribution: bool = False) -> DataSetFieldAnalytics:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -226,7 +257,7 @@ class DataSet:
             raise Exception("There is no such column in the presented dataset!")
 
     def create_empty_dataset(self,
-                             columns_names: list,
+                             columns_names: list = None,
                              delimiter: str = ",",
                              encoding: str = 'utf-8'):
         """
@@ -236,11 +267,14 @@ class DataSet:
         :param encoding: Explicit indication of the .csv file encoding
         :return:
         """
-        if len(set(columns_names)) != len(columns_names):
-            raise Exception(f"Column names should not be repeated!")
+        if columns_names is not None:
+            if len(set(columns_names)) != len(columns_names):
+                raise Exception(f"Column names should not be repeated!")
+            self.dataset = pd.DataFrame(columns=columns_names)
+        else:
+            self.dataset = pd.DataFrame()
         self.delimiter = delimiter
         self.encoding = encoding
-        self.dataset = pd.DataFrame(columns=columns_names)
         self.is_dataset_loaded = True
         self._update_dataset_base_info()
 
@@ -275,7 +309,7 @@ class DataSet:
             raise Exception("When loading a dataset from a .csv file, you must specify a separator character!")
         self.delimiter = delimiter
         self.dataset_file = csv_file
-        self.dataset = self._read_from_csv(filename=csv_file,
+        self.dataset = self._read_from_csv(filename=str(csv_file),
                                            delimiter=delimiter,
                                            encoding=encoding)
         self._update_dataset_base_info()
@@ -296,9 +330,9 @@ class DataSet:
         if not os.path.exists(dataset_project_folder):
             raise Exception("The specified path was not found!")
 
-        with open(f"{dataset_project_folder}\\{json_config_filename}", 'r') as jsonfile:
-            dataset_info = json.load(jsonfile)
-            jsonfile.close()
+        with open(f"{dataset_project_folder}\\{json_config_filename}", 'r') as json_file:
+            dataset_info = json.load(json_file)
+            json_file.close()
             self._read_dataset_info_from_json(dataset_info)
         self.dataset = self._read_from_csv(filename=f"{dataset_project_folder}\\{self.dataset_file}",
                                            delimiter=self.delimiter,
@@ -347,8 +381,8 @@ class DataSet:
                         self.update_dataset_analytics()
                     json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                              self.dataset_analytics[key].to_json())
-                with open(f"{folder}{dataset_filename}\\{dataset_filename}.json", 'w') as jsonfile:
-                    json.dump(json_config, jsonfile, indent=4)
+                with open(f"{folder}{dataset_filename}\\{dataset_filename}.json", 'w') as json_file:
+                    json.dump(json_config, json_file, indent=4)
         self.dataset.to_csv(f"{folder}{dataset_filename}\\{dataset_filename}.csv",
                             index=False,
                             sep=self.delimiter,
