@@ -3,9 +3,8 @@ import json
 import math
 import numpy as np
 import pandas as pd
-
 from typing import Dict
-from DataSetColumn import *
+from RaML_feature_package.DataSet.DataSetColumn import *
 
 
 class DataSet:
@@ -157,6 +156,9 @@ class DataSet:
         :param columns: List of column names
         :return: Returns the selected columns
         """
+        for column in columns:
+            if column not in self.dataset_keys:
+                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         for column in columns:
             if column not in self.dataset_keys:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
