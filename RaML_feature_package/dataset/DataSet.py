@@ -120,7 +120,7 @@ class DataSet:
                 raise Exception(f"The \"{column}\" column is missing!")
         self.dataset.loc[len(self.dataset)] = [new_row[d] for d in self.dataset_keys]
 
-    def get_row(self, index: int) -> Dict:
+    def get_row(self, index: int) -> dict:
         """
         This method returns a row of the dataset in dictionary format, where the keys are the column names and the
         values are the values in the columns
