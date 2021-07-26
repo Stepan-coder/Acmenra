@@ -8,7 +8,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.tree import DecisionTreeRegressor
 from typing import Dict, List
 
-from RaML_feature_package.Errors import Errors
+from Ra_feature_package.Errors import Errors
 
 
 class DTRegressor:

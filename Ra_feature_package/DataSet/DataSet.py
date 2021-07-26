@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from typing import Dict
-from RaML_feature_package.DataSet.DataSetColumn import *
+from Ra_feature_package.DataSet.DataSetColumn import *
 
 
 class DataSet:
