@@ -2,81 +2,43 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from typing import Dict, List
 
 from Ra_feature_package.Errors import Errors
 
-class RFRegressor:
+
+class LinRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the RFRegressor class
+        This method is the initiator of the LinRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.text_name = "RandomForestRegressor"
-        self.default_param_types = {'n_estimators': int,
-                                    'criterion': str,
-                                    'max_depth': int,
-                                    'min_samples_split': int or float,
-                                    'min_samples_leaf': int,
-                                    'min_weight_fraction_leaf': float,
-                                    'max_features': str,
-                                    'max_leaf_nodes': int,
-                                    'min_impurity_decrease': float,
-                                    'min_impurity_split': float,
-                                    'bootstrap': bool,
-                                    'oob_score': bool,
+        self.text_name = "LinearRegression"
+        self.default_param_types = {'fit_intercept': bool,
+                                    'normalize': bool,
+                                    'copy_X': bool,
                                     'n_jobs': int,
-                                    'verbose': int,
-                                    'warm_start': bool,
-                                    'ccp_alpha': float,
-                                    'max_samples': int or float}
+                                    'positive': bool}
 
-        self.default_param = {'n_estimators': 100,
-                              'criterion': "mse",
-                              'max_depth': None,
-                              'min_samples_split': 2,
-                              'min_samples_leaf': 1,
-                              'min_weight_fraction_leaf': 0.0,
-                              'max_features': "auto",
-                              'max_leaf_nodes': None,
-                              'min_impurity_decrease': 0.0,
-                              'min_impurity_split': None,
-                              'bootstrap': True,
-                              'oob_score': False,
+        self.default_param = {'fit_intercept': True,
+                              'normalize': False,
+                              'copy_X': True,
                               'n_jobs': None,
-                              'verbose': 0,
-                              'warm_start': False,
-                              'ccp_alpha': 0.0,
-                              'max_samples': None}
+                              'positive': False}
 
-        self.default_params = {'n_estimators': [i * 10 for i in range(1, len(task.keys()) + 1)],
-                               'criterion': ["mse", "mae"],
-                               'max_depth': [i for i in range(1, len(task.keys()) + 1)],
-                               'min_samples_split': [i for i in range(2, len(task.keys()) + 1)],
-                               'min_samples_leaf': [i for i in range(1, len(task.keys()) + 1)],
-                               'min_weight_fraction_leaf': [0.],
-                               'max_features': ['sqrt', 'auto', 'log2', None],
-                               'max_leaf_nodes': [None],
-                               'min_impurity_decrease': [0.0],
-                               'min_impurity_split': [None],
-                               'bootstrap': [True, False],
-                               'oob_score': [True, False],
-                               'n_jobs': [None],
-                               'verbose': [0],
-                               'warm_start': [True, False],
-                               'ccp_alpha': [0.0],
-                               'max_samples': [i for i in range(1, len(task.keys()) + 1)]}
+        self.default_params = {'fit_intercept': [True, False],
+                               'normalize': [True, False],
+                               'copy_X': [True, False],
+                               'n_jobs': [i for i in range(1, len(task.keys()) + 1)],
+                               'positive': [True, False]}
 
         self.importance = {}
         self.is_model_fit = False
@@ -93,10 +55,10 @@ class RFRegressor:
                                                                                 random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{RFRegressor.__name__} model>'"
+        return f"'<Ra.{LinRegressor.__name__} model>'"
 
     def __repr__(self):
-        return f"'<Ra.{RFRegressor.__name__} model>'"
+        return f"'<Ra.{LinRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)
@@ -111,24 +73,11 @@ class RFRegressor:
          from avia for training
         """
         if grid_params and param_dict is None:
-            self.model = RandomForestRegressor(n_estimators=self.grid_best_params['n_estimators'],
-                                               criterion=self.grid_best_params['criterion'],
-                                               max_depth=self.grid_best_params['max_depth'],
-                                               min_samples_split=self.grid_best_params['min_samples_split'],
-                                               min_samples_leaf=self.grid_best_params['min_samples_leaf'],
-                                               min_weight_fraction_leaf=self.grid_best_params['min_weight_fraction_leaf'],
-                                               max_features=self.grid_best_params['max_features'],
-                                               max_leaf_nodes=self.grid_best_params['max_leaf_nodes'],
-                                               min_impurity_decrease=self.grid_best_params['min_impurity_decrease'],
-                                               min_impurity_split=self.grid_best_params['min_impurity_split'],
-                                               bootstrap=self.grid_best_params['bootstrap'],
-                                               oob_score=self.grid_best_params['oob_score'],
-                                               n_jobs=self.grid_best_params['n_jobs'],
-                                               verbose=self.grid_best_params['verbose'],
-                                               warm_start=self.grid_best_params['warm_start'],
-                                               ccp_alpha=self.grid_best_params['ccp_alpha'],
-                                               max_samples=self.grid_best_params['max_samples'],
-                                               random_state=13)
+            self.model = LinearRegression(fit_intercept=self.grid_best_params['fit_intercept'],
+                                          normalize=self.grid_best_params['normalize'],
+                                          copy_X=self.grid_best_params['copy_X'],
+                                          n_jobs=self.grid_best_params['n_jobs'],
+                                          positive=self.grid_best_params['positive'])
         elif not grid_params and param_dict is not None:
             model_params = self.default_param
             for param in param_dict:
@@ -139,27 +88,13 @@ class RFRegressor:
                                  self.default_param_types[param],
                                  type(self.default_param[param]))
                 model_params[param] = param_dict[param]
-
-            self.model = RandomForestRegressor(n_estimators=model_params['n_estimators'],
-                                               criterion=model_params['criterion'],
-                                               max_depth=model_params['max_depth'],
-                                               min_samples_split=model_params['min_samples_split'],
-                                               min_samples_leaf=model_params['min_samples_leaf'],
-                                               min_weight_fraction_leaf=model_params['min_weight_fraction_leaf'],
-                                               max_features=model_params['max_features'],
-                                               max_leaf_nodes=model_params['max_leaf_nodes'],
-                                               min_impurity_decrease=model_params['min_impurity_decrease'],
-                                               min_impurity_split=model_params['min_impurity_split'],
-                                               bootstrap=model_params['bootstrap'],
-                                               oob_score=model_params['oob_score'],
-                                               n_jobs=model_params['n_jobs'],
-                                               verbose=model_params['verbose'],
-                                               warm_start=model_params['warm_start'],
-                                               ccp_alpha=model_params['ccp_alpha'],
-                                               max_samples=model_params['max_samples'],
-                                               random_state=13)
+            self.model = LinearRegression(fit_intercept=model_params['fit_intercept'],
+                                          normalize=model_params['normalize'],
+                                          copy_X=model_params['copy_X'],
+                                          n_jobs=model_params['n_jobs'],
+                                          positive=model_params['positive'])
         elif not grid_params and param_dict is None:
-            self.model = RandomForestRegressor()
+            self.model = LinearRegression()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         print(f"Learning {self.text_name}...")
@@ -186,13 +121,13 @@ class RFRegressor:
                                  setting_param_type=type(self.default_params[param]))
                 self.default_params[param] = params_dict[param]
 
-        for param in ['max_depth', 'min_samples_split', 'min_samples_leaf', 'max_samples', 'n_estimators']:
+        for param in ['n_jobs']:
             self.default_params[param] = self.get_choosed_params(self.default_params[param], step=step)
 
         if self.show:
             print(f"Learning GridSearch {self.text_name}...")
             self.show_grid_params(self.default_params)
-        model = RandomForestRegressor(random_state=13)
+        model = LinearRegression()
         grid = GridSearchCV(model, self.default_params, cv=cross_validation)
         grid.fit(self.X_train, self.Y_train.values.ravel())
         self.grid_best_params = grid.best_params_
@@ -325,9 +260,9 @@ class RFRegressor:
         :param setting_param_type: The parameter responsible for selecting the method that will check the input values
         """
         if setting_param_type == list:
-            RFRegressor.check_params_list(grid_param, value, param_type)
+            LinRegressor.check_params_list(grid_param, value, param_type)
         else:
-            RFRegressor.check_param_value(grid_param, value, param_type)
+            LinRegressor.check_param_value(grid_param, value, param_type)
 
     @staticmethod
     def check_param_value(grid_param: str,

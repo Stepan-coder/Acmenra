@@ -10,7 +10,7 @@ from typing import Dict, List
 
 from Ra_feature_package.Errors import Errors
 
-
+# НЕ РАБОТАЕТ НАДО ЗАПОЛНИТЬ ПАРАМЕТРЫ
 class DTClassifier:
     def __init__(self,
                  task: pd.DataFrame,
