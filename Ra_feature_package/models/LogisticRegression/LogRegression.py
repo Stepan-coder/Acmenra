@@ -1,12 +1,13 @@
+import math
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LogisticRegressionCV
+
 from typing import Dict, List
-
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
-
+from Ra_feature_package.models.static_methods import *
 
 class LogRegressor:
     def __init__(self,
@@ -15,19 +16,18 @@ class LogRegressor:
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the LogRegressor class
+        This method is the initiator of the LogisticRegression class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.text_name = "LinearRegression"
+        self.text_name = "LogisticRegression"
         self.default_param_types = {'penalty': str,
                                     'dual': bool,
                                     'tol': float,
                                     'C': float,
                                     'fit_intercept': bool,
-
                                     'intercept_scaling': float,
                                     'class_weight': dict,
                                     'solver': str,
@@ -54,6 +54,7 @@ class LogRegressor:
                               'n_jobs': None,
                               'l1_ratio': None}
 
+        count = len(task.keys()) + 1
         self.default_params = {'penalty': ["l2", "elasticnet", "none"],
                                'dual': [False],
                                'tol': [1e-4],  # Лучше не трогать
@@ -62,13 +63,13 @@ class LogRegressor:
                                'intercept_scaling': [1],
                                'class_weight': [None],  # Лучше не трогать
                                'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
-                               'max_iter': [i * 10 for i in range(1, len(task.keys()) + 1)],
+                               'max_iter': conf_params(min_val=2, max_val=count, count=count, ltype=int),
                                'multi_class': ['auto', 'ovr', 'multinomial'],
-                               'verbose': [i for i in range(1, len(task.keys()) + 1)],
+                               'verbose': conf_params(min_val=2, count=count, ltype=int),
                                'warm_start': [True, False],
-                               'n_jobs': [i for i in range(1, len(task.keys()) + 1)],
+                               'n_jobs': conf_params(min_val=2, count=count, ltype=int),
                                'l1_ratio': [None]}
-
+        self.locked_params = ['penalty', 'fit_intercept', 'solver', 'multi_class', 'warm_start']
         self.importance = {}
         self.is_model_fit = False
         self.is_grid_fit = False
@@ -122,10 +123,10 @@ class LogRegressor:
             for param in param_dict:
                 if param not in self.default_params.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                self.check_param(param,
-                                 param_dict[param],
-                                 self.default_param_types[param],
-                                 type(self.default_param[param]))
+                check_param(param,
+                            param_dict[param],
+                            self.default_param_types[param],
+                            type(self.default_param[param]))
                 model_params[param] = param_dict[param]
 
             self.model = LogisticRegression(penalty=model_params['penalty'],
@@ -153,32 +154,32 @@ class LogRegressor:
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 step: int = 1,
+                 count: int = 1,
                  cross_validation: int = 3):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
-        :param step: The step with which to return the values
+        :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
         """
+        model_params = self.default_params
         if params_dict is not None:
             for param in params_dict:
                 if param not in self.default_params.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                self.check_param(grid_param=param,
-                                 value=params_dict[param],
-                                 param_type=self.default_param_types[param],
-                                 setting_param_type=type(self.default_params[param]))
-                self.default_params[param] = params_dict[param]
+                check_param(grid_param=param,
+                            value=params_dict[param],
+                            param_type=self.default_param_types[param],
+                            setting_param_type=type(self.default_params[param]))
+                model_params[param] = params_dict[param]
 
-        for param in ['max_iter', 'verbose', 'n_jobs']:
-            self.default_params[param] = self.get_choosed_params(self.default_params[param], step=step)
-
+        for param in [p for p in model_params if p not in self.locked_params]:
+            model_params[param] = get_choosed_params(model_params[param], count=count)
         if self.show:
             print(f"Learning GridSearch {self.text_name}...")
-            self.show_grid_params(self.default_params)
+            show_grid_params(model_params)
         model = LogisticRegression(random_state=13)
-        grid = GridSearchCV(model, self.default_params, cv=cross_validation)
+        grid = GridSearchCV(model, model_params, cv=cross_validation)
         grid.fit(self.X_train, self.Y_train.values.ravel())
         self.grid_best_params = grid.best_params_
         self.is_grid_fit = True
@@ -263,85 +264,3 @@ class LogRegressor:
         if not self.is_model_fit:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
         return Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
-
-    @staticmethod
-    def show_grid_params(params: dict):
-        """
-        This method show grid parameters from dict 'params'
-        :param params: Dict of grid params
-        """
-        count_elements = []
-        multiply = 1
-        for param in params:
-            print("Param({0}[{2}]): {1}".format(param, params[param], len(params[param])))
-            count_elements.append(len(params[param]))
-        for ce in count_elements:
-            multiply *= ce
-        print("Total({1}): {0}".format(" X ".join([str(e) for e in count_elements]), multiply))
-
-    @staticmethod
-    def get_choosed_params(params: list, step: int) -> list:
-        """
-        This method calculates the values with the specified step
-        :param params: The list of input parameters
-        :param step: The step with which to return the values
-        :return: The step with which to return the values
-        """
-        first_param = params[0]
-        last_param = params[-1]
-        remains_params = params[1:-1]
-        choosed_params = remains_params[1::step]
-        choosed_params = [first_param] + choosed_params + [last_param]
-        choosed_params = list(set(choosed_params))
-        choosed_params.sort()
-        return choosed_params
-
-    @staticmethod
-    def check_param(grid_param: str,
-                    value: list or int or str,
-                    param_type: type,
-                    setting_param_type: type):
-        """
-        This method switches the check between two methods "_check_params"[for checking values as lists] and
-        "_check_param"[for checking values as simplest]
-        :param grid_param: The parameter of the hyperparameter grid that we check
-        :param value: Values that will be passed to the " grid"
-        :param param_type: The data type acceptable for this parameter
-        :param setting_param_type: The parameter responsible for selecting the method that will check the input values
-        """
-        if setting_param_type == list:
-            LogRegressor.check_params_list(grid_param, value, param_type)
-        else:
-            LogRegressor.check_param_value(grid_param, value, param_type)
-
-    @staticmethod
-    def check_param_value(grid_param: str,
-                          value: str or int,
-                          param_type: type):
-        """
-        This method checks the correctness of the data types passed for training
-        :param grid_param: The parameter of the hyperparameter grid that we check
-        :param value: Values that will be passed to the " grid"
-        :param param_type: The data type acceptable for this parameter
-        """
-        if not isinstance(value, param_type):
-            raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
-                            f" byt was \'{type(value)}\'")
-
-    @staticmethod
-    def check_params_list(grid_param: str,
-                          value: list,
-                          param_type: type):
-        """
-        This method checks the correctness of the data types passed to the " grid"
-        :param grid_param: The parameter of the hyperparameter grid that we check
-        :param value: Values that will be passed to the " grid"
-        :param param_type: The data type acceptable for this parameter
-        """
-        if isinstance(value, list) and len(value):
-            for val in value:
-                if not isinstance(val, param_type) and val is not None:
-                    raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
-                                    f" byt was \'<{type(val)}>\'")
-        else:
-            raise Exception(f"The value of the '{grid_param}' parameter must be a non-empty list")
