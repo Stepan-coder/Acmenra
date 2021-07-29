@@ -1,6 +1,8 @@
+import os
 import math
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
@@ -24,8 +26,6 @@ class RFRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.text_name = "RandomForestRegressor"
-        default_params_int_list = [i for i in range(2, len(task.keys()) + 1)]
-        default_params_float_list = [i * 1.0 / (len(task.keys()) + 1) for i in range(1, len(task.keys()) + 1)]
         self.default_param_types = {'n_estimators': int,
                                     'criterion': str,
                                     'max_depth': int,
@@ -65,7 +65,7 @@ class RFRegressor:
         count = len(task.keys()) + 1
         self.default_params = {'n_estimators': conf_params(min_val=2, max_val=count, count=count, ltype=int),
                                'criterion': ["mse", "mae"],
-                               'max_depth': conf_params(min_val=2, max_val=count, count=count, ltype=int),
+                               'max_depth': conf_params(min_val=2, max_val=count * 2, count=count, ltype=int),
                                'min_samples_split': conf_params(min_val=2, count=count, ltype=int),
                                'min_samples_leaf': conf_params(min_val=2, count=count, ltype=int),
                                'min_weight_fraction_leaf': [0.],
@@ -201,6 +201,12 @@ class RFRegressor:
         self.grid_best_params = grid.best_params_
         self.is_grid_fit = True
 
+    def get_locked_params(self) -> List[str]:
+        return self.locked_params
+
+    def get_non_locked_params(self) -> List[str]:
+        return [p for p in self.default_params if p not in self.locked_params]
+
     def get_default_param_types(self) -> dict:
         """
         :return: This method return default model param types
@@ -281,3 +287,26 @@ class RFRegressor:
         if not self.is_model_fit:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
         return Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
+
+    def get_predict_text_plt(self,
+                             save_path: str = None,
+                             show: bool = False):
+        """
+        This method automates the display/saving of a graph of prediction results with a real graph
+        :param save_path: The path to save the graph on
+        :param show: The parameter responsible for displaying the plot of prediction
+        """
+        if not self.is_model_fit:
+            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        values = [i for i in range(len(self.x_test))]
+        plt.title(f'Predict {self.text_name} at test data')
+        plt.plot(values, self.y_test, 'g-', label='test')
+        plt.plot(values, self.model.predict(self.x_test), 'r-', label='predict')
+        plt.legend(loc='best')
+        if save_path is not None:
+            if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
+                raise Exception("The specified path was not found!")
+            plt.savefig(f"{save_path}\\Test predict {self.text_name}.png")
+        if show:
+            plt.show()
+        plt.close()

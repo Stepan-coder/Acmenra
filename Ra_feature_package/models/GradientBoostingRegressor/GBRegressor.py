@@ -1,6 +1,8 @@
+import os
 import math
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
@@ -212,6 +214,12 @@ class GBRegressor:
         self.grid_best_params = grid.best_params_
         self.is_grid_fit = True
 
+    def get_locked_params(self) -> List[str]:
+        return self.locked_params
+
+    def get_non_locked_params(self) -> List[str]:
+        return [p for p in self.default_params if p not in self.locked_params]
+
     def get_default_param_types(self) -> dict:
         """
         :return: This method return default model param types
@@ -293,34 +301,29 @@ class GBRegressor:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
         return Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
 
-    def get_grid_min_combinations(self) -> int:
+    def get_predict_text_plt(self,
+                             save_path: str = None,
+                             show: bool = False):
         """
-        This method calculates minimal count of params
-        :return: minimal count of params
+        This method automates the display/saving of a graph of prediction results with a real graph
+        :param save_path: The path to save the graph on
+        :param show: The parameter responsible for displaying the plot of prediction
         """
-        count_elements = []
-        multiply = 1
-        for param in self.default_params:
-            if param in self.locked_params:
-                count_elements.append(len(self.default_params[param]))
-        for ce in count_elements:
-            multiply *= ce
-        return multiply
+        if not self.is_model_fit:
+            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        values = [i for i in range(len(self.x_test))]
+        plt.title(f'Predict {self.text_name} at test data')
+        plt.plot(values, self.y_test, 'g-', label='test')
+        plt.plot(values, self.model.predict(self.x_test), 'r-', label='predict')
+        plt.legend(loc='best')
+        if save_path is not None:
+            if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
+                raise Exception("The specified path was not found!")
+            plt.savefig(f"{save_path}\\Test predict {self.text_name}.png")
+        if show:
+            plt.show()
+        plt.close()
 
-    def get_grid_max_combinations(self) -> int:
-        """
-        This method calculates maximal count of params
-        :return: minimal count of params
-        """
-        count_elements = []
-        multiply = 1
-        for param in self.default_params:
-            count_elements.append(len(self.default_params[param]))
-        for ce in count_elements:
-            multiply *= ce
-        return multiply
 
-    def get_count_non_locked_params(self) -> int:
-        return len([p for p in self.default_params if p not in self.locked_params])
 
 
