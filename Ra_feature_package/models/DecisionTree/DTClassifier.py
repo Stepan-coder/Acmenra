@@ -233,30 +233,45 @@ class DTClassifier:
 
     def get_roc_auc_score(self) -> float:
         f"""
-          This method calculates the "roc_auc_score" for the {self.text_name} on the test data
-          :return: roc_auc_score
-          """
+        This method calculates the "roc_auc_score" for the {self.text_name} on the test data
+        :return: roc_auc_score
+        """
+        error = float("inf")
         if not self.is_model_fit:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
-        return Errors.get_roc_auc_score(self.y_test, self.model.predict(self.x_test))
+        try:
+            error = Errors.get_roc_auc_score(self.y_test, self.model.predict(self.x_test))
+        except:
+            print("An error occurred when calculating the \"roc_auc_score\" error")
+        return error
 
     def get_mean_squared_error(self) -> float:
         """
         This method calculates the "mean_squared_error" for the {self.text_name} on the test data
         :return: mean_squared_error
         """
+        error = float("inf")
         if not self.is_model_fit:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
-        return Errors.get_mean_squared_error(self.y_test, self.model.predict(self.x_test))
+        try:
+            error = Errors.get_mean_squared_error(self.y_test, self.model.predict(self.x_test))
+        except:
+            print("An error occurred when calculating the \"mean_squared_error\" error")
+        return error
 
     def get_mean_absolute_error(self) -> float:
         """
         This method calculates the "mean_absolute_error" for the {self.text_name} on the test data
         :return: mean_absolute_error
         """
+        error = float("inf")
         if not self.is_model_fit:
             raise Exception(f"You haven't trained the {self.text_name} yet!")
-        return Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
+        try:
+            error = Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
+        except:
+            print("An error occurred when calculating the \"mean_absolute_error\" error")
+        return error
 
     @staticmethod
     def show_grid_params(params: dict):
