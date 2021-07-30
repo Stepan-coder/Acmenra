@@ -22,7 +22,7 @@ def show_grid_params(params: dict):
 
 
 def conf_params(min_val: int or float,
-                       count: int or float,
+                count: int or float,
                        ltype: type,
                        max_val: int or float = None) -> list:
     if max_val is not None:
