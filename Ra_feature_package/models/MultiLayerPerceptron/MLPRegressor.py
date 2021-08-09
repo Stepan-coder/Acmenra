@@ -1,7 +1,10 @@
 import os
 import math
+<<<<<<< HEAD
 import time
 
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -180,8 +183,12 @@ class MLPRegressor:
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
                  count: int = 1,
+<<<<<<< HEAD
                  cross_validation: int = 3,
                  grid_n_jobs: int = 1):
+=======
+                 cross_validation: int = 3):
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
@@ -204,10 +211,14 @@ class MLPRegressor:
 
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
+<<<<<<< HEAD
             show_grid_params(params=model_params,
                              locked_params=self.__locked_params,
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
+=======
+            show_grid_params(model_params)
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         model = MultiLayerPerceptronRegressor(random_state=13)
         grid = GridSearchCV(model, model_params, cv=cross_validation)
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
@@ -340,11 +351,16 @@ class MLPRegressor:
         if save_path is not None:
             if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
                 raise Exception("The specified path was not found!")
+<<<<<<< HEAD
             plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+=======
+            plt.savefig(f"{save_path}\\Test predict {self.__text_name}.png")
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         if show:
             plt.show()
         plt.close()
 
+<<<<<<< HEAD
     def __get_default_model_fit_time(self) -> float:
         """
         This method return time of fit model with defualt params
@@ -355,5 +371,7 @@ class MLPRegressor:
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 
 

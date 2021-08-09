@@ -1,7 +1,10 @@
 import os
 import math
+<<<<<<< HEAD
 import time
 
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -36,6 +39,10 @@ class SGDRegressor:
                                       'max_iter': int,
                                       'tol': float,
                                       'shuffle': bool,
+<<<<<<< HEAD
+=======
+                                      'verbose': int,
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                       'epsilon': float,
                                       'learning_rate': float,
                                       'eta0': float,
@@ -54,6 +61,10 @@ class SGDRegressor:
                                 'max_iter': 1000,
                                 'tol': 1e-3,
                                 'shuffle': True,
+<<<<<<< HEAD
+=======
+                                'verbose': 0,
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                 'epsilon': 0.1,
                                 'learning_rate': 'invscaling',
                                 'eta0': 0.01,
@@ -74,6 +85,10 @@ class SGDRegressor:
                                  'max_iter': conf_params(min_val=2, count=count*100, ltype=int),
                                  'tol': conf_params(min_val=2, max_val=count*0.00005, count=count, ltype=float),
                                  'shuffle': [True, False],
+<<<<<<< HEAD
+=======
+                                 'verbose': conf_params(min_val=2, count=count, ltype=int),
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                  'epsilon': conf_params(min_val=0, max_val=count*0.05, count=count, ltype=float),
                                  'learning_rate': ['constant', 'invscaling', 'adaptive'],
                                  'eta0': conf_params(min_val=2, max_val=count*0.005, count=count, ltype=float),
@@ -110,14 +125,21 @@ class SGDRegressor:
 
     def fit(self,
             param_dict: Dict[str, int or str] = None,
+<<<<<<< HEAD
             grid_params: bool = False,
             verbose: int = 0):
+=======
+            grid_params: bool = False):
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
+<<<<<<< HEAD
         :param verbose: Learning-show param
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         if grid_params and param_dict is None:
             self.model = StochasticGradientDescentRegressor(loss=self.__grid_best_params['loss'],
@@ -128,6 +150,10 @@ class SGDRegressor:
                                                             max_iter=self.__grid_best_params['max_iter'],
                                                             tol=self.__grid_best_params['tol'],
                                                             shuffle=self.__grid_best_params['shuffle'],
+<<<<<<< HEAD
+=======
+                                                            verbose=self.__grid_best_params['verbose'],
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                             epsilon=self.__grid_best_params['epsilon'],
                                                             learning_rate=self.__grid_best_params['learning_rate'],
                                                             eta0=self.__grid_best_params['eta0'],
@@ -138,7 +164,10 @@ class SGDRegressor:
                                                             n_iter_no_change=self.__grid_best_params['n_iter_no_change'],
                                                             warm_start=self.__grid_best_params['warm_start'],
                                                             average=self.__grid_best_params['average'],
+<<<<<<< HEAD
                                                             verbose=verbose,
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                             random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
@@ -158,6 +187,10 @@ class SGDRegressor:
                                                             max_iter=model_params['max_iter'],
                                                             tol=model_params['tol'],
                                                             shuffle=model_params['shuffle'],
+<<<<<<< HEAD
+=======
+                                                            verbose=model_params['verbose'],
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                             epsilon=model_params['epsilon'],
                                                             learning_rate=model_params['learning_rate'],
                                                             eta0=model_params['eta0'],
@@ -167,7 +200,10 @@ class SGDRegressor:
                                                             n_iter_no_change=model_params['n_iter_no_change'],
                                                             warm_start=model_params['warm_start'],
                                                             average=model_params['average'],
+<<<<<<< HEAD
                                                             verbose=verbose,
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                             random_state=13)
         elif not grid_params and param_dict is None:
             self.model = StochasticGradientDescentRegressor()
@@ -180,14 +216,21 @@ class SGDRegressor:
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
                  count: int = 1,
+<<<<<<< HEAD
                  cross_validation: int = 3,
                  grid_n_jobs: int = 1):
+=======
+                 cross_validation: int = 3):
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
         :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
+<<<<<<< HEAD
         :param grid_n_jobs: The number of jobs to run in parallel.
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         model_params = self.__default_params
         if params_dict is not None:
@@ -201,6 +244,7 @@ class SGDRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if p not in self.__locked_params]:
+<<<<<<< HEAD
             if count != 0:
                 model_params[param] = get_choosed_params(model_params[param],
                                                          count=count,
@@ -221,6 +265,15 @@ class SGDRegressor:
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
+=======
+            model_params[param] = get_choosed_params(model_params[param], count=count)
+
+        if self.__show:
+            print(f"Learning GridSearch {self.__text_name}...")
+            show_grid_params(model_params)
+        model = StochasticGradientDescentRegressor(random_state=13)
+        grid = GridSearchCV(model, model_params, cv=cross_validation)
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
@@ -351,11 +404,16 @@ class SGDRegressor:
         if save_path is not None:
             if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
                 raise Exception("The specified path was not found!")
+<<<<<<< HEAD
             plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+=======
+            plt.savefig(f"{save_path}\\Test predict {self.__text_name}.png")
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         if show:
             plt.show()
         plt.close()
 
+<<<<<<< HEAD
     def __get_default_model_fit_time(self) -> float:
         """
         This method return time of fit model with defualt params
@@ -366,4 +424,7 @@ class SGDRegressor:
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
+=======
+
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 

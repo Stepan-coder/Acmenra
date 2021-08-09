@@ -1,7 +1,10 @@
 import os
 import math
+<<<<<<< HEAD
 import time
 
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -28,6 +31,7 @@ class GBRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "GradientBoostingRegressor"
+<<<<<<< HEAD
         self.__default_param_types = {'loss': str or type(None),
                                       'learning_rate': float or type(None),
                                       'n_estimators': int or type(None),
@@ -47,6 +51,28 @@ class GBRegressor:
                                       'n_iter_no_change': int or type(None),
                                       'tol': float or type(None),
                                       'ccp_alpha': float or type(None)}
+=======
+        self.__default_param_types = {'loss': str,
+                                      'learning_rate': float,
+                                      'n_estimators': int,
+                                      'subsample': float,
+                                      'criterion': str,
+                                      'min_samples_split': int or float,
+                                      'min_samples_leaf': int or float,
+                                      'min_weight_fraction_leaf': float,
+                                      'max_depth': int,
+                                      'min_impurity_decrease': float,
+                                      'init': str,
+                                      'max_features': str,
+                                      'alpha': float,
+                                      'verbose': int,
+                                      'max_leaf_nodes': int,
+                                      'warm_start': bool,
+                                      'validation_fraction': float,
+                                      'n_iter_no_change': int,
+                                      'tol': float,
+                                      'ccp_alpha': float}
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 
         self.__default_param = {'loss': 'ls',
                                 'learning_rate': 0.1,
@@ -61,6 +87,10 @@ class GBRegressor:
                                 'init': None,
                                 'max_features': None,
                                 'alpha': 0.9,
+<<<<<<< HEAD
+=======
+                                'verbose': 0,
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                 'max_leaf_nodes': None,
                                 'warm_start': False,
                                 'validation_fraction': 0.1,
@@ -82,6 +112,10 @@ class GBRegressor:
                                  'init': [None],
                                  'max_features': ['auto', 'sqrt', 'log2'],
                                  'alpha': conf_params(min_val=0, max_val=0.5, count=count,  ltype=float),
+<<<<<<< HEAD
+=======
+                                 'verbose': conf_params(min_val=2, count=count, ltype=int),
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                  'max_leaf_nodes': conf_params(min_val=2, count=count, ltype=int),
                                  'warm_start': [True, False],
                                  'validation_fraction': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
@@ -114,14 +148,21 @@ class GBRegressor:
 
     def fit(self,
             param_dict: Dict[str, int or str] = None,
+<<<<<<< HEAD
             grid_params: bool = False,
             verbose: int = 0):
+=======
+            grid_params: bool = False):
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
+<<<<<<< HEAD
         :param verbose: Learning-show param
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         if grid_params and param_dict is None:
             self.model = GradientBoostingRegressor(loss=self.__grid_best_params['loss'],
@@ -136,13 +177,20 @@ class GBRegressor:
                                                    min_impurity_decrease=self.__grid_best_params['min_impurity_decrease'],
                                                    max_features=self.__grid_best_params['max_features'],
                                                    alpha=self.__grid_best_params['alpha'],
+<<<<<<< HEAD
+=======
+                                                   verbose=self.__grid_best_params['verbose'],
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                    max_leaf_nodes=self.__grid_best_params['max_leaf_nodes'],
                                                    warm_start=self.__grid_best_params['warm_start'],
                                                    validation_fraction=self.__grid_best_params['validation_fraction'],
                                                    n_iter_no_change=self.__grid_best_params['n_iter_no_change'],
                                                    tol=self.__grid_best_params['tol'],
                                                    ccp_alpha=self.__grid_best_params['ccp_alpha'],
+<<<<<<< HEAD
                                                    verbose=verbose,
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                    random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
@@ -166,13 +214,20 @@ class GBRegressor:
                                                    min_impurity_decrease=model_params['min_impurity_decrease'],
                                                    max_features=model_params['max_features'],
                                                    alpha=model_params['alpha'],
+<<<<<<< HEAD
+=======
+                                                   verbose=model_params['verbose'],
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                    max_leaf_nodes=model_params['max_leaf_nodes'],
                                                    warm_start=model_params['warm_start'],
                                                    validation_fraction=model_params['validation_fraction'],
                                                    n_iter_no_change=model_params['n_iter_no_change'],
                                                    tol=model_params['tol'],
                                                    ccp_alpha=model_params['ccp_alpha'],
+<<<<<<< HEAD
                                                    verbose=verbose,
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
                                                    random_state=13)
         elif not grid_params and param_dict is None:
             self.model = GradientBoostingRegressor()
@@ -184,15 +239,23 @@ class GBRegressor:
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
+<<<<<<< HEAD
                  count: int = 0,
                  cross_validation: int = 3,
                  grid_n_jobs: int = 1):
+=======
+                 count: int = 1,
+                 cross_validation: int = 3):
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
         :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
+<<<<<<< HEAD
         :param grid_n_jobs: The number of jobs to run in parallel.
+=======
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         """
         model_params = self.__default_params
         if params_dict is not None:
@@ -206,6 +269,7 @@ class GBRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if p not in self.__locked_params]:
+<<<<<<< HEAD
             if count != 0:
                 model_params[param] = get_choosed_params(model_params[param],
                                                          count=count,
@@ -226,6 +290,15 @@ class GBRegressor:
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
+=======
+            model_params[param] = get_choosed_params(model_params[param], count=count)
+
+        if self.__show:
+            print(f"Learning GridSearch {self.__text_name}...")
+            show_grid_params(model_params)
+        model = GradientBoostingRegressor(random_state=13)
+        grid = GridSearchCV(model, model_params, cv=cross_validation, verbose=0)
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
@@ -356,11 +429,16 @@ class GBRegressor:
         if save_path is not None:
             if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
                 raise Exception("The specified path was not found!")
+<<<<<<< HEAD
             plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+=======
+            plt.savefig(f"{save_path}\\Test predict {self.__text_name}.png")
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         if show:
             plt.show()
         plt.close()
 
+<<<<<<< HEAD
     def __get_default_model_fit_time(self) -> float:
         """
         This method return time of fit model with defualt params
@@ -371,5 +449,8 @@ class GBRegressor:
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
+=======
+
+>>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 
 

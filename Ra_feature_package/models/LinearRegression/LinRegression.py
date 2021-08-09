@@ -1,70 +1,50 @@
 import os
 import math
-import time
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LassoCV
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 
 
-class LCVRegressor:
+class LinRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the LCVRegressor class
+        This method is the initiator of the LinRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "LassoCVRegressor"
-        self.__default_param_types = {'eps': float,
-                                      'n_alphas': int,
-                                      'fit_intercept': bool,
+        self.__text_name = "LinearRegression"
+        self.__default_param_types = {'fit_intercept': bool,
                                       'normalize': bool,
-                                      'precompute': str,
-                                      'max_iter': int,
-                                      'tol': float,
                                       'copy_X': bool,
-                                      'cv': int,
-                                      'positive': bool,
-                                      'selection': str}
+                                      'n_jobs': int,
+                                      'positive': bool}
 
-        self.__default_param = {'eps': 1e-3,
-                                'n_alphas': 100,
-                                'fit_intercept': True,
+        self.__default_param = {'fit_intercept': True,
                                 'normalize': False,
-                                'precompute': 'auto',
-                                'max_iter': 1000,
-                                'tol': 1e-4,
                                 'copy_X': True,
-                                'cv': None,
-                                'positive': False,
-                                'selection': 'cyclic'}
+                                'n_jobs': None,
+                                'positive': False}
 
         count = len(task.keys()) + 1
-        self.__default_params = {'eps': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'n_alphas': conf_params(min_val=1, max_val=count * 5, count=count, ltype=int),
-                                 'fit_intercept': [True, False],
+        self.__default_params = {'fit_intercept': [True, False],
                                  'normalize': [True, False],
-                                 'precompute': ['auto'],
-                                 'max_iter': conf_params(min_val=0, max_val=100 * count, count=count, ltype=int),
-                                 'tol': conf_params(min_val=0, max_val=1, count=count, ltype=float),
                                  'copy_X': [True, False],
-                                 'cv': [None],
-                                 'positive': [True, False],
-                                 'selection': ['random', 'cyclic']}
-        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X', 'positive', 'selection']
+                                 'n_jobs': conf_params(min_val=2, count=count, ltype=int),
+                                 'positive': [True, False]}
+        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X', 'positive']
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -80,42 +60,29 @@ class LCVRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{LCVRegressor.__name__} model>'"
+        return f"'<Ra.{LinRegressor.__name__} model>'"
 
     def __repr__(self):
-        return f"'<Ra.{LCVRegressor.__name__} model>'"
+        return f"'<Ra.{LinRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)
 
     def fit(self,
             param_dict: Dict[str, int or str] = None,
-            grid_params: bool = False,
-            n_jobs: int = 1,
-            verbose: int = 0):
+            grid_params: bool = False):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
-        :param n_jobs: The number of jobs to run in parallel.
-        :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = LassoCV(eps=self.__grid_best_params['eps'],
-                                 n_alphas=self.__grid_best_params['n_alphas'],
-                                 fit_intercept=self.__grid_best_params['fit_intercept'],
-                                 normalize=self.__grid_best_params['normalize'],
-                                 precompute=self.__grid_best_params['precompute'],
-                                 max_iter=self.__grid_best_params['max_iter'],
-                                 tol=self.__grid_best_params['tol'],
-                                 copy_X=self.__grid_best_params['copy_X'],
-                                 cv=self.__grid_best_params['cv'],
-                                 positive=self.__grid_best_params['positive'],
-                                 selection=self.__grid_best_params['selection'],
-                                 n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
+            self.model = LinearRegression(fit_intercept=self.__grid_best_params['fit_intercept'],
+                                          normalize=self.__grid_best_params['normalize'],
+                                          copy_X=self.__grid_best_params['copy_X'],
+                                          n_jobs=self.__grid_best_params['n_jobs'],
+                                          positive=self.__grid_best_params['positive'])
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
             for param in param_dict:
@@ -126,26 +93,13 @@ class LCVRegressor:
                             self.__default_param_types[param],
                             type(self.__default_param[param]))
                 model_params[param] = param_dict[param]
-
-            self.model = LassoCV(eps=model_params['eps'],
-                                 n_alphas=model_params['n_alphas'],
-                                 fit_intercept=model_params['fit_intercept'],
-                                 normalize=model_params['normalize'],
-                                 precompute=model_params['precompute'],
-                                 max_iter=model_params['max_iter'],
-                                 tol=model_params['tol'],
-                                 copy_X=model_params['copy_X'],
-                                 cv=model_params['cv'],
-                                 positive=model_params['positive'],
-                                 selection=model_params['selection'],
-                                 n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
-
+            self.model = LinearRegression(fit_intercept=model_params['fit_intercept'],
+                                          normalize=model_params['normalize'],
+                                          copy_X=model_params['copy_X'],
+                                          n_jobs=model_params['n_jobs'],
+                                          positive=model_params['positive'])
         elif not grid_params and param_dict is None:
-            self.model = LassoCV(n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
+            self.model = LinearRegression()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         print(f"Learning {self.__text_name}...")
@@ -155,14 +109,12 @@ class LCVRegressor:
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
                  count: int = 1,
-                 cross_validation: int = 3,
-                 grid_n_jobs: int = 1):
+                 cross_validation: int = 3):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
         :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
-        :param grid_n_jobs: The number of jobs to run in parallel.
         """
         model_params = self.__default_params
         if params_dict is not None:
@@ -176,26 +128,12 @@ class LCVRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if p not in self.__locked_params]:
-            if count != 0:
-                model_params[param] = get_choosed_params(model_params[param],
-                                                         count=count,
-                                                         ltype=self.__default_param_types[param])
-            else:
-                model_params[param] = [self.__default_param[param]]
+            model_params[param] = get_choosed_params(model_params[param], count=count)
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
-            show_grid_params(params=model_params,
-                             locked_params=self.__locked_params,
-                             single_model_time=self.__get_default_model_fit_time(),
-                             n_jobs=grid_n_jobs)
-        model = LassoCV(n_jobs=1,
-                        verbose=0,
-                        random_state=13)
-        grid = GridSearchCV(model,
-                            model_params,
-                            cv=cross_validation,
-                            n_jobs=grid_n_jobs,
-                            scoring='neg_mean_absolute_error')
+            show_grid_params(model_params)
+        model = LinearRegression()
+        grid = GridSearchCV(model, model_params, cv=cross_validation)
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
@@ -326,18 +264,7 @@ class LCVRegressor:
         if save_path is not None:
             if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
                 raise Exception("The specified path was not found!")
-            plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+            plt.savefig(f"{save_path}\\Test predict {self.__text_name}.png")
         if show:
             plt.show()
         plt.close()
-
-    def __get_default_model_fit_time(self) -> float:
-        """
-        This method return time of fit model with defualt params
-        :return: time of fit model with defualt params
-        """
-        time_start = time.time()
-        model = LassoCV(random_state=13)
-        model.fit(self.__X_train, self.__Y_train)
-        time_end = time.time()
-        return time_end - time_start
