@@ -1,11 +1,7 @@
 import math
 
 
-<<<<<<< HEAD
 def show_grid_params(params: dict, locked_params: list, single_model_time, n_jobs: int):
-=======
-def show_grid_params(params: dict):
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
     """
     This method show grid parameters from dict 'params'
     :param params: Dict of grid params
@@ -13,7 +9,6 @@ def show_grid_params(params: dict):
     count_elements = []
     multiply = 1
     for param in params:
-<<<<<<< HEAD
         param_text = "  -Param \'{0}\'({2}): {1}".format(param, params[param], len(params[param]))
         if param in locked_params:
             print("\033[31m {}".format(param_text))
@@ -28,49 +23,23 @@ def show_grid_params(params: dict):
     total_time = "Total time: {0}, {1} per model * {2} flows.".format(fit_time, round(single_model_time, 2), n_jobs)
     print("\033[0m {}".format(total_models))
     print("\033[0m {}".format(total_time))
-=======
-        is_locked = ""
-        try:
-            print("  -Param \'{0}\'({2}): {1}".format(param, params[param], len(params[param]), is_locked))
-            count_elements.append(len(params[param]))
-        except:
-            print("  -Param \'{0}\'({2}): {1}".format(param, [params[param]], len([params[param]]), is_locked))
-            count_elements.append(len([params[param]]))
-    for ce in count_elements:
-        multiply *= ce
-    print("Total {1} models: {0}".format(" X ".join([str(e) for e in count_elements]), multiply))
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
 
 
 def conf_params(min_val: int or float,
                 count: int or float,
-<<<<<<< HEAD
                 ltype: type,
                 max_val: int or float = None) -> list:
-=======
-                       ltype: type,
-                       max_val: int or float = None) -> list:
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
     if max_val is not None:
         step = (float(max_val) - float(min_val)) / float(count)
     else:
         step = 1
     if ltype == int:
-<<<<<<< HEAD
         return list(set([int(min_val + val * step) for val in range(count)]))
     else:
         return list(set([float(min_val + val * step) for val in range(count)]))
 
 
 def get_choosed_params(params: list, count: int, ltype: type) -> list:
-=======
-        return [int(min_val + val * step) for val in range(count)]
-    else:
-        return [float(min_val + val * step) for val in range(count)]
-
-
-def get_choosed_params(params: list, count: int) -> list:
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
     """
     This method calculates the values with the specified step
     :param params: The list of input parameters
@@ -96,7 +65,6 @@ def get_choosed_params(params: list, count: int) -> list:
         index = len(params) / 2
         return [first_param, params[int(index)], last_param]
     else:
-<<<<<<< HEAD
         params.sort()
         index = float(len(params)) / float(((count + 1) - 2))
         remains_params = [params[0], params[-1]]
@@ -105,12 +73,6 @@ def get_choosed_params(params: list, count: int) -> list:
                 remains_params.append(int(math.ceil(params[i] * index)))
             else:
                 remains_params.append(params[i] * index)
-=======
-        index = len(params) / ((count + 1) - 2)
-        remains_params = [params[0], params[-1]]
-        for i in range(1, ((count + 1) - 2), 1):
-            remains_params.append(int(math.ceil(i * index)))
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d
         remains_params.sort()
         return remains_params
 
@@ -163,7 +125,6 @@ def check_params_list(grid_param: str,
                                 f" byt was \'<{type(val)}>\'")
     else:
         raise Exception(f"The value of the '{grid_param}' parameter must be a non-empty list")
-<<<<<<< HEAD
 
 
 def convert_to_preferred_format(sec: float) -> str:
@@ -178,5 +139,3 @@ def convert_to_preferred_format(sec: float) -> str:
     min = sec // 60
     sec %= 60
     return "%02d:%02d:%02d" % (hour, min, sec)
-=======
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d

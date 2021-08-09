@@ -9,10 +9,7 @@ from sklearn.tree import DecisionTreeClassifier
 from typing import Dict, List
 
 from Ra_feature_package.Errors import Errors
-<<<<<<< HEAD:Ra_feature_package/models/Trees/DTClassifier.py
 
-=======
->>>>>>> 681e1dda3502c867eb414a2e6e4565821da4389d:Ra_feature_package/models/DecisionTree/DTClassifier.py
 
 # НЕ РАБОТАЕТ НАДО ЗАПОЛНИТЬ ПАРАМЕТРЫ
 class DTClassifier:

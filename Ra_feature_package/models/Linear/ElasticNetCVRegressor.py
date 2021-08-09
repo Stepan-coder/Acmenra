@@ -1,76 +1,77 @@
 import os
 import math
+import time
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import ElasticNetCV
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 
-class LogRegressor:
+
+class ENCVRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the LogisticRegression class
+        This method is the initiator of the ENCVRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "LogisticRegression"
-        self.__default_param_types = {'penalty': str,
-                                      'dual': bool,
-                                      'tol': float,
-                                      'C': float,
+        self.__text_name = "ElasticNetCVRegressor"
+        self.__default_param_types = {'l1_ratio': float or List[float],
+                                      'eps': float,
+                                      'n_alphas': int,
+                                      'alphas': type(np.ndarray),
                                       'fit_intercept': bool,
-                                      'intercept_scaling': float,
-                                      'class_weight': dict,
-                                      'solver': str,
+                                      'normalize': bool,
+                                      'precompute': str,
                                       'max_iter': int,
-                                      'multi_class': str,
-                                      'verbose': int,
-                                      'warm_start': bool,
-                                      'n_jobs': int,
-                                      'l1_ratio': float}
+                                      'tol': float,
+                                      'cv': int,
+                                      'copy_X': bool,
+                                      'positive': bool,
+                                      'selection': str}
 
-        self.__default_param = {'penalty': "l2",
-                                'dual': False,
-                                'tol': 1e-4,
-                                'C': 1.0,
+        self.__default_param = {'l1_ratio': 0.5,
+                                'eps': 1e-3,
+                                'n_alphas': 100,
+                                'alphas': None,
                                 'fit_intercept': True,
-                                'intercept_scaling': 1,
-                                'class_weight': None,
-                                'solver': "lbfgs",
-                                'max_iter': 100,
-                                'multi_class': 'auto',
-                                'verbose': 0,
-                                'warm_start': False,
-                                'n_jobs': None,
-                                'l1_ratio': None}
+                                'normalize': False,
+                                'precompute': 'auto',
+                                'max_iter': 1000,
+                                'tol': 1e-4,
+                                'cv': None,
+                                'copy_X': True,
+                                'positive': False,
+                                'selection': 'cyclic'}
 
         count = len(task.keys()) + 1
-        self.__default_params = {'penalty': ["l2", "elasticnet", "none"],
-                                 'dual': [False],
-                                 'tol': [1e-4],  # Лучше не трогать
-                                 'C': [1.0],  # Лучше не трогать
+        self.__default_params = {'l1_ratio': conf_params(min_val=0.1, max_val=1, count=count, ltype=float),
+                                 'eps': [1e-3],
+                                 'n_alphas': conf_params(min_val=1, max_val=count * 10, count=count, ltype=int),
+                                 'alphas': [None],
                                  'fit_intercept': [True, False],
-                                 'intercept_scaling': [1],
-                                 'class_weight': [None],  # Лучше не трогать
-                                 'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
-                                 'max_iter': conf_params(min_val=2, max_val=count, count=count, ltype=int),
-                                 'multi_class': ['auto', 'ovr', 'multinomial'],
-                                 'verbose': conf_params(min_val=2, count=count, ltype=int),
-                                 'warm_start': [True, False],
-                                 'n_jobs': conf_params(min_val=2, count=count, ltype=int),
-                                 'l1_ratio': [None]}
-        self.__locked_params = ['penalty', 'fit_intercept', 'solver', 'multi_class', 'warm_start']
+                                 'normalize': [True, False],
+                                 'precompute': ['auto'],
+                                 'max_iter': conf_params(min_val=100, max_val=count * 100, count=count, ltype=int),
+                                 'tol': [1e-4],
+                                 'cv': [None],
+                                 'copy_X': [True, False],
+                                 'positive': [True, False],
+                                 'selection': ['cyclic', 'random']}
+        self.__locked_params = ['selection', 'positive', 'copy_X', 'precompute',
+                                'normalize', 'fit_intercept']
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -86,39 +87,43 @@ class LogRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{LogRegressor.__name__} model>'"
+        return f"'<Ra.{ENCVRegressor.__name__} model>'"
 
     def __repr__(self):
-        return f"'<Ra.{LogRegressor.__name__} model>'"
+        return f"'<Ra.{ENCVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)
 
     def fit(self,
             param_dict: Dict[str, int or str] = None,
-            grid_params: bool = False):
+            grid_params: bool = False,
+            n_jobs: int = 1,
+            verbose: int = 0):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
+        :param n_jobs: The number of jobs to run in parallel.
+        :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = LogisticRegression(penalty=self.__grid_best_params['penalty'],
-                                            dual=self.__grid_best_params['dual'],
-                                            tol=self.__grid_best_params['tol'],
-                                            C=self.__grid_best_params['C'],
-                                            fit_intercept=self.__grid_best_params['fit_intercept'],
-                                            intercept_scaling=self.__grid_best_params['intercept_scaling'],
-                                            class_weight=self.__grid_best_params['class_weight'],
-                                            solver=self.__grid_best_params['solver'],
-                                            max_iter=self.__grid_best_params['max_iter'],
-                                            multi_class=self.__grid_best_params['multi_class'],
-                                            verbose=self.__grid_best_params['verbose'],
-                                            warm_start=self.__grid_best_params['warm_start'],
-                                            n_jobs=self.__grid_best_params['n_jobs'],
-                                            l1_ratio=self.__grid_best_params['l1_ratio'],
-                                            random_state=13)
+            self.model = ElasticNetCV(l1_ratio=self.__grid_best_params['l1_ratio'],
+                                      eps=self.__grid_best_params['eps'],
+                                      n_alphas=self.__grid_best_params['n_alphas'],
+                                      alphas=self.__grid_best_params['alphas'],
+                                      fit_intercept=self.__grid_best_params['fit_intercept'],
+                                      normalize=self.__grid_best_params['normalize'],
+                                      precompute=self.__grid_best_params['precompute'],
+                                      max_iter=self.__grid_best_params['max_iter'],
+                                      tol=self.__grid_best_params['tol'],
+                                      cv=self.__grid_best_params['cv'],
+                                      copy_X=self.__grid_best_params['copy_X'],
+                                      positive=self.__grid_best_params['positive'],
+                                      selection=self.__grid_best_params['selection'],
+                                      n_jobs=n_jobs,
+                                      verbose=verbose)
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
             for param in param_dict:
@@ -130,38 +135,42 @@ class LogRegressor:
                             type(self.__default_param[param]))
                 model_params[param] = param_dict[param]
 
-            self.model = LogisticRegression(penalty=model_params['penalty'],
-                                            dual=model_params['dual'],
-                                            tol=model_params['tol'],
-                                            C=model_params['C'],
-                                            fit_intercept=model_params['fit_intercept'],
-                                            intercept_scaling=model_params['intercept_scaling'],
-                                            class_weight=model_params['class_weight'],
-                                            solver=model_params['solver'],
-                                            max_iter=model_params['max_iter'],
-                                            multi_class=model_params['multi_class'],
-                                            verbose=model_params['verbose'],
-                                            warm_start=model_params['warm_start'],
-                                            n_jobs=model_params['n_jobs'],
-                                            l1_ratio=model_params['l1_ratio'],
-                                            random_state=13)
+            self.model = ElasticNetCV(l1_ratio=model_params['l1_ratio'],
+                                      eps=model_params['eps'],
+                                      n_alphas=model_params['n_alphas'],
+                                      alphas=model_params['alphas'],
+                                      fit_intercept=model_params['fit_intercept'],
+                                      normalize=model_params['normalize'],
+                                      precompute=model_params['precompute'],
+                                      max_iter=model_params['max_iter'],
+                                      tol=model_params['tol'],
+                                      cv=model_params['cv'],
+                                      copy_X=model_params['copy_X'],
+                                      positive=model_params['positive'],
+                                      selection=model_params['selection'],
+                                      n_jobs=n_jobs,
+                                      verbose=verbose)
+
         elif not grid_params and param_dict is None:
-            self.model = LogisticRegression()
+            self.model = ElasticNetCV(n_jobs=n_jobs,
+                                      verbose=verbose)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         print(f"Learning {self.__text_name}...")
-        self.model.fit(self.__X_train, self.__Y_train.values.astype(float))
+        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
                  count: int = 1,
-                 cross_validation: int = 3):
+                 cross_validation: int = 3,
+                 grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
         :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
+        :param grid_n_jobs: The number of jobs to run in parallel.
         """
         model_params = self.__default_params
         if params_dict is not None:
@@ -175,12 +184,26 @@ class LogRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if p not in self.__locked_params]:
-            model_params[param] = get_choosed_params(model_params[param], count=count)
+            if count != 0:
+                model_params[param] = get_choosed_params(model_params[param],
+                                                         count=count,
+                                                         ltype=self.__default_param_types[param])
+            else:
+                model_params[param] = [self.__default_param[param]]
+
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
-            show_grid_params(model_params)
-        model = LogisticRegression(random_state=13)
-        grid = GridSearchCV(model, model_params, cv=cross_validation)
+            show_grid_params(params=model_params,
+                             locked_params=self.__locked_params,
+                             single_model_time=self.__get_default_model_fit_time(),
+                             n_jobs=grid_n_jobs)
+        model = ElasticNetCV(n_jobs=1,
+                             verbose=0)
+        grid = GridSearchCV(model,
+                            model_params,
+                            cv=cross_validation,
+                            n_jobs=grid_n_jobs,
+                            scoring='neg_mean_absolute_error')
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
@@ -311,7 +334,18 @@ class LogRegressor:
         if save_path is not None:
             if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
                 raise Exception("The specified path was not found!")
-            plt.savefig(f"{save_path}\\Test predict {self.__text_name}.png")
+            plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
         if show:
             plt.show()
         plt.close()
+
+    def __get_default_model_fit_time(self) -> float:
+        """
+        This method return time of fit model with defualt params
+        :return: time of fit model with defualt params
+        """
+        time_start = time.time()
+        model = ElasticNetCV()
+        model.fit(self.__X_train, self.__Y_train)
+        time_end = time.time()
+        return time_end - time_start

@@ -8,83 +8,55 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import SGDRegressor as StochasticGradientDescentRegressor
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 
 
-class SGDRegressor:
+class RCVRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the SGDRegressor class
+        This method is the initiator of the RCVRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "StochasticGradientDescentRegressor"
-        self.__default_param_types = {'loss': str,
-                                      'penalty': str,
-                                      'alpha': float,
-                                      'l1_ratio': float,
+        self.__text_name = "RidgeCVRegressor"
+        self.__default_param_types = {'alphas': type(np.ndarray),
                                       'fit_intercept': bool,
-                                      'max_iter': int,
-                                      'tol': float,
-                                      'shuffle': bool,
-                                      'epsilon': float,
-                                      'learning_rate': float,
-                                      'eta0': float,
-                                      'power_t': float,
-                                      'early_stopping': bool,
-                                      'validation_fraction': float,
-                                      'n_iter_no_change': int,
-                                      'warm_start': bool,
-                                      'average': bool}
+                                      'normalize': bool,
+                                      'scoring': str,
+                                      'cv': int,
+                                      'gcv_mode': str,
+                                      'store_cv_values': bool,
+                                      'alpha_per_target': bool}
 
-        self.__default_param = {'loss': 'squared_loss',
-                                'penalty': 'l2',
-                                'alpha': 0.0001,
-                                'l1_ratio': 0.15,
+        self.__default_param = {'alphas': np.array([0.1, 1.0, 10.0]),
                                 'fit_intercept': True,
-                                'max_iter': 1000,
-                                'tol': 1e-3,
-                                'shuffle': True,
-                                'epsilon': 0.1,
-                                'learning_rate': 'invscaling',
-                                'eta0': 0.01,
-                                'power_t': 0.25,
-                                'early_stopping': False,
-                                'validation_fraction': 0.1,
-                                'n_iter_no_change': 5,
-                                'warm_start': False,
-                                'average': False}
+                                'normalize': False,
+                                'scoring': None,
+                                'cv': None,
+                                'gcv_mode': 'auto',
+                                'store_cv_values': False,
+                                'alpha_per_target': False}
 
-        # Доделать
         count = len(task.keys()) + 1
-        self.__default_params = {'loss': ['squared_loss', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive'],
-                                 'penalty': ['l2', 'l1', 'elasticnet'],
-                                 'alpha': conf_params(min_val=0, max_val=count*0.00005, count=count, ltype=float),
-                                 'l1_ratio': conf_params(min_val=0, max_val=1, count=count, ltype=float),
+        self.__default_params = {'alphas': [np.array(list(x / 10 for x in range(1, 101)))],
                                  'fit_intercept': [True, False],
-                                 'max_iter': conf_params(min_val=2, count=count*100, ltype=int),
-                                 'tol': conf_params(min_val=2, max_val=count*0.00005, count=count, ltype=float),
-                                 'shuffle': [True, False],
-                                 'epsilon': conf_params(min_val=0, max_val=count*0.05, count=count, ltype=float),
-                                 'learning_rate': ['constant', 'invscaling', 'adaptive'],
-                                 'eta0': conf_params(min_val=2, max_val=count*0.005, count=count, ltype=float),
-                                 'power_t': conf_params(min_val=0, max_val=count*0.025, count=count,  ltype=float),
-                                 'early_stopping': [True, False],
-                                 'validation_fraction': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'n_iter_no_change': conf_params(min_val=2, count=count, ltype=int),
-                                 'warm_start': [True, False],
-                                 'average': [True, False]}
-        self.__locked_params = ['loss', 'penalty', 'fit_intercept', 'shuffle', 'learning_rate', 'early_stopping',
-                                'warm_start', 'average']
+                                 'normalize': [True, False],
+                                 'scoring': [None],
+                                 'cv': [None],
+                                 'gcv_mode': ['auto', 'svd', 'eigen'],
+                                 'store_cv_values': [True, False],
+                                 'alpha_per_target': [True, False]}
+        self.__locked_params = ['fit_intercept', 'normalize', 'scoring', 'gcv_mode',
+                                'store_cv_values', 'alpha_per_target']
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -100,46 +72,32 @@ class SGDRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{SGDRegressor.__name__} model>'"
+        return f"'<Ra.{RCVRegressor.__name__} model>'"
 
     def __repr__(self):
-        return f"'<Ra.{SGDRegressor.__name__} model>'"
+        return f"'<Ra.{RCVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)
 
     def fit(self,
             param_dict: Dict[str, int or str] = None,
-            grid_params: bool = False,
-            verbose: int = 0):
+            grid_params: bool = False):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
-        :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor(loss=self.__grid_best_params['loss'],
-                                                            penalty=self.__grid_best_params['penalty'],
-                                                            alpha=self.__grid_best_params['alpha'],
-                                                            l1_ratio=self.__grid_best_params['l1_ratio'],
-                                                            fit_intercept=self.__grid_best_params['fit_intercept'],
-                                                            max_iter=self.__grid_best_params['max_iter'],
-                                                            tol=self.__grid_best_params['tol'],
-                                                            shuffle=self.__grid_best_params['shuffle'],
-                                                            epsilon=self.__grid_best_params['epsilon'],
-                                                            learning_rate=self.__grid_best_params['learning_rate'],
-                                                            eta0=self.__grid_best_params['eta0'],
-                                                            power_t=self.__grid_best_params['power_T'],
-                                                            early_stopping=self.__grid_best_params['early_stopping'],
-                                                            validation_fraction=self.__grid_best_params[
-                                                                'validation_fraction'],
-                                                            n_iter_no_change=self.__grid_best_params['n_iter_no_change'],
-                                                            warm_start=self.__grid_best_params['warm_start'],
-                                                            average=self.__grid_best_params['average'],
-                                                            verbose=verbose,
-                                                            random_state=13)
+            self.model = RidgeCV(alphas=self.__grid_best_params['alphas'],
+                                 fit_intercept=self.__grid_best_params['fit_intercept'],
+                                 normalize=self.__grid_best_params['normalize'],
+                                 scoring=self.__grid_best_params['scoring'],
+                                 cv=self.__grid_best_params['cv'],
+                                 gcv_mode=self.__grid_best_params['gcv_mode'],
+                                 store_cv_values=self.__grid_best_params['store_cv_values'],
+                                 alpha_per_target=self.__grid_best_params['alpha_per_target'])
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
             for param in param_dict:
@@ -150,27 +108,18 @@ class SGDRegressor:
                             self.__default_param_types[param],
                             type(self.__default_param[param]))
                 model_params[param] = param_dict[param]
-            self.model = StochasticGradientDescentRegressor(loss=model_params['loss'],
-                                                            penalty=model_params['penalty'],
-                                                            alpha=model_params['alpha'],
-                                                            l1_ratio=model_params['l1_ratio'],
-                                                            fit_intercept=model_params['fit_intercept'],
-                                                            max_iter=model_params['max_iter'],
-                                                            tol=model_params['tol'],
-                                                            shuffle=model_params['shuffle'],
-                                                            epsilon=model_params['epsilon'],
-                                                            learning_rate=model_params['learning_rate'],
-                                                            eta0=model_params['eta0'],
-                                                            power_t=model_params['power_T'],
-                                                            early_stopping=model_params['early_stopping'],
-                                                            validation_fraction=model_params['validation_fraction'],
-                                                            n_iter_no_change=model_params['n_iter_no_change'],
-                                                            warm_start=model_params['warm_start'],
-                                                            average=model_params['average'],
-                                                            verbose=verbose,
-                                                            random_state=13)
+
+            self.model = RidgeCV(alphas=model_params['alphas'],
+                                 fit_intercept=model_params['fit_intercept'],
+                                 normalize=model_params['normalize'],
+                                 scoring=model_params['scoring'],
+                                 cv=model_params['cv'],
+                                 gcv_mode=model_params['gcv_mode'],
+                                 store_cv_values=model_params['store_cv_values'],
+                                 alpha_per_target=model_params['alpha_per_target'])
+
         elif not grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor()
+            self.model = RidgeCV()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         print(f"Learning {self.__text_name}...")
@@ -179,7 +128,7 @@ class SGDRegressor:
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
+                 count: int = 0,
                  cross_validation: int = 3,
                  grid_n_jobs: int = 1):
         """
@@ -207,15 +156,13 @@ class SGDRegressor:
                                                          ltype=self.__default_param_types[param])
             else:
                 model_params[param] = [self.__default_param[param]]
-
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
                              locked_params=self.__locked_params,
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = StochasticGradientDescentRegressor(verbose=0,
-                                                   random_state=13)
+        model = RidgeCV()
         grid = GridSearchCV(model,
                             model_params,
                             cv=cross_validation,
@@ -362,8 +309,7 @@ class SGDRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = StochasticGradientDescentRegressor(random_state=13)
+        model = RidgeCV()
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
-
