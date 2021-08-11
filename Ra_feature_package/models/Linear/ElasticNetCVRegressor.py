@@ -31,13 +31,13 @@ class ENCVRegressor:
         self.__default_param_types = {'l1_ratio': float or List[float],
                                       'eps': float,
                                       'n_alphas': int,
-                                      'alphas': type(np.ndarray),
+                                      'alphas': type(None),
                                       'fit_intercept': bool,
                                       'normalize': bool,
                                       'precompute': str,
                                       'max_iter': int,
                                       'tol': float,
-                                      'cv': int,
+                                      'cv': type(None),
                                       'copy_X': bool,
                                       'positive': bool,
                                       'selection': str}
@@ -99,7 +99,8 @@ class ENCVRegressor:
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
             n_jobs: int = 1,
-            verbose: int = 0):
+            verbose: int = 0,
+            show: bool = False):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
@@ -156,14 +157,15 @@ class ENCVRegressor:
                                       verbose=verbose)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.__text_name}...")
+        if show:
+            print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
-                 cross_validation: int = 3,
+                 count: int = 0,
+                 cross_validation: int or type(None) = 3,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
@@ -189,7 +191,8 @@ class ENCVRegressor:
                                                          count=count,
                                                          ltype=self.__default_param_types[param])
             else:
-                model_params[param] = [self.__default_param[param]]
+                if param not in params_dict:
+                    model_params[param] = [self.__default_param[param]]
 
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
@@ -202,8 +205,7 @@ class ENCVRegressor:
         grid = GridSearchCV(model,
                             model_params,
                             cv=cross_validation,
-                            n_jobs=grid_n_jobs,
-                            scoring='neg_mean_absolute_error')
+                            n_jobs=grid_n_jobs)
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True

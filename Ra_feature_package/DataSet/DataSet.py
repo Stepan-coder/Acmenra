@@ -168,6 +168,7 @@ class DataSet:
             if column not in new_row.keys():
                 raise Exception(f"The \"{column}\" column is missing!")
         self.__dataset.loc[len(self.__dataset)] = [new_row[d] for d in self.__dataset_keys]
+        self.__update_dataset_base_info()
 
     def get_row(self, index: int) -> dict:
         """
@@ -187,7 +188,7 @@ class DataSet:
                                                      index=index)
         return result
 
-    def delete_row(self, index):
+    def delete_row(self, index) -> None:
         """
         This method delete row from dataset
         :param index: Index of the dataset string
