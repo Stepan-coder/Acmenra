@@ -70,6 +70,9 @@ class DataSetColumn:
     def get_values(self):
         return self.__values
 
+    def get_num_stat(self) -> NumericalIndicators:
+        return self.num_stat
+
     def get_from_json(self, data: dict, values: dict) -> None:
         """
         This method load DataSet indicators from json
@@ -88,7 +91,7 @@ class DataSetColumn:
         self.__nan_count = data["count_NaN"]
         self.__values = values
         if "Numerical indicators" in data:
-            self.num_stat = NumericalIndicators()
+            self.num_stat: NumericalIndicators = NumericalIndicators()
             self.num_stat.get_from_json(data=data["Numerical indicators"])
             self.__is_num_stat = True
 

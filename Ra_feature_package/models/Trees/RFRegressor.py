@@ -104,7 +104,8 @@ class RFRegressor:
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
             n_jobs: int = 1,
-            verbose: int = 0):
+            verbose: int = 0,
+            show: bool = False):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
@@ -166,7 +167,8 @@ class RFRegressor:
                                                random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.__text_name}...")
+        if show:
+            print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 

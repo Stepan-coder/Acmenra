@@ -8,83 +8,58 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import MultiTaskElasticNet
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import SGDRegressor as StochasticGradientDescentRegressor
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 
 
-class SGDRegressor:
+class MTENRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the SGDRegressor class
+        This method is the initiator of the MTENRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "StochasticGradientDescentRegressor"
-        self.__default_param_types = {'loss': str,
-                                      'penalty': str,
-                                      'alpha': float,
+        self.__text_name = "MultiTaskElasticNetRegressor"
+        self.__default_param_types = {'alpha': float,
                                       'l1_ratio': float,
                                       'fit_intercept': bool,
+                                      'normalize': bool,
+                                      'copy_X': bool,
                                       'max_iter': int,
                                       'tol': float,
-                                      'shuffle': bool,
-                                      'epsilon': float,
-                                      'learning_rate': float,
-                                      'eta0': float,
-                                      'power_t': float,
-                                      'early_stopping': bool,
-                                      'validation_fraction': float,
-                                      'n_iter_no_change': int,
                                       'warm_start': bool,
-                                      'average': bool}
+                                      'selection': str}
 
-        self.__default_param = {'loss': 'squared_loss',
-                                'penalty': 'l2',
-                                'alpha': 0.0001,
-                                'l1_ratio': 0.15,
+        self.__default_param = {'alpha': 1.0,
+                                'l1_ratio': 0.5,
                                 'fit_intercept': True,
+                                'normalize': False,
+                                'copy_X': True,
                                 'max_iter': 1000,
-                                'tol': 1e-3,
-                                'shuffle': True,
-                                'epsilon': 0.1,
-                                'learning_rate': 'invscaling',
-                                'eta0': 0.01,
-                                'power_t': 0.25,
-                                'early_stopping': False,
-                                'validation_fraction': 0.1,
-                                'n_iter_no_change': 5,
+                                'tol': [1e-4],
                                 'warm_start': False,
-                                'average': False}
+                                'selection': 'cyclic'}
 
-        # Доделать
         count = len(task.keys()) + 1
-        self.__default_params = {'loss': ['squared_loss', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive'],
-                                 'penalty': ['l2', 'l1', 'elasticnet'],
-                                 'alpha': conf_params(min_val=0, max_val=count*0.00005, count=count, ltype=float),
-                                 'l1_ratio': conf_params(min_val=0, max_val=1, count=count, ltype=float),
+        self.__default_params = {'alpha': conf_params(min_val=0, max_val=1, count=count, ltype=float),
+                                 'l1_ratio': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
                                  'fit_intercept': [True, False],
-                                 'max_iter': conf_params(min_val=2, count=count*100, ltype=int),
-                                 'tol': conf_params(min_val=2, max_val=count*0.00005, count=count, ltype=float),
-                                 'shuffle': [True, False],
-                                 'epsilon': conf_params(min_val=0, max_val=count*0.05, count=count, ltype=float),
-                                 'learning_rate': ['constant', 'invscaling', 'adaptive'],
-                                 'eta0': conf_params(min_val=2, max_val=count*0.005, count=count, ltype=float),
-                                 'power_t': conf_params(min_val=0, max_val=count*0.025, count=count,  ltype=float),
-                                 'early_stopping': [True, False],
-                                 'validation_fraction': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'n_iter_no_change': conf_params(min_val=2, count=count, ltype=int),
+                                 'normalize': [True, False],
+                                 'copy_X': [True, False],
+                                 'max_iter': conf_params(min_val=100, max_val=count * 100, count=count, ltype=int),
+                                 'tol': [1e-4],
                                  'warm_start': [True, False],
-                                 'average': [True, False]}
-        self.__locked_params = ['loss', 'penalty', 'fit_intercept', 'shuffle', 'learning_rate', 'early_stopping',
-                                'warm_start', 'average']
+                                 'selection': ['cyclic', 'random']}
+        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X',
+                                'warm_start', 'selection']
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -100,10 +75,10 @@ class SGDRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{SGDRegressor.__name__} model>'"
+        return f"'<Ra.{MTENRegressor.__name__} model>'"
 
     def __repr__(self):
-        return f"'<Ra.{SGDRegressor.__name__} model>'"
+        return f"'<Ra.{MTENRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)
@@ -111,6 +86,7 @@ class SGDRegressor:
     def fit(self,
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
+            n_jobs: int = 1,
             verbose: int = 0,
             show: bool = False):
         f"""
@@ -118,29 +94,20 @@ class SGDRegressor:
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
          from avia for training
+        :param n_jobs: The number of jobs to run in parallel.
         :param verbose: Learning-show param
         """
+
         if grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor(loss=self.__grid_best_params['loss'],
-                                                            penalty=self.__grid_best_params['penalty'],
-                                                            alpha=self.__grid_best_params['alpha'],
-                                                            l1_ratio=self.__grid_best_params['l1_ratio'],
-                                                            fit_intercept=self.__grid_best_params['fit_intercept'],
-                                                            max_iter=self.__grid_best_params['max_iter'],
-                                                            tol=self.__grid_best_params['tol'],
-                                                            shuffle=self.__grid_best_params['shuffle'],
-                                                            epsilon=self.__grid_best_params['epsilon'],
-                                                            learning_rate=self.__grid_best_params['learning_rate'],
-                                                            eta0=self.__grid_best_params['eta0'],
-                                                            power_t=self.__grid_best_params['power_T'],
-                                                            early_stopping=self.__grid_best_params['early_stopping'],
-                                                            validation_fraction=self.__grid_best_params[
-                                                                'validation_fraction'],
-                                                            n_iter_no_change=self.__grid_best_params['n_iter_no_change'],
-                                                            warm_start=self.__grid_best_params['warm_start'],
-                                                            average=self.__grid_best_params['average'],
-                                                            verbose=verbose,
-                                                            random_state=13)
+            self.model = MultiTaskElasticNet(alpha=self.__grid_best_params['alpha'],
+                                             l1_ratio=self.__grid_best_params['l1_ratio'],
+                                             fit_intercept=self.__grid_best_params['fit_intercept'],
+                                             normalize=self.__grid_best_params['normalize'],
+                                             copy_X=self.__grid_best_params['copy_X'],
+                                             max_iter=self.__grid_best_params['max_iter'],
+                                             tol=self.__grid_best_params['tol'],
+                                             warm_start=self.__grid_best_params['warm_start'],
+                                             selection=self.__grid_best_params['selection'])
         elif not grid_params and param_dict is not None:
             model_params = self.__default_param
             for param in param_dict:
@@ -151,38 +118,30 @@ class SGDRegressor:
                             self.__default_param_types[param],
                             type(self.__default_param[param]))
                 model_params[param] = param_dict[param]
-            self.model = StochasticGradientDescentRegressor(loss=model_params['loss'],
-                                                            penalty=model_params['penalty'],
-                                                            alpha=model_params['alpha'],
-                                                            l1_ratio=model_params['l1_ratio'],
-                                                            fit_intercept=model_params['fit_intercept'],
-                                                            max_iter=model_params['max_iter'],
-                                                            tol=model_params['tol'],
-                                                            shuffle=model_params['shuffle'],
-                                                            epsilon=model_params['epsilon'],
-                                                            learning_rate=model_params['learning_rate'],
-                                                            eta0=model_params['eta0'],
-                                                            power_t=model_params['power_T'],
-                                                            early_stopping=model_params['early_stopping'],
-                                                            validation_fraction=model_params['validation_fraction'],
-                                                            n_iter_no_change=model_params['n_iter_no_change'],
-                                                            warm_start=model_params['warm_start'],
-                                                            average=model_params['average'],
-                                                            verbose=verbose,
-                                                            random_state=13)
+
+            self.model = MultiTaskElasticNet(alpha=model_params['alpha'],
+                                             l1_ratio=model_params['l1_ratio'],
+                                             fit_intercept=model_params['fit_intercept'],
+                                             normalize=model_params['normalize'],
+                                             copy_X=model_params['copy_X'],
+                                             max_iter=model_params['max_iter'],
+                                             tol=model_params['tol'],
+                                             warm_start=model_params['warm_start'],
+                                             selection=model_params['selection'])
+
         elif not grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor()
+            self.model = MultiTaskElasticNet()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if show:
             print(f"Learning {self.__text_name}...")
-        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
+        self.model.fit(self.__X_train, self.__Y_train)
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
-                 cross_validation: int = 3,
+                 count: int = 0,
+                 cross_validation: int or type(None) = 3,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
@@ -208,7 +167,8 @@ class SGDRegressor:
                                                          count=count,
                                                          ltype=self.__default_param_types[param])
             else:
-                model_params[param] = [self.__default_param[param]]
+                if param not in params_dict:
+                    model_params[param] = [self.__default_param[param]]
 
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
@@ -216,14 +176,12 @@ class SGDRegressor:
                              locked_params=self.__locked_params,
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = StochasticGradientDescentRegressor(verbose=0,
-                                                   random_state=13)
+        model = MultiTaskElasticNet()
         grid = GridSearchCV(model,
                             model_params,
                             cv=cross_validation,
-                            n_jobs=grid_n_jobs,
-                            scoring='neg_mean_absolute_error')
-        grid.fit(self.__X_train, self.__Y_train.values.ravel())
+                            n_jobs=grid_n_jobs)
+        grid.fit(self.__X_train, self.__Y_train)
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
@@ -364,8 +322,7 @@ class SGDRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = StochasticGradientDescentRegressor(random_state=13)
+        model = MultiTaskElasticNet()
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
-
