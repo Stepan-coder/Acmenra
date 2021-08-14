@@ -181,6 +181,7 @@ class DataSet:
             raise Exception("The string value must be greater than 0!")
         if index > self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
+        self.__update_dataset_base_info()
         result = {}
         for column in self.__dataset_keys:
             if column not in result:
@@ -198,6 +199,7 @@ class DataSet:
         if index > self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
         self.__dataset = self.__dataset.drop(index=index)
+        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
 
     def get_columns(self, columns: list) -> pd.DataFrame:
