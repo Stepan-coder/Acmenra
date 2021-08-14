@@ -3,66 +3,98 @@ import pandas as pd
 
 from Ra_feature_package.DataSet.DataSetColumnNumStat import *
 
+"""
+TODO
+str - сделать красивой табличкой
+"""
 
 class DataSetColumn:
     def __init__(self,
                  column_name: str,
                  values: list = None,
+                 categorical: int = 25,
                  normal_distribution: bool = False,
                  rounding_factor: int = 2):
         self.__column_name = column_name
-        self.__values = values
+        self.__values = None
+        self.__count = None
+        self.__count_unique = None
+        self.__field_type = None
+        self.__field_dtype = None
+        self.__nan_count = None
+
         self.__use_normal_distribution = normal_distribution
         self.__rounding_factor = rounding_factor
 
         self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
-        self.__field_type = None
-        self.__count = None
-        self.__count_unique = None
-        self.__nan_count = None
         self.num_stat = None
         if values is not None:
             self.__fill_dataset_column(values=values,
+                                       categorical=categorical,
                                        normal_distribution=normal_distribution,
                                        rounding_factor=rounding_factor)
+
+    def __fill_dataset_column(self,
+                              values: list,
+                              categorical: int = 25,
+                              normal_distribution: bool = False,
+                              rounding_factor: int = 2):
+        """
+        This method fill this class when we use values
+        :param values: list of column values
+        :param normal_distribution: The switch responsible for calculating the indicators of the normal distribution
+        """
+        self.__values = values
+        self.__count = len(self.__values)
+        self.__count_unique = len(list(set(self.__values)))
+        self.__field_type = type(self.__values[0]).__name__
+        self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
+        self.__nan_count = self.__get_nan_count()
+        if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
+            self.num_stat = NumericalIndicators()
+            self.num_stat.set_values(values=self.__values,
+                                     normal_distribution=self.__use_normal_distribution)
+            self.__is_num_stat = True
 
     def __str__(self):
         """
         Displaying information about the column
         """
-        text = f"DataSetColumn: \'{self.column_name}\'\n"
-        text += f"  -Name: \'{self.column_name}\'\n"
-        text += f"  -Type: \'{self.field_type}\'\n"
-        text += f"  -Count: {self.count}\n"
-        text += f"  -Count unique: {self.count_unique}\n"
-        text += f"  -Count NaN: {self.nan_count}\n"
-        if self.field_type.startswith("int") or self.field_type.startswith("float"):
-            text += f"  Numerical indicators:\n"
-            text += f"      -Min: {self.min}\n"
-            text += f"      -Max: {self.max}\n"
-            text += f"      -Average: {round(self.average, self.rounding_factor)}\n"
-            if self.normal_distribution:
-                text += f"  Normal distribution:\n"
-                text += f"      -Moda: {self.math_moda}\n"
-                text += f"      -Wait: {round(self.math_wait, self.rounding_factor)}\n"
-                text += f"      -Dispersion: {round(self.math_dispersion, self.rounding_factor)}\n"
-                text += f"      -Sigma: {round(self.math_sigma, self.rounding_factor)}\n"
-                text += "      -Moda - 3 * Sigma: {0}\n".format(round(self.math_wait - 3 * self.math_sigma,
-                                                                      self.rounding_factor))
-                text += "      -Moda - 2 * Sigma: {0}\n".format(round(self.math_wait - 2 * self.math_sigma,
-                                                                      self.rounding_factor))
-                text += "      -Moda - 1 * Sigma: {0}\n".format(round(self.math_wait - 1 * self.math_sigma),
-                                                                self.rounding_factor)
-                text += "      -Moda + 1 * Sigma: {0}\n".format(round(self.math_wait + 1 * self.math_sigma),
-                                                                self.rounding_factor)
-                text += "      -Moda + 2 * Sigma: {0}\n".format(round(self.math_wait + 2 * self.math_sigma),
-                                                                self.rounding_factor)
-                text += "      -Moda + 3 * Sigma: {0}\n".format(round(self.math_wait + 3 * self.math_sigma),
-                                                                self.rounding_factor)
+        text = f"DataSetColumn: \'{self.__column_name}\'\n"
+        text += f"  -Name: \'{self.__column_name}\'\n"
+        text += f"  -Type: \'{self.__field_type}\'\n"
+        text += f"  -Count: {self.__count}\n"
+        text += f"  -Count unique: {self.__count_unique}\n"
+        text += f"  -Count NaN: {self.__nan_count}\n"
         return text
 
     def get_column_name(self) -> str:
         return self.__column_name
+
+    def get_count(self):
+        if self.__count is None:
+            raise Exception("The values were not loaded!")
+        return self.__count
+
+    def get_count_unique(self):
+        if self.__count_unique is None:
+            raise Exception("The values were not loaded!")
+        return self.__count_unique
+
+    def get_nan_count(self):
+        if self.__nan_count is None:
+            raise Exception("The values were not loaded!")
+        return self.__nan_count
+
+    def get_type(self):
+        if self.__field_type is None:
+            raise Exception("The values were not loaded!")
+        return self.__field_type
+
+    def get_dtype(self):
+        if self.__field_dtype is None:
+            raise Exception("The values were not loaded!")
+        return self.__field_dtype
 
     def get_is_num_stat(self) -> bool:
         return self.__is_num_stat
@@ -116,26 +148,6 @@ class DataSetColumn:
             return {self.__column_name: data}
         else:
             raise Exception("The values were not loaded!")
-
-    def __fill_dataset_column(self,
-                              values: list,
-                              normal_distribution: bool = False,
-                              rounding_factor: int = 2):
-        """
-        This method fill this class when we use values
-        :param values: list of column values
-        :param normal_distribution: The switch responsible for calculating the indicators of the normal distribution
-        """
-        self.__values = values
-        self.__field_type = type(self.__values[0]).__name__
-        self.__count = len(self.__values)
-        self.__count_unique = len(list(set(self.__values)))
-        self.__nan_count = self.__get_nan_count()
-        if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
-            self.num_stat = NumericalIndicators()
-            self.num_stat.set_values(values=self.__values,
-                                     normal_distribution=self.__use_normal_distribution)
-            self.__is_num_stat = True
 
     def __get_nan_count(self) -> int:
         """

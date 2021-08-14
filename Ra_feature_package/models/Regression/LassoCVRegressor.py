@@ -310,7 +310,7 @@ class LCVRegressor:
             print("An error occurred when calculating the \"mean_absolute_error\" error")
         return error
 
-    def get_predict_text_plt(self,
+    def get_predict_test_plt(self,
                              save_path: str = None,
                              show: bool = False):
         """

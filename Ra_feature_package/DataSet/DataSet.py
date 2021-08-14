@@ -9,6 +9,12 @@ from tqdm import tqdm
 from typing import Dict
 from Ra_feature_package.DataSet.DataSetColumn import *
 
+"""
+TODO 
+.head() - вывод красивой табличкой, сделать проверки на адекватные значения
+.tail() - вывод красивой табличкой, сделать проверки на адекватные значения
+
+"""
 
 class DataSet:
     def __init__(self, dataset_project_name: str, show: bool = False):
@@ -31,6 +37,34 @@ class DataSet:
 
     def __len__(self):
         return len(self.__dataset)
+
+    def head(self, n: int = 5):
+        """
+        This method ...
+        :param n: Count of lines
+        :return:
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            raise Exception("Count of rows 'n' should be less, then length of dataset!")
+        return self.__dataset.iloc[:n]
+
+    def tail(self, n: int = 5):
+        """
+        This method ...
+        :param n: Count of lines
+        :return:
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            raise Exception("Count of rows 'n' should be less, then length of dataset!")
+        return self.__dataset.iloc[-n:]
 
     # set-get init params
     def set_project_name(self, project_name: str) -> None:
@@ -202,7 +236,10 @@ class DataSet:
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
 
-    def get_columns(self, columns: list) -> pd.DataFrame:
+    def set_column(self, column_name: str, values: list):
+        pass
+
+    def get_column(self, columns: List[str]) -> pd.DataFrame:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param columns: List of column names
@@ -215,6 +252,21 @@ class DataSet:
             if column not in self.__dataset_keys:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return pd.DataFrame(self.__dataset[columns])
+
+    def get_column_info(self, column_name: str, extended: bool = False) -> DataSetColumn:
+        """
+        This method returns statistical analytics for a given column
+        :param column_name: The name of the dataset column for which we output statistics
+        :param normal_distribution: Responsible for calculating additional parameters
+        :return:
+        """
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        if column_name not in self.__dataset_analytics:
+            self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
+                                                                  values=self.__dataset[column_name],
+                                                                  normal_distribution=extended)
+        return self.__dataset_analytics[column_name]
 
     def get_dataframe(self) -> pd.DataFrame:
         """
@@ -241,39 +293,6 @@ class DataSet:
         if len(set(columns_names)) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the same column names!")
         self.__dataset = self.__dataset.join(dataset)
-        self.__update_dataset_base_info()
-
-    def get_column_analytics(self, column_name: str, normal_distribution: bool = False) -> DataSetColumn:
-        """
-        This method returns statistical analytics for a given column
-        :param column_name: The name of the dataset column for which we output statistics
-        :param normal_distribution: Responsible for calculating additional parameters
-        :return:
-        """
-        if column_name not in self.__dataset_keys:
-            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        if column_name not in self.__dataset_analytics:
-            self.update_dataset_analytics(normal_distribution=normal_distribution)
-        return self.__dataset_analytics[column_name]
-
-    def update_dataset_analytics(self, normal_distribution: bool = False):
-        """
-        This method calculates column metrics
-        :param normal_distribution: Responsible for calculating additional parameters
-        """
-        if self.__dataset is not None and len(self.__dataset) > 0:
-            if self.__show:
-                for key in tqdm(self.__dataset_keys,
-                                desc=str(f"Updating _{self.__dataset_project_name}_ analytics"),
-                                colour="green"):
-                    self.__dataset_analytics[key] = DataSetColumn(column_name=key,
-                                                                  values=self.__dataset[key],
-                                                                  normal_distribution=normal_distribution)
-            else:
-                for key in self.__dataset_keys:
-                    self.__dataset_analytics[key] = DataSetColumn(column_name=key,
-                                                                  values=self.__dataset[key],
-                                                                  normal_distribution=normal_distribution)
         self.__update_dataset_base_info()
 
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
@@ -340,14 +359,14 @@ class DataSet:
         self.__is_dataset_loaded = True
         self.__update_dataset_base_info()
 
-    def load_dataset(self, dataset: pd.DataFrame):
+    def load_DataFrame(self, dataframe: pd.DataFrame):
         """
         This method loads the dataset into the DataSet class
         :param dataset: Explicitly specifying pd. DataFrame as a dataset
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
-        self.__dataset = dataset
+        self.__dataset = dataframe
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
