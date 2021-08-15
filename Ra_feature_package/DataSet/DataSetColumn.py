@@ -36,6 +36,44 @@ class DataSetColumn:
                                        normal_distribution=normal_distribution,
                                        rounding_factor=rounding_factor)
 
+    def __str__(self):
+        table = PrettyTable()
+        is_dataset = True if self.__values is not None and len(self.__values) > 0 else False
+        table.title = f"{'Empty ' if not is_dataset else ''}Column \"{self.__column_name}\""
+        table.field_names = ["Indicator", "Value"]
+        table.add_row(["Сolumn name", self.get_column_name()])
+        table.add_row(["Type", self.get_type()])
+        table.add_row(["DType", self.get_dtype()])
+        table.add_row(["Count", self.get_count()])
+        table.add_row(["Count unique", self.get_count_unique()])
+        table.add_row(["NaN count", self.get_nan_count()])
+
+        if self.__is_num_stat:
+            table.add_row(["Numerical indicators", "".join(len("Numerical indicators") * [" "])])
+            table.add_row(["Min val", self.get_min()])
+            table.add_row(["Mean val", self.get_mean()])
+            table.add_row(["Median val", self.get_median()])
+            table.add_row(["Max val", self.get_max()])
+
+
+            table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
+            table.add_row(["Mathematical mode", self.get_math_mode()])
+            table.add_row(["Mathematical expectation", self.get_math_expectation()])
+            table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
+            table.add_row(["Mathematical sigma", self.get_math_sigma()])
+            table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
+
+        # if is_dataset:
+        #     for key in self.__dataset_keys:
+        #         column = self.get_column_info(column_name=key)
+        #         table.add_row([column.get_column_name(),
+        #                        column.get_type(),
+        #                        column.get_dtype(),
+        #                        column.get_count(),
+        #                        column.get_count_unique(),
+        #                        column.get_nan_count()])
+        return str(table)
+
     def __fill_dataset_column(self,
                               values: list,
                               categorical: int = 25,
@@ -55,22 +93,14 @@ class DataSetColumn:
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
             self.__num_stat = NumericalIndicators()
             self.__num_stat.set_values(values=self.__values,
-                                       normal_distribution=self.__use_normal_distribution)
+                                       normal_distribution=normal_distribution)
             self.__is_num_stat = True
 
-    def __str__(self):
-        """
-        Displaying information about the column
-        """
-        text = f"DataSetColumn: \'{self.__column_name}\'\n"
-        text += f"  -Name: \'{self.__column_name}\'\n"
-        text += f"  -Type: \'{self.__field_type}\'\n"
-        text += f"  -Count: {self.__count}\n"
-        text += f"  -Count unique: {self.__count_unique}\n"
-        text += f"  -Count NaN: {self.__nan_count}\n"
-        return text
-
     def get_column_name(self) -> str:
+        """
+        This method return the name of current column
+        :return:
+        """
         return self.__column_name
 
     def get_count(self) -> int:

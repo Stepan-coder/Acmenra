@@ -76,8 +76,7 @@ class NormalDistribution:
         """
         This method return the Z-score
         """
-        if self.__is_nor
-            mal_distribution is not None:
+        if self.__is_normal_distribution is not None:
             return self.__z_score
         else:
             raise Exception("The data has not been loaded yet!")
@@ -220,6 +219,7 @@ class NumericalIndicators:
         if values is not None:
             self.__fill_numerical_indicators(values=values,
                                              normal_distribution=normal_distribution)
+        print("&", self.__is_normal_distribution)
 
     def get_min(self):
         """

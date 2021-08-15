@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import Dict
+from prettytable import PrettyTable
 from Ra_feature_package.DataSet.DataSetColumn import *
 
 """
@@ -15,6 +16,7 @@ TODO
 .tail() - вывод красивой табличкой, сделать проверки на адекватные значения
 
 """
+
 
 class DataSet:
     def __init__(self, dataset_project_name: str, show: bool = False):
@@ -37,6 +39,25 @@ class DataSet:
 
     def __len__(self):
         return len(self.__dataset)
+
+    def __str__(self):
+        table = PrettyTable()
+        is_dataset = True if self.__dataset is not None and self.__dataset_len > 0 else False
+        table.title = f"{'Empty ' if not is_dataset else ''}DataSet \"{self.__dataset_project_name}\""
+        table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
+        if is_dataset:
+            for key in self.__dataset_keys:
+                column = self.get_column_info(column_name=key)
+                table.add_row([column.get_column_name(),
+                               column.get_type(),
+                               column.get_dtype(),
+                               column.get_count(),
+                               column.get_count_unique(),
+                               column.get_nan_count()])
+        return str(table)
+
+    def stat_info(self):
+        pass  # Сдесь должно быть то же самое, что и просто в str у колонки, но для всех колонок и сведено в 1 таблицу
 
     def head(self, n: int = 5):
         """

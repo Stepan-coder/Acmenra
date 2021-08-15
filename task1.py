@@ -13,16 +13,18 @@ for i in range(len(original_dataset)):
                                   value=original_dataset.get_from_field(column='price_rupiah',
                                                                         index=i).replace('Rp', '').replace(',', ''))
 original_dataset.set_field_type(field_name='price_rupiah', new_field_type=int)
-print(original_dataset.head())
-column_info = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
 
-print(column_info.get_count())
-print(column_info.get_min())
-print(column_info.get_max())
-print(column_info.get_mean())
-print(column_info.get_median())
+#
+# print(column_info.get_count())
+# print(column_info.get_min())
+# print(column_info.get_max())
+# print(column_info.get_mean())
+# print(column_info.get_median())
+#
+# print(column_info.get_math_distribution())
 
-print(column_info.get_math_distribution())
+print(original_dataset)
+print(original_dataset.get_column_info(column_name='price_rupiah', extended=True).get_math_distribution())
 
 
 
