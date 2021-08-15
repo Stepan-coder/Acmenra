@@ -19,15 +19,16 @@ class DataSetColumn:
         self.__values = None
         self.__count = None
         self.__count_unique = None
+        self.__nan_count = None
         self.__field_type = None
         self.__field_dtype = None
-        self.__nan_count = None
 
         self.__use_normal_distribution = normal_distribution
         self.__rounding_factor = rounding_factor
 
         self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
-        self.num_stat = None
+        self.__num_stat = None
+
         if values is not None:
             self.__fill_dataset_column(values=values,
                                        categorical=categorical,
@@ -51,9 +52,9 @@ class DataSetColumn:
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
         self.__nan_count = self.__get_nan_count()
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
-            self.num_stat = NumericalIndicators()
-            self.num_stat.set_values(values=self.__values,
-                                     normal_distribution=self.__use_normal_distribution)
+            self.__num_stat = NumericalIndicators()
+            self.__num_stat.set_values(values=self.__values,
+                                       normal_distribution=self.__use_normal_distribution)
             self.__is_num_stat = True
 
     def __str__(self):
@@ -71,17 +72,17 @@ class DataSetColumn:
     def get_column_name(self) -> str:
         return self.__column_name
 
-    def get_count(self):
+    def get_count(self) -> int:
         if self.__count is None:
             raise Exception("The values were not loaded!")
         return self.__count
 
-    def get_count_unique(self):
+    def get_count_unique(self) -> int:
         if self.__count_unique is None:
             raise Exception("The values were not loaded!")
         return self.__count_unique
 
-    def get_nan_count(self):
+    def get_nan_count(self) -> int:
         if self.__nan_count is None:
             raise Exception("The values were not loaded!")
         return self.__nan_count
@@ -96,6 +97,35 @@ class DataSetColumn:
             raise Exception("The values were not loaded!")
         return self.__field_dtype
 
+    def get_min(self) -> int or float or bool:
+        """
+        This method return minimal value of column
+        :return Minimal value of column
+        """
+        if self.__is_num_stat:
+            return self.__num_stat.get_min()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_max(self) -> int or float or bool:
+        """
+        This method return maximal value of column
+        :return Maximal value of column
+        """
+        if self.__is_num_stat:
+            return self.__num_stat.get_max()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_average(self) -> int or float or bool:
+        """
+        This method return maximal value of column
+        """
+        if self.__is_num_stat:
+            return self.__num_stat.get_average()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
     def get_is_num_stat(self) -> bool:
         return self.__is_num_stat
 
@@ -103,7 +133,7 @@ class DataSetColumn:
         return self.__values
 
     def get_num_stat(self) -> NumericalIndicators:
-        return self.num_stat
+        return self.__num_stat
 
     def get_from_json(self, data: dict, values: dict) -> None:
         """
@@ -117,14 +147,16 @@ class DataSetColumn:
             if rf not in data:
                 raise Exception("The resulting json file does not contain required arguments! Try another file.")
         self.__column_name = data["column_name"]
-        self.__field_type = data["type"]
+        self.__values = values
         self.__count = data["count"]
         self.__count_unique = data["count_unique"]
         self.__nan_count = data["count_NaN"]
-        self.__values = values
+        self.__field_type = data["type"]
+        self.__field_dtype = data["dtype"]
+
         if "Numerical indicators" in data:
-            self.num_stat: NumericalIndicators = NumericalIndicators()
-            self.num_stat.get_from_json(data=data["Numerical indicators"])
+            self.__num_stat: NumericalIndicators = NumericalIndicators()
+            self.__num_stat.get_from_json(data=data["Numerical indicators"])
             self.__is_num_stat = True
 
     def to_json(self) -> dict:
@@ -134,10 +166,11 @@ class DataSetColumn:
         """
         if self.__values is not None:
             data = {"column_name": self.__column_name,
-                    "type": self.__field_type,
                     "count": self.__count,
                     "count_unique": self.__count_unique,
-                    "count_NaN": self.__nan_count}
+                    "count_NaN": self.__nan_count,
+                    "type": self.__field_type,
+                    "dtype": self.__field_dtype}
             if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
                 if not self.num_stat.get_is_numerical_indicators():
                     self.num_stat = NumericalIndicators()
