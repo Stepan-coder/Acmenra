@@ -1,3 +1,5 @@
+import time
+
 from sklearn.metrics import roc_auc_score
 from Ra_feature_package.DataSet.DataSet import *
 
@@ -17,9 +19,12 @@ column_info = original_dataset.get_column_info(column_name='price_rupiah', exten
 print(column_info.get_count())
 print(column_info.get_min())
 print(column_info.get_max())
-print(column_info.get_average())
-print(column_info.get_num_stat().get_normal_distribution().get_math_distribution())
-print(original_dataset.get_dataframe()['price_rupiah'].std())
+print(column_info.get_mean())
+print(column_info.get_median())
+
+print(column_info.get_math_distribution())
+
+
 
 # dtc.fit_grid()
 # dtc.fit(params=dtc.get_best_params())

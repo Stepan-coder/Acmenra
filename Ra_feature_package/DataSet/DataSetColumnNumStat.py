@@ -1,6 +1,9 @@
 import math
 from typing import Dict, List
 
+import numpy as np
+from scipy import stats
+
 
 class NormalDistribution:
     def __init__(self, values: List[int or float] = None):
@@ -9,6 +12,8 @@ class NormalDistribution:
         self.__math_dispersion = None
         self.__math_sigma = None
         self.__math_distribution = None
+        self.__coef_of_variation = None
+        self.__z_score = None
         self.__is_normal_distribution = False
         if values is not None:
             self.__fill_normal_distribution(values=values)
@@ -17,31 +22,65 @@ class NormalDistribution:
         """
         This method return mathematical distribution dict
         """
-        return self.__math_distribution
+        if self.__is_normal_distribution is not None:
+            return self.__math_distribution
+        else:
+            raise Exception("The data has not been loaded yet!")
 
     def get_math_mode(self):
         """
         This method return mathematical mode
         """
-        return self.__math_mode
+        if self.__is_normal_distribution is not None:
+            return self.__math_mode
+        else:
+            raise Exception("The data has not been loaded yet!")
 
     def get_math_expectation(self):
         """
         This method return mathematical expectation
         """
-        return self.__math_expectation
+        if self.__is_normal_distribution is not None:
+            return self.__math_expectation
+        else:
+            raise Exception("The data has not been loaded yet!")
 
     def get_math_dispersion(self):
         """
         This method return mathematical dispersion
         """
-        return self.__math_dispersion
+        if self.__is_normal_distribution is not None:
+            return self.__math_dispersion
+        else:
+            raise Exception("The data has not been loaded yet!")
 
     def get_math_sigma(self):
         """
         This method return mathematical sigma
         """
-        return self.__math_sigma
+        if self.__is_normal_distribution is not None:
+            return self.__math_sigma
+        else:
+            raise Exception("The data has not been loaded yet!")
+
+    def get_coef_of_variation(self):
+        """
+        This method return Coefficient of Variation
+        """
+        if self.__is_normal_distribution is not None:
+            return self.__coef_of_variation
+        else:
+            raise Exception("The data has not been loaded yet!")
+
+    def get_Z_score(self):
+        """
+        This method return the Z-score
+        """
+        if self.__is_nor
+            mal_distribution is not None:
+            return self.__z_score
+        else:
+            raise Exception("The data has not been loaded yet!")
 
     def get_is_normal_distribution(self) -> bool:
         """
@@ -95,13 +134,12 @@ class NormalDistribution:
         """
 
         self.__math_distribution = self.__get_math_distribution(values)
-        self.__math_mode = self.__get_math_moda(self.__math_distribution)
+        self.__math_mode = stats.mode(values)[0][0]
         self.__math_expectation = self.__get_math_expectation(self.__math_distribution)
-        self.__math_dispersion = self.__get_math_dispersion(self.__math_distribution)
-        if self.__math_dispersion >= 0:
-            self.__math_sigma = math.sqrt(self.__math_dispersion)
-        else:
-            self.__math_sigma = -1 * math.sqrt(abs(self.__math_dispersion))
+        self.__math_sigma = np.std(values)
+        self.__math_dispersion = self.__math_sigma ** 2
+        self.__coef_of_variation = np.std(values) / np.mean(values) * 100
+        self.__z_score = stats.zscore(values)
         self.__is_normal_distribution = True
 
     @staticmethod
@@ -186,20 +224,30 @@ class NumericalIndicators:
     def get_min(self):
         """
         This method return minimal value of column
+        :return Minimal value of column
         """
         return self.__min
 
     def get_max(self):
         """
         This method return maximal value of column
+        :return Maximal value of column
         """
         return self.__max
 
-    def get_average(self) -> float:
+    def get_mean(self):
         """
-        This method return maximal value of column
+        This method return mean value of column
+        :return Mean value of column
         """
-        return self.__average
+        return self.__mean
+
+    def get_median(self):
+        """
+        This method return median value of column
+        :return Median value of column
+        """
+        return self.__median
 
     def get_is_normal_distribution(self) -> bool:
         return self.__is_normal_distribution
@@ -238,7 +286,8 @@ class NumericalIndicators:
                 raise Exception("The resulting json file does not contain required arguments! Try another file.")
         self.__min = data["Minimal value"]
         self.__max = data["Maximal value"]
-        self.__average = data["Average value"]
+        self.__mean = data["Mean value"]
+        self.__median = data["Median value"]
         self.__is_numerical_indicators = True
         if "Normal distribution" in data:
             self.normal_distribution = NormalDistribution()
@@ -253,7 +302,8 @@ class NumericalIndicators:
             raise Exception("The values were not loaded!")
         data = {"Minimal value": self.__min,
                 "Maximal value": self.__max,
-                "Average value": self.__average}
+                "Mean value": self.__mean,
+                "Median value": self.__median}
         if self.__use_normal_distribution and self.__is_normal_distribution:
             data['Normal distribution'] = self.normal_distribution.to_json()
         return data
@@ -266,7 +316,8 @@ class NumericalIndicators:
         """
         self.__min = min(values)
         self.__max = max(values)
-        self.__average = sum(values) / len(values)
+        self.__mean = np.mean(values)
+        self.__median = np.median(values)
         self.__use_normal_distribution = normal_distribution
         self.__is_numerical_indicators = True
         if normal_distribution and not self.__is_normal_distribution:

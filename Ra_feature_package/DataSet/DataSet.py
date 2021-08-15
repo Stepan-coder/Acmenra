@@ -133,7 +133,7 @@ class DataSet:
             self.__update_dataset_base_info()
             return list(self.__dataset_keys)
         else:
-            raise Exception("The dataset has not been loaded yet")
+            raise Exception("The dataset has not been loaded yet!")
 
     def set_keys_order(self, new_order_columns: List[str]) -> None:
         """

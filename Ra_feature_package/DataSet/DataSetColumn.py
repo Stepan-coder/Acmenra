@@ -1,12 +1,13 @@
 import math
 import pandas as pd
-
+from prettytable import PrettyTable
 from Ra_feature_package.DataSet.DataSetColumnNumStat import *
 
 """
 TODO
 str - сделать красивой табличкой
 """
+
 
 class DataSetColumn:
     def __init__(self,
@@ -117,14 +118,87 @@ class DataSetColumn:
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
-    def get_average(self) -> int or float or bool:
+    def get_mean(self) -> int or float or bool:
         """
         This method return maximal value of column
         """
         if self.__is_num_stat:
-            return self.__num_stat.get_average()
+            return self.__num_stat.get_mean()
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_median(self) -> int or float or bool:
+        """
+        This method return maximal value of column
+        """
+        if self.__is_num_stat:
+            return self.__num_stat.get_median()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_math_distribution(self):
+        """
+        This method return mathematical distribution dict
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_math_distribution()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_math_mode(self):
+        """
+        This method return mathematical mode
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_math_mode()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_math_expectation(self):
+        """
+        This method return mathematical expectation
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_math_expectation()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_math_dispersion(self):
+        """
+        This method return mathematical dispersion
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_math_dispersion()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_math_sigma(self):
+        """
+        This method return mathematical sigma
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_math_sigma()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_coef_of_variation(self):
+        """
+        This method return mathematical sigma
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_coef_of_variation()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
+    def get_Z_score(self):
+        """
+        This method return mathematical sigma
+        """
+        if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
+            return self.__num_stat.get_normal_distribution().get_Z_score()
+        else:
+            raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
+
 
     def get_is_num_stat(self) -> bool:
         return self.__is_num_stat
