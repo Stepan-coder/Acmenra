@@ -3,18 +3,13 @@ import pandas as pd
 from prettytable import PrettyTable
 from Ra_feature_package.DataSet.DataSetColumnNumStat import *
 
-"""
-TODO
-str - сделать красивой табличкой
-"""
-
 
 class DataSetColumn:
     def __init__(self,
                  column_name: str,
                  values: list = None,
                  categorical: int = 25,
-                 normal_distribution: bool = False,
+                 extended: bool = False,
                  rounding_factor: int = 2):
         self.__column_name = column_name
         self.__values = None
@@ -23,18 +18,15 @@ class DataSetColumn:
         self.__nan_count = None
         self.__field_type = None
         self.__field_dtype = None
-
-        self.__use_normal_distribution = normal_distribution
-        self.__rounding_factor = rounding_factor
-
-        self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
         self.__num_stat = None
-
+        self.__use_extended = extended
+        self.__rounding_factor = rounding_factor
+        self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
         if values is not None:
-            self.__fill_dataset_column(values=values,
-                                       categorical=categorical,
-                                       normal_distribution=normal_distribution,
-                                       rounding_factor=rounding_factor)
+            self.fill_dataset_column(values=values,
+                                     categorical=categorical,
+                                     extended=extended,
+                                     rounding_factor=rounding_factor)
 
     def __str__(self):
         table = PrettyTable()
@@ -55,34 +47,24 @@ class DataSetColumn:
             table.add_row(["Median val", self.get_median()])
             table.add_row(["Max val", self.get_max()])
 
-
-            table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
-            table.add_row(["Mathematical mode", self.get_math_mode()])
-            table.add_row(["Mathematical expectation", self.get_math_expectation()])
-            table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
-            table.add_row(["Mathematical sigma", self.get_math_sigma()])
-            table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
-
-        # if is_dataset:
-        #     for key in self.__dataset_keys:
-        #         column = self.get_column_info(column_name=key)
-        #         table.add_row([column.get_column_name(),
-        #                        column.get_type(),
-        #                        column.get_dtype(),
-        #                        column.get_count(),
-        #                        column.get_count_unique(),
-        #                        column.get_nan_count()])
+            if self.get_num_stat().get_normal_distribution():
+                table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
+                table.add_row(["Mathematical mode", self.get_math_mode()])
+                table.add_row(["Mathematical expectation", self.get_math_expectation()])
+                table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
+                table.add_row(["Mathematical sigma", self.get_math_sigma()])
+                table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
         return str(table)
 
-    def __fill_dataset_column(self,
-                              values: list,
-                              categorical: int = 25,
-                              normal_distribution: bool = False,
-                              rounding_factor: int = 2):
+    def fill_dataset_column(self,
+                            values: list,
+                            categorical: int = 25,
+                            extended: bool = False,
+                            rounding_factor: int = 2):
         """
         This method fill this class when we use values
         :param values: list of column values
-        :param normal_distribution: The switch responsible for calculating the indicators of the normal distribution
+        :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
         self.__values = values
         self.__count = len(self.__values)
@@ -93,7 +75,7 @@ class DataSetColumn:
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
             self.__num_stat = NumericalIndicators()
             self.__num_stat.set_values(values=self.__values,
-                                       normal_distribution=normal_distribution)
+                                       extended=extended)
             self.__is_num_stat = True
 
     def get_column_name(self) -> str:
@@ -229,9 +211,11 @@ class DataSetColumn:
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
-
     def get_is_num_stat(self) -> bool:
         return self.__is_num_stat
+
+    def get_is_extended(self) -> bool:
+        return self.__use_extended
 
     def get_values(self):
         return self.__values
@@ -276,12 +260,12 @@ class DataSetColumn:
                     "type": self.__field_type,
                     "dtype": self.__field_dtype}
             if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
-                if not self.num_stat.get_is_numerical_indicators():
-                    self.num_stat = NumericalIndicators()
-                    self.num_stat.set_values(values=self.__values,
-                                             normal_distribution=self.__use_normal_distribution)
+                if not self.__num_stat.get_is_numerical_indicators():
+                    self.__num_stat = NumericalIndicators()
+                    self.__num_stat.set_values(values=self.__values,
+                                               extended=self.__use_extended)
                     self.__is_num_stat = True
-                data["Numerical indicators"] = self.num_stat.to_json()
+                data["Numerical indicators"] = self.__num_stat.to_json()
             return {self.__column_name: data}
         else:
             raise Exception("The values were not loaded!")

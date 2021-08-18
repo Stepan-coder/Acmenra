@@ -210,8 +210,9 @@ class NormalDistribution:
 class NumericalIndicators:
     def __init__(self, values: List[int or float] = None, normal_distribution: bool = False):
         self.__min = None
+        self.__mean = None
+        self.__median = None
         self.__max = None
-        self.__average = None
         self.normal_distribution = None
         self.__use_normal_distribution = normal_distribution
         self.__is_numerical_indicators = False  # Отвечает за наличие данных в классе NumericalIndicators
@@ -219,7 +220,6 @@ class NumericalIndicators:
         if values is not None:
             self.__fill_numerical_indicators(values=values,
                                              normal_distribution=normal_distribution)
-        print("&", self.__is_normal_distribution)
 
     def get_min(self):
         """
@@ -262,17 +262,17 @@ class NumericalIndicators:
         """
         return self.__is_numerical_indicators
 
-    def set_values(self, values: List[int or float], normal_distribution: bool = False):
+    def set_values(self, values: List[int or float], extended: bool = False):
         """
         This method init the filling params of this class
         :param values: Values from DataSetColumn - values of column from the dataset
-        :param normal_distribution: The switch responsible for calculating the indicators of the normal distribution
+        :param extended: The switch responsible for calculating the indicators of the normal distribution
         :return: None
         """
         if not self.__is_numerical_indicators:
             if values is not None:
                 self.__fill_numerical_indicators(values=values,
-                                                 normal_distribution=normal_distribution)
+                                                 extended=extended)
 
     def get_from_json(self, data: dict) -> None:
         """
@@ -308,19 +308,20 @@ class NumericalIndicators:
             data['Normal distribution'] = self.normal_distribution.to_json()
         return data
 
-    def __fill_numerical_indicators(self, values: List[int or float], normal_distribution: bool = False):
+    def __fill_numerical_indicators(self, values: List[int or float], extended: bool = False):
         """
         This method fill this class when we use values
         :param values: list of column values
-        :param normal_distribution: The switch responsible for calculating the indicators of the normal distribution
+        :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
         self.__min = min(values)
         self.__max = max(values)
         self.__mean = np.mean(values)
         self.__median = np.median(values)
-        self.__use_normal_distribution = normal_distribution
+        self.__use_extended = extended
         self.__is_numerical_indicators = True
-        if normal_distribution and not self.__is_normal_distribution:
+        if extended and not self.__is_normal_distribution:
             self.normal_distribution = NormalDistribution()
             self.normal_distribution.set_values(values=values)
             self.__is_normal_distribution = True
+

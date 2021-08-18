@@ -10,13 +10,6 @@ from typing import Dict
 from prettytable import PrettyTable
 from Ra_feature_package.DataSet.DataSetColumn import *
 
-"""
-TODO 
-.head() - вывод красивой табличкой, сделать проверки на адекватные значения
-.tail() - вывод красивой табличкой, сделать проверки на адекватные значения
-
-"""
-
 
 class DataSet:
     def __init__(self, dataset_project_name: str, show: bool = False):
@@ -47,7 +40,7 @@ class DataSet:
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:
-                column = self.get_column_info(column_name=key)
+                column = self.get_column_info(column_name=key, extended=True)
                 table.add_row([column.get_column_name(),
                                column.get_type(),
                                column.get_dtype(),
@@ -144,7 +137,6 @@ class DataSet:
         """
         return self.__encoding
 
-    #
     def get_keys(self) -> list:
         """
         This method return column names of dataset pd.DataFrame
@@ -183,21 +175,6 @@ class DataSet:
         else:
             raise Exception("The dataset has not been loaded yet")
 
-    def get_from_field(self, column: str, index: int):
-        """
-        This method gets the value from the dataset cell
-        :param column: The name of the dataset column
-        :param index: Index of the dataset string
-        :return: value
-        """
-        if index < 0:
-            raise Exception("The string value must be greater than 0!")
-        if index > self.__dataset_len:
-            raise Exception("The row value must be less than the number of rows in the dataset!")
-        if column not in self.__dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        return self.__dataset.at[index, column]
-
     def set_to_field(self, column: str, index: int, value):
         """
         This method gets the value from the dataset cell
@@ -212,6 +189,21 @@ class DataSet:
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         self.__dataset.loc[index, column] = value
+
+    def get_from_field(self, column: str, index: int):
+        """
+        This method gets the value from the dataset cell
+        :param column: The name of the dataset column
+        :param index: Index of the dataset string
+        :return: value
+        """
+        if index < 0:
+            raise Exception("The string value must be greater than 0!")
+        if index > self.__dataset_len:
+            raise Exception("The row value must be less than the number of rows in the dataset!")
+        if column not in self.__dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        return self.__dataset.at[index, column]
 
     def add_row(self, new_row: dict):
         if len(set(new_row.keys())) != len(new_row.keys()):
@@ -257,28 +249,38 @@ class DataSet:
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
 
-    def set_column(self, column_name: str, values: list):
-        pass
+    def add_column(self, column: str, values: list, dif_len: bool = False):
+        if column in self.__dataset_keys:
+            raise Exception(f"The '{column}' column already exists in the presented dataset!")
+        if len(self.__dataset) != len(values):
+            if not dif_len:
+                raise Exception("The column and dataset must have the same size!")
+        self.__dataset[column] = values
+        self.__update_dataset_base_info()
 
-    def get_column(self, columns: List[str]) -> pd.DataFrame:
+    def get_column(self, column: str) -> pd.DataFrame:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
-        :param columns: List of column names
-        :return: Returns the selected columns
+        :param column: List of column names
+        :return: Return the selected column
         """
-        for column in columns:
-            if column not in self.__dataset_keys:
-                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        for column in columns:
-            if column not in self.__dataset_keys:
-                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        return pd.DataFrame(self.__dataset[columns])
+        if column not in self.__dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        return self.__dataset[column].tolist()
 
-    def get_column_info(self, column_name: str, extended: bool = False) -> DataSetColumn:
+    def delete_column(self, column: str) -> None:
+        if column not in self.__dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        self.__dataset = self.__dataset.drop([column], axis=1)
+        if column in self.__dataset_analytics:
+            self.__dataset_analytics.pop(column)
+        self.__update_dataset_base_info()
+
+    def get_column_info(self, column_name: str, extended: bool) -> DataSetColumn:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
-        :param normal_distribution: Responsible for calculating additional parameters
+        :param extended: Responsible for calculating additional parameters
         :return:
         """
         if column_name not in self.__dataset_keys:
@@ -286,7 +288,7 @@ class DataSet:
         if column_name not in self.__dataset_analytics:
             self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
                                                                   values=self.__dataset[column_name],
-                                                                  normal_distribution=extended)
+                                                                  extended=extended)
         return self.__dataset_analytics[column_name]
 
     def get_dataframe(self) -> pd.DataFrame:
@@ -357,6 +359,16 @@ class DataSet:
                 print(f"Convert DataSet field \'{field_name}\': {primary_type} -> {secondary_type}")
         else:
             raise Exception("There is no such column in the presented dataset!")
+
+    def update_dataset_info(self):
+        self.__update_dataset_base_info()
+        for key in self.__dataset_keys:
+            is_extended = False
+            if key in self.__dataset_analytics:
+                is_extended = self.__dataset_analytics[key].get_is_extended()
+            self.__dataset_analytics[key] = DataSetColumn(column_name=key,
+                                                          values=self.__dataset[key],
+                                                          extended=is_extended)
 
     def create_empty_dataset(self,
                              columns_names: list = None,
@@ -559,14 +571,14 @@ class DataSet:
     def __save_min_average_max_plot(self, path: str, column: DataSetColumn):
         plot_title = f'Numerical Indicators of _{column.get_column_name()}_'
         values_plot = column.get_values()
-        max_plot = len(values_plot) * [column.num_stat.get_max()]
-        min_plot = len(values_plot) * [column.num_stat.get_min()]
-        average_plot = len(values_plot) * [column.num_stat.get_average()]
+        max_plot = len(values_plot) * [column.get_max()]
+        min_plot = len(values_plot) * [column.get_min()]
+        average_plot = len(values_plot) * [column.get_mean()]
         plt.title(plot_title)
         plt.plot(values_plot, 'b-', label=f"Values count={len(values_plot)}")
-        plt.plot(max_plot, 'r-', label=f"Max value={column.num_stat.get_max()}")
-        plt.plot(min_plot, 'r--', label=f"Min value={column.num_stat.get_min()}")
-        plt.plot(average_plot, 'g--', label=f"Average value={column.num_stat.get_average()}")
+        plt.plot(max_plot, 'r-', label=f"Max value={column.get_max()}")
+        plt.plot(min_plot, 'r--', label=f"Min value={column.get_min()}")
+        plt.plot(average_plot, 'g--', label=f"Average value={column.get_mean()}")
         plt.legend(loc='best')
         if path is not None:
             if not os.path.exists(path):  # Надо что то с путём что то адекватное придумать
@@ -589,7 +601,6 @@ class DataSet:
             self.__dataset_analytics[dk] = DataSetColumn(column_name=dk)
             self.__dataset_analytics[dk].get_from_json(data=data["columns"][dk],
                                                        values=self.__dataset[dk].values)
-        self.update_dataset_analytics()
 
     def __update_dataset_base_info(self):
         """
