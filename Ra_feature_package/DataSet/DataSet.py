@@ -41,9 +41,14 @@ class DataSet:
         if is_dataset:
             for key in self.__dataset_keys:
                 column = self.get_column_info(column_name=key, extended=True)
+
+                if column.get_dtype() == 'variable':
+                    dtype = "\033[32m {}\033[0m".format(column.get_dtype())
+                else:
+                    dtype = "\033[31m {}\033[0m".format(column.get_dtype())
                 table.add_row([column.get_column_name(),
                                column.get_type(),
-                               column.get_dtype(),
+                               dtype,
                                column.get_count(),
                                column.get_count_unique(),
                                column.get_nan_count()])

@@ -1,11 +1,17 @@
+import os
+import math
+import time
+
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
+from prettytable import PrettyTable
+
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import RandomForestClassifier
+
 
 class RForestClassifier:
     def __init__(self, data_df, target, train_split, show=False):
@@ -29,6 +35,19 @@ class RForestClassifier:
                       'min_samples_leaf': int,
                       'min_samples_split': int,
                       'criterion': str}
+
+    def __str__(self):
+        table = PrettyTable()
+        is_fited = self.__is_model_fit
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
 
     def fit_grid(self, params_dict=None, n_estimators=None,  max_depth=None, max_features=None, min_samples_leaf=None,
                  min_samples_split=None, criterion=None, step=1, cross_validation=5):
@@ -129,45 +148,73 @@ class RForestClassifier:
         return {k: v for k, v in sorted(self.importance.items(), key=lambda item: item[1], reverse=True)}
 
     def get_roc_auc_score(self) -> float:
-        f"""
-        This method calculates the "roc_auc_score" for the {self.text_name} on the test data
-        :return: roc_auc_score
+        """
+        This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
+        :return: ROC AUC Score
         """
         error = float("inf")
-        if not self.is_model_fit:
-            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
         try:
-            error = Errors.get_roc_auc_score(self.y_test, self.model.predict(self.x_test))
+            error = Errors.get_roc_auc_score(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"roc_auc_score\" error")
+            print("An error occurred when calculating the \"ROC AUC score\" error")
         return error
 
-    def get_mean_squared_error(self) -> float:
+    def get_r_squared_error(self) -> float:
         """
-        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
-        :return: mean_squared_error
+        This method calculates the "R-Squared_error" for the on the test data
+        :return: R-Squared_error
         """
         error = float("inf")
-        if not self.is_model_fit:
-            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
         try:
-            error = Errors.get_mean_squared_error(self.y_test, self.model.predict(self.x_test))
+            error = Errors.get_r_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"mean_squared_error\" error")
+            print("An error occurred when calculating the \"R-Squared_error\" error")
         return error
 
     def get_mean_absolute_error(self) -> float:
         """
         This method calculates the "mean_absolute_error" for the {self.text_name} on the test data
-        :return: mean_absolute_error
+        :return: Mean Absolute Error
         """
         error = float("inf")
-        if not self.is_model_fit:
-            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
         try:
-            error = Errors.get_mean_absolute_error(self.y_test, self.model.predict(self.x_test))
+            error = Errors.get_mean_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"mean_absolute_error\" error")
+            print("An error occurred when calculating the \"Mean Absolute Error\" error")
+        return error
+
+    def get_mean_squared_error(self) -> float:
+        """
+        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
+        :return: Mean Squared Error
+        """
+        error = float("inf")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        try:
+            error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
+        except:
+            print("An error occurred when calculating the \"Mean Squared Error\" error")
+        return error
+
+    def get_median_absolute_error(self) -> float:
+        """
+        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
+        :return: Median Absolute Error
+        """
+        error = float("inf")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        try:
+            error = Errors.get_median_absolute_error(self.__y_test, self.model.predict(self.__x_test))
+        except:
+            print("An error occurred when calculating the \"Median Absolute Error\" error")
         return error
 
     def show_grid_params(self, params):

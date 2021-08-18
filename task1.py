@@ -19,15 +19,18 @@ for key in original_dataset.get_keys():
         original_dataset.delete_column(column=key)
         original_dataset.add_column(column=key, values=encoders[key].encode(key_column.get_values().tolist()))
 original_dataset.update_dataset_info()
+print(original_dataset)
 task = DataSet(dataset_project_name='task')
 task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
-target_analitic = original_dataset.get_column_info(column_name='price_rupiah',extended=True)
-rfr = RFRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100)
-rfr.fit(n_jobs=-1, show=True)
-print(rfr.get_mean_absolute_error())
-
+target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
+rfr = RFRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+# rfr.fit_grid(count=1, grid_n_jobs=-1)
+rfr.fit(grid_params=False, n_jobs=-1, show=True)
+# print(rfr.get_mean_absolute_error())
+rfr.get_predict_test_plt(show=True)
+print(rfr)
 
 
 
@@ -48,3 +51,14 @@ print(rfr.get_mean_absolute_error())
 # print("feature_importances: ", rfc.get_feature_importances())
 
 
+# +--------------------------------------------+
+# |       "RandomForestRegressor" model        |
+# +-----------------------+--------------------+
+# |         Error         |       Result       |
+# +-----------------------+--------------------+
+# |     ROC AUC score     |        inf         |
+# |    R-Squared_error    | 0.9332411200753861 |
+# |  Mean Absolute Error  | 6776.551724137931  |
+# |   Mean Squared Error  | 73119270.68965517  |
+# | Median Absolute Error |       5300.0       |
+# +-----------------------+--------------------+

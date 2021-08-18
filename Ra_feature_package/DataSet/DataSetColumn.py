@@ -78,6 +78,12 @@ class DataSetColumn:
                                        extended=extended)
             self.__is_num_stat = True
 
+    def get_values(self):
+        return self.__values
+
+    def get_num_stat(self) -> NumericalIndicators:
+        return self.__num_stat
+
     def get_column_name(self) -> str:
         """
         This method return the name of current column
@@ -216,12 +222,6 @@ class DataSetColumn:
 
     def get_is_extended(self) -> bool:
         return self.__use_extended
-
-    def get_values(self):
-        return self.__values
-
-    def get_num_stat(self) -> NumericalIndicators:
-        return self.__num_stat
 
     def get_from_json(self, data: dict, values: dict) -> None:
         """

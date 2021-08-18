@@ -7,10 +7,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Dict, List
+from prettytable import PrettyTable
+from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 
 
@@ -27,7 +28,7 @@ class RFRegressor:
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "RandomForestRegressor"
+        self.__text_name = "RandomForest Regressor"
         self.__default_param_types = {'n_estimators': int or type(None),
                                       'criterion': str or type(None),
                                       'max_depth': int or type(None),
@@ -92,7 +93,17 @@ class RFRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{RFRegressor.__name__} model>'"
+        table = PrettyTable()
+        is_fited = self.__is_model_fit
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
 
     def __repr__(self):
         return f"'<Ra.{RFRegressor.__name__} model>'"
@@ -288,9 +299,9 @@ class RFRegressor:
         return {k: v for k, v in sorted(self.__importance.items(), key=lambda item: item[1], reverse=True)}
 
     def get_roc_auc_score(self) -> float:
-        f"""
-        This method calculates the "roc_auc_score" for the {self.__text_name} on the test data
-        :return: roc_auc_score
+        """
+        This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
+        :return: ROC AUC Score
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -298,27 +309,27 @@ class RFRegressor:
         try:
             error = Errors.get_roc_auc_score(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"roc_auc_score\" error")
+            print("An error occurred when calculating the \"ROC AUC score\" error")
         return error
 
-    def get_mean_squared_error(self) -> float:
+    def get_r_squared_error(self) -> float:
         """
-        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
-        :return: mean_squared_error
+        This method calculates the "R-Squared_error" for the on the test data
+        :return: R-Squared_error
         """
         error = float("inf")
         if not self.__is_model_fit:
             raise Exception(f"You haven't trained the {self.__text_name} yet!")
         try:
-            error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
+            error = Errors.get_r_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"mean_squared_error\" error")
+            print("An error occurred when calculating the \"R-Squared_error\" error")
         return error
 
     def get_mean_absolute_error(self) -> float:
         """
         This method calculates the "mean_absolute_error" for the {self.text_name} on the test data
-        :return: mean_absolute_error
+        :return: Mean Absolute Error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -326,7 +337,35 @@ class RFRegressor:
         try:
             error = Errors.get_mean_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"mean_absolute_error\" error")
+            print("An error occurred when calculating the \"Mean Absolute Error\" error")
+        return error
+
+    def get_mean_squared_error(self) -> float:
+        """
+        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
+        :return: Mean Squared Error
+        """
+        error = float("inf")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        try:
+            error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
+        except:
+            print("An error occurred when calculating the \"Mean Squared Error\" error")
+        return error
+
+    def get_median_absolute_error(self) -> float:
+        """
+        This method calculates the "mean_squared_error" for the {self.text_name} on the test data
+        :return: Median Absolute Error
+        """
+        error = float("inf")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        try:
+            error = Errors.get_median_absolute_error(self.__y_test, self.model.predict(self.__x_test))
+        except:
+            print("An error occurred when calculating the \"Median Absolute Error\" error")
         return error
 
     def get_predict_test_plt(self,

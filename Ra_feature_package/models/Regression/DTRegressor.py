@@ -257,7 +257,7 @@ class DTRegressor:
 
     def get_roc_auc_score(self) -> float:
         """
-        This method calculates the "roc_auc_score" for the {self.__text_name} on the test data
+        This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
         :return: ROC AUC Score
         """
         error = float("inf")
@@ -266,12 +266,12 @@ class DTRegressor:
         try:
             error = Errors.get_roc_auc_score(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"roc_auc_score\" error")
+            print("An error occurred when calculating the \"ROC AUC score\" error")
         return error
 
     def get_r_squared_error(self) -> float:
         """
-        This method calculates the "R-Squared_error" for the {self.text_name} on the test data
+        This method calculates the "R-Squared_error" for the on the test data
         :return: R-Squared_error
         """
         error = float("inf")
