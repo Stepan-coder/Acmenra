@@ -26,30 +26,29 @@ task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
 rfr = RFRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-# rfr.fit_grid(count=1, grid_n_jobs=-1)
-rfr.fit(grid_params=False, n_jobs=-1, show=True)
+rfr.fit_grid(count=5, grid_n_jobs=6)
+rfr.fit(grid_params=True, n_jobs=-1)
 # print(rfr.get_mean_absolute_error())
-rfr.get_predict_test_plt(show=True)
+# rfr.get_predict_test_plt(show=True)
 print(rfr)
 
 
 
-# dtc.fit_grid()
-# dtc.fit(params=dtc.get_best_params())
-# print("roc_auc: ", dtc.get_roc_auc_score())
-# print("mean_squared_error: ", dtc.get_mean_squared_error())
-# print("mean_absolute_error: ", dtc.get_mean_absolute_error())
-# print("feature_importances: ", dtc.get_feature_importances())
-# print("best_params: ", dtc.get_best_params())
-# rfc_params = dtc.get_best_params(is_list=True)
-# rfc_params['n_estimators'] = [i * 10 for i in range(1, 20 + 1)]
-# rfc.fit_grid(params_dict=rfc_params)
-# rfc.fit(params=rfc.get_best_params())
-# print("roc_auc: ", rfc.get_roc_auc_score())
-# print("mean_squared_error: ", rfc.get_mean_squared_error())
-# print("mean_absolute_error: ", rfc.get_mean_absolute_error())
-# print("feature_importances: ", rfc.get_feature_importances())
-
+# "   -Param 'n_estimators'(1): [100]
+#    -Param 'criterion'(2): ['mse', 'mae']
+#    -Param 'max_depth'(1): [None]
+#    -Param 'min_samples_split'(1): [2]
+#    -Param 'min_samples_leaf'(1): [1]
+#    -Param 'min_weight_fraction_leaf'(1): [0.0]
+#    -Param 'max_features'(4): ['sqrt', 'auto', 'log2', None]
+#    -Param 'max_leaf_nodes'(1): [None]
+#    -Param 'min_impurity_decrease'(1): [0.0]
+#    -Param 'bootstrap'(2): [True, False]
+#    -Param 'oob_score'(1): [False]
+#    -Param 'verbose'(1): [0]
+#    -Param 'warm_start'(2): [True, False]
+#    -Param 'ccp_alpha'(1): [0.0]
+#    -Param 'max_samples'(1): [None]"
 
 # +--------------------------------------------+
 # |       "RandomForestRegressor" model        |

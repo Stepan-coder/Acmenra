@@ -28,15 +28,15 @@ class RFRegressor:
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "RandomForest Regressor"
-        self.__default_param_types = {'n_estimators': int or type(None),
+        self.__text_name = "RandomForestRegressor"
+        self.__default_param_types = {'n_estimators': int,
                                       'criterion': str or type(None),
                                       'max_depth': int or type(None),
                                       'min_samples_split': int or float or type(None),
                                       'min_samples_leaf': int or type(None),
                                       'min_weight_fraction_leaf': float or type(None),
                                       'max_features': str or type(None),
-                                      'max_leaf_nodes': int or type(None),
+                                      'max_leaf_nodes': int,
                                       'min_impurity_decrease': float or type(None),
                                       'bootstrap': bool or type(None),
                                       'oob_score': bool or type(None),
@@ -94,7 +94,6 @@ class RFRegressor:
 
     def __str__(self):
         table = PrettyTable()
-        is_fited = self.__is_model_fit
         table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
         table.field_names = ["Error", "Result"]
         if self.__is_model_fit:
@@ -115,8 +114,7 @@ class RFRegressor:
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
             n_jobs: int = 1,
-            verbose: int = 0,
-            show: bool = False):
+            verbose: int = 0):
         f"""
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
@@ -178,14 +176,14 @@ class RFRegressor:
                                                random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        if show:
+        if self.__show:
             print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 0,
+                 count: int = 1,
                  cross_validation: int = 2,
                  grid_n_jobs: int = 1):
         """
@@ -207,13 +205,13 @@ class RFRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if p not in self.__locked_params]:
-            if count != 0:
-                model_params[param] = get_choosed_params(model_params[param],
+            if count > 1:
+                model_params[param] = get_choosed_params(params=[self.__default_param[param]] + model_params[param],
                                                          count=count,
                                                          ltype=self.__default_param_types[param])
             else:
                 model_params[param] = [self.__default_param[param]]
-
+            # model_params[param].sort()
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,

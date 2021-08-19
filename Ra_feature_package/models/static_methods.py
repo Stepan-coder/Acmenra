@@ -52,18 +52,23 @@ def get_choosed_params(params: list, count: int, ltype: type) -> list:
         raise Exception("The value of \'count\' must be greater than 0!")
     if count > len(params):
         count = len(params)
+    if len(params) == 1:
+        return params
 
-    if count == 1:
-        return [params[int(len(params) / 2)]]
+    has_none = False
+    if None in params:
+        params = [value for value in params if value is not None]
+        count -= 1
+        has_none = True
+
+    if len(params) == 0:
+        return [None]
+    elif count == 1:
+        remains_params = [params[int(len(params) / 2)]]
     elif count == 2:
-        index_1_3 = int(1 * len(params) / 3)
-        index_2_3 = int(2 * len(params) / 3)
-        return [params[index_1_3], params[index_2_3]]
+        remains_params = [params[int(1 * len(params) / 3)], params[int(2 * len(params) / 3)]]
     elif count == 3:
-        first_param = params[0]
-        last_param = params[-1]
-        index = len(params) / 2
-        return [first_param, params[int(index)], last_param]
+        remains_params = [params[0], params[int(len(params) / 2)], params[-1]]
     else:
         params.sort()
         index = float(len(params)) / float(((count + 1) - 2))
@@ -73,8 +78,11 @@ def get_choosed_params(params: list, count: int, ltype: type) -> list:
                 remains_params.append(int(math.ceil(params[i] * index)))
             else:
                 remains_params.append(params[i] * index)
-        remains_params.sort()
-        return remains_params
+    remains_params = list(set(remains_params))
+    remains_params.sort()
+    if has_none:
+        remains_params.append(None)
+    return remains_params
 
 
 def check_param(grid_param: str,
