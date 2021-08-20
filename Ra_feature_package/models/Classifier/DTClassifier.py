@@ -84,7 +84,6 @@ class DTClassifier:
 
     def __str__(self):
         table = PrettyTable()
-        is_fited = self.__is_model_fit
         table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
         table.field_names = ["Error", "Result"]
         if self.__is_model_fit:
@@ -108,54 +107,25 @@ class DTClassifier:
          from avia for training
         """
         if grid_params and param_dict is None:
-            self.model = DecisionTreeClassifier(n_estimators=self.grid_best_params['n_estimators'],
-                                               criterion=self.grid_best_params['criterion'],
-                                               max_depth=self.grid_best_params['max_depth'],
-                                               min_samples_split=self.grid_best_params['min_samples_split'],
-                                               min_samples_leaf=self.grid_best_params['min_samples_leaf'],
-                                               min_weight_fraction_leaf=self.grid_best_params['min_weight_fraction_leaf'],
-                                               max_features=self.grid_best_params['max_features'],
-                                               max_leaf_nodes=self.grid_best_params['max_leaf_nodes'],
-                                               min_impurity_decrease=self.grid_best_params['min_impurity_decrease'],
-                                               min_impurity_split=self.grid_best_params['min_impurity_split'],
-                                               bootstrap=self.grid_best_params['bootstrap'],
-                                               oob_score=self.grid_best_params['oob_score'],
-                                               warm_start=self.grid_best_params['warm_start'],
-                                               ccp_alpha=self.grid_best_params['ccp_alpha'],
-                                               max_samples=self.grid_best_params['max_samples'],
-                                               random_state=13)
+            self.model = DecisionTreeClassifier(**self.__grid_best_params,
+                                                random_state=13)
         elif not grid_params and param_dict is not None:
-            model_params = self.default_param
+            model_params = self.get_default_grid_param_values()
             for param in param_dict:
-                if param not in self.default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                self.check_param(param,
-                                 param_dict[param],
-                                 self.default_param_types[param],
-                                 type(self.default_param_types[param]))
+                check_param_value(grid_param=param,
+                                  value=param_dict[param],
+                                  param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-
-            self.model = DecisionTreeClassifier(n_estimators=model_params['n_estimators'],
-                                               criterion=model_params['criterion'],
-                                               max_depth=model_params['max_depth'],
-                                               min_samples_split=model_params['min_samples_split'],
-                                               min_samples_leaf=model_params['min_samples_leaf'],
-                                               min_weight_fraction_leaf=model_params['min_weight_fraction_leaf'],
-                                               max_features=model_params['max_features'],
-                                               max_leaf_nodes=model_params['max_leaf_nodes'],
-                                               min_impurity_decrease=model_params['min_impurity_decrease'],
-                                               min_impurity_split=model_params['min_impurity_split'],
-                                               bootstrap=model_params['bootstrap'],
-                                               oob_score=model_params['oob_score'],
-                                               warm_start=model_params['warm_start'],
-                                               ccp_alpha=model_params['ccp_alpha'],
-                                               max_samples=model_params['max_samples'],
-                                               random_state=13)
+            self.model = DecisionTreeClassifier(**model_params,
+                                                random_state=13)
         elif not grid_params and param_dict is None:
             self.model = DecisionTreeClassifier()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.text_name}...")
+        if self.__show:
+            print(f"Learning {self.__text_name}...")
         self.model.fit(self.X_train, self.Y_train.values.ravel())
         self.is_model_fit = True
 
@@ -169,45 +139,81 @@ class DTClassifier:
         :param step: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
         """
+        model_params = self.get_default_grid_param_values()
         if params_dict is not None:
             for param in params_dict:
-                if param not in self.default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                self.check_param(grid_param=param,
-                                 value=params_dict[param],
-                                 param_type=self.default_param_types[param],
-                                 setting_param_type=type(self.default_params[param]))
-                self.default_params[param] = params_dict[param]
+                check_params_list(grid_param=param,
+                                  value=params_dict[param],
+                                  param_type=self.__default[param].ptype)
+                model_params[param] = params_dict[param]
 
-        for param in ['max_depth', 'min_samples_split', 'min_samples_leaf', 'max_samples', 'n_estimators']:
-            self.default_params[param] = self.get_choosed_params(self.default_params[param], step=step)
-
-        if self.show:
-            print(f"Learning GridSearch {self.text_name}...")
-            self.show_grid_params(self.default_params)
+        for param in [p for p in model_params if not self.__default[p].is_locked]:
+            if count > 0:
+                if param not in params_dict:
+                    model_params[param] = [self.__default[param].def_val] + \
+                                          get_choosed_params(params=model_params[param],
+                                                             count=count - 1,
+                                                             ltype=self.__default[param].ptype)
+                else:
+                    model_params[param] = model_params[param]
+            else:
+                model_params[param] = [self.__default[param].def_val]
+        if self.__show:
+            print(f"Learning GridSearch {self.__text_name}...")
+            show_grid_params(params=model_params,
+                             locked_params=self.get_locked_params(),
+                             single_model_time=self.__get_default_model_fit_time(),
+                             n_jobs=grid_n_jobs)
         model = DecisionTreeClassifier(random_state=13)
-        grid = GridSearchCV(model, self.default_params, cv=cross_validation)
+        grid = GridSearchCV(estimator=model,
+                            param_grid=model_params,
+                            cv=cross_validation,
+                            n_jobs=grid_n_jobs,
+                            scoring='neg_mean_absolute_error')
         grid.fit(self.X_train, self.Y_train.values.ravel())
         self.grid_best_params = grid.best_params_
         self.is_grid_fit = True
+
+    def get_locked_params(self) -> List[str]:
+        """
+        :return: This method return the list of locked params
+        """
+        return [p for p in self.__default if self.__default[p].is_locked]
+
+    def get_non_locked_params(self) -> List[str]:
+        """
+        :return: This method return the list of non locked params
+        """
+        return [p for p in self.__default if not self.__default[p].is_locked]
 
     def get_default_param_types(self) -> dict:
         """
         :return: This method return default model param types
         """
-        return self.default_param_types
+        default_param_types = {}
+        for default in self.__default:
+            default_param_types[default] = self.__default[default].ptype
+        return default_param_types
 
     def get_default_param_values(self) -> dict:
         """
         :return: This method return default model param values
         """
-        return self.default_param
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_val
+        return default_param_values
 
     def get_default_grid_param_values(self) -> dict:
         """
         :return: This method return default model param values for grid search
         """
-        return self.default_params
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_vals
+        return default_param_values
 
     def get_is_model_fit(self) -> bool:
         f"""

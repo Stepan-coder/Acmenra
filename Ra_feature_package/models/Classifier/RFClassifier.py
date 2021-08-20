@@ -38,7 +38,6 @@ class RForestClassifier:
 
     def __str__(self):
         table = PrettyTable()
-        is_fited = self.__is_model_fit
         table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
         table.field_names = ["Error", "Result"]
         if self.__is_model_fit:
@@ -49,90 +48,143 @@ class RForestClassifier:
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
-    def fit_grid(self, params_dict=None, n_estimators=None,  max_depth=None, max_features=None, min_samples_leaf=None,
-                 min_samples_split=None, criterion=None, step=1, cross_validation=5):
-        print("Learning GridSearch RandomForestClassifier...")
-        is_params_none = max_depth is None and max_features is None and min_samples_leaf is None and \
-                         min_samples_split is None and criterion is None
-        if params_dict is not None and is_params_none:
-            params = params_dict
-            for param in params:
-                self.check_param(param, params[param], self.types)
-        elif params_dict is None and not is_params_none:
-            params = {}
-            if n_estimators is not None:
-                self.check_param('n_estimators', n_estimators, self.types)
-                params['n_estimators'] = self.get_choosed_params(n_estimators, step)
-            if max_depth is not None:
-                self.check_param('max_depth', max_depth, self.types)
-                params['max_depth'] = self.get_choosed_params(max_depth, step)
-            if max_features is not None:
-                self.check_param('max_features', max_features, self.types)
-                params['max_features'] = max_features
-            if min_samples_leaf is not None:
-                self.check_param('min_samples_leaf', min_samples_leaf, self.types)
-                params['min_samples_leaf'] = self.get_choosed_params(min_samples_leaf, step)
-            if min_samples_split is not None:
-                self.check_param('min_samples_split', min_samples_split, self.types)
-                params['min_samples_split'] = self.get_choosed_params(min_samples_split, step)
-            if criterion is not None:
-                self.check_param('criterion', criterion, self.types)
-                params['criterion'] = criterion
-        elif params_dict is None and is_params_none:
-            params = {'n_estimators': self.get_choosed_params([i * 10 for i in range(1, self.keys_len + 1)], step),
-                      'max_depth': self.get_choosed_params([i for i in range(1, self.keys_len + 1)], step) + [None],
-                      'max_features': ['sqrt', 'auto', 'log2', None],
-                      'min_samples_leaf': self.get_choosed_params([i for i in range(1, self.keys_len + 1)], step),
-                      'min_samples_split': self.get_choosed_params([i for i in range(2, self.keys_len + 1)], step),
-                      'criterion': ['gini', 'entropy']}
-        else:
-            raise Exception("You should only choose one way to select hyperparameters!")
-        if self.show:
-            self.show_grid_params(params)
-        rfc = RandomForestClassifier(random_state=13)
-        grid = GridSearchCV(rfc, params, cv=cross_validation)
-        grid.fit(self.X_train, self.Y_train)
-        self.grid_best_params = grid.best_params_
-        self.is_grif_fit = True
+    def __repr__(self):
+        return f"'<Ra.{RFRegressor.__name__} model>'"
 
-    def fit(self, grid_params=False, params=None, n_estimators=None, max_depth=None, max_features=None,
-                  min_samples_leaf=None, min_samples_split=None, criterion=None):
-        print("Learned RandomForestClassifier...")
-        is_params_none = max_depth is None and max_features is None and min_samples_leaf is None and \
-                         min_samples_split is None and criterion is None
-        if grid_params and is_params_none and params is None:
-            self.rf = RandomForestClassifier(n_estimators=self.grid_best_params['n_estimators'],
-                                             max_depth=self.grid_best_params['max_depth'],
-                                             max_features=self.grid_best_params['max_features'],
-                                             min_samples_leaf=self.grid_best_params['min_samples_leaf'],
-                                             min_samples_split=self.grid_best_params['min_samples_split'],
-                                             criterion=self.grid_best_params['criterion'],
-                                             random_state=13)
-        elif not grid_params and not is_params_none and params is None:
-            self.rf = RandomForestClassifier(n_estimators=n_estimators,
-                                             max_depth=max_depth,
-                                             max_features=max_features,
-                                             min_samples_leaf=min_samples_leaf,
-                                             min_samples_split=min_samples_split,
-                                             criterion=criterion,
-                                             random_state=13)
-        elif not grid_params and is_params_none and params is not None:
-            for param in params:
-                if param not in self.types:
-                    raise Exception('The parameter "{0}" not in params list'.format(param))
-            self.rf = RandomForestClassifier(n_estimators=params['n_estimators'],
-                                             max_depth=params['max_depth'],
-                                             max_features=params['max_features'],
-                                             min_samples_leaf=params['min_samples_leaf'],
-                                             min_samples_split=params['min_samples_split'],
-                                             criterion=params['criterion'],
-                                             random_state=13)
-        elif not grid_params and is_params_none and params is None:
-            self.rf = RandomForestClassifier()
+    def predict(self, data: pd.DataFrame):
+        return self.model.predict(data)
+
+    def fit(self,
+            param_dict: Dict[str, int or str] = None,
+            grid_params: bool = False,
+            n_jobs: int = 1,
+            verbose: int = 0):
+        """
+        This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
+        :param param_dict: The parameter of the hyperparameter grid that we check
+        :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
+         from avia for training
+        :param n_jobs: The number of jobs to run in parallel.
+        :param verbose: Learning-show param
+        """
+        if grid_params and param_dict is None:
+            self.model = RandomForestClassifier(**self.__grid_best_params,
+                                               n_jobs=n_jobs,
+                                               verbose=verbose,
+                                               random_state=13)
+        elif not grid_params and param_dict is not None:
+            model_params = self.get_default_grid_param_values()
+            for param in param_dict:
+                if param not in self.__default.keys():
+                    raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
+                check_param_value(grid_param=param,
+                                  value=param_dict[param],
+                                  param_type=self.__default[param].ptype)
+                model_params[param] = param_dict[param]
+            self.model = RandomForestClassifier(**model_params,
+                                               n_jobs=n_jobs,
+                                               verbose=verbose,
+                                               random_state=13)
+        elif not grid_params and param_dict is None:
+            self.model = RandomForestClassifier(n_jobs=n_jobs,
+                                               verbose=verbose,
+                                               random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        self.rf.fit(self.X_train, self.Y_train)
-        self.is_model_fit = True
+        if self.__show:
+            print(f"Learning {self.__text_name}...")
+        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
+        self.__is_model_fit = True
+
+    def fit_grid(self,
+                 params_dict: Dict[str, list] = None,
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
+                 grid_n_jobs: int = 1):
+        """
+        This method uses iteration to find the best hyperparameters for the model and trains the model using them
+        :param params_dict: The parameter of the hyperparameter grid that we check
+        :param count: The step with which to return the values
+        :param cross_validation: The number of sections into which the dataset will be divided for training
+        :param grid_n_jobs: The number of jobs to run in parallel.
+        """
+        model_params = self.get_default_grid_param_values()
+        if params_dict is not None:
+            for param in params_dict:
+                if param not in self.__default.keys():
+                    raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
+                check_params_list(grid_param=param,
+                                  value=params_dict[param],
+                                  param_type=self.__default[param].ptype)
+                model_params[param] = params_dict[param]
+
+        for param in [p for p in model_params if not self.__default[p].is_locked]:
+            if count > 0:
+                if param not in params_dict:
+                    model_params[param] = [self.__default[param].def_val] + \
+                                          get_choosed_params(params=model_params[param],
+                                                             count=count - 1,
+                                                             ltype=self.__default[param].ptype)
+                else:
+                    model_params[param] = model_params[param]
+            else:
+                model_params[param] = [self.__default[param].def_val]
+        if self.__show:
+            print(f"Learning GridSearch {self.__text_name}...")
+            show_grid_params(params=model_params,
+                             locked_params=self.get_locked_params(),
+                             single_model_time=self.__get_default_model_fit_time(),
+                             n_jobs=grid_n_jobs)
+        model = RandomForestClassifier(n_jobs=1,
+                                       verbose=0,
+                                       random_state=13)
+        grid = GridSearchCV(estimator=model,
+                            param_grid=model_params,
+                            cv=cross_validation,
+                            n_jobs=grid_n_jobs,
+                            scoring='neg_mean_absolute_error')
+        grid.fit(self.__X_train, self.__Y_train.values.ravel())
+        self.__grid_best_params = grid.best_params_
+        self.__is_grid_fit = True
+
+    def get_locked_params(self) -> List[str]:
+        """
+        :return: This method return the list of locked params
+        """
+        return [p for p in self.__default if self.__default[p].is_locked]
+
+    def get_non_locked_params(self) -> List[str]:
+        """
+        :return: This method return the list of non locked params
+        """
+        return [p for p in self.__default if not self.__default[p].is_locked]
+
+    def get_default_param_types(self) -> dict:
+        """
+        :return: This method return default model param types
+        """
+        default_param_types = {}
+        for default in self.__default:
+            default_param_types[default] = self.__default[default].ptype
+        return default_param_types
+
+    def get_default_param_values(self) -> dict:
+        """
+        :return: This method return default model param values
+        """
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_val
+        return default_param_values
+
+    def get_default_grid_param_values(self) -> dict:
+        """
+        :return: This method return default model param values for grid search
+        """
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_vals
+        return default_param_values
 
     def get_best_params(self):
         if self.is_grif_fit:

@@ -105,7 +105,6 @@ class MLPRegressor:
 
     def __str__(self):
         table = PrettyTable()
-        is_fited = self.__is_model_fit
         table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
         table.field_names = ["Error", "Result"]
         if self.__is_model_fit:
@@ -132,53 +131,18 @@ class MLPRegressor:
          from avia for training
         """
         if grid_params and param_dict is None:
-            self.model = MultiLayerPerceptronRegressor(loss=self.__grid_best_params['loss'],
-                                                       penalty=self.__grid_best_params['penalty'],
-                                                       alpha=self.__grid_best_params['alpha'],
-                                                       l1_ratio=self.__grid_best_params['l1_ratio'],
-                                                       fit_intercept=self.__grid_best_params['fit_intercept'],
-                                                       max_iter=self.__grid_best_params['max_iter'],
-                                                       tol=self.__grid_best_params['tol'],
-                                                       shuffle=self.__grid_best_params['shuffle'],
-                                                       verbose=self.__grid_best_params['verbose'],
-                                                       epsilon=self.__grid_best_params['epsilon'],
-                                                       learning_rate=self.__grid_best_params['learning_rate'],
-                                                       eta0=self.__grid_best_params['eta0'],
-                                                       power_t=self.__grid_best_params['power_T'],
-                                                       early_stopping=self.__grid_best_params['early_stopping'],
-                                                       validation_fraction=self.__grid_best_params['validation_fraction'],
-                                                       n_iter_no_change=self.__grid_best_params['n_iter_no_change'],
-                                                       warm_start=self.__grid_best_params['warm_start'],
-                                                       average=self.__grid_best_params['average'],
+            self.model = MultiLayerPerceptronRegressor(**self.__grid_best_params,
                                                        random_state=13)
         elif not grid_params and param_dict is not None:
-            model_params = self.__default_param
+            model_params = self.get_default_grid_param_values()
             for param in param_dict:
-                if param not in self.__default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                check_param(param,
-                            param_dict[param],
-                            self.__default_param_types[param],
-                            type(self.__default_param[param]))
+                check_param_value(grid_param=param,
+                                  value=param_dict[param],
+                                  param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = MultiLayerPerceptronRegressor(loss=model_params['loss'],
-                                                       penalty=model_params['penalty'],
-                                                       alpha=model_params['alpha'],
-                                                       l1_ratio=model_params['l1_ratio'],
-                                                       fit_intercept=model_params['fit_intercept'],
-                                                       max_iter=model_params['max_iter'],
-                                                       tol=model_params['tol'],
-                                                       shuffle=model_params['shuffle'],
-                                                       verbose=model_params['verbose'],
-                                                       epsilon=model_params['epsilon'],
-                                                       learning_rate=model_params['learning_rate'],
-                                                       eta0=model_params['eta0'],
-                                                       power_t=model_params['power_T'],
-                                                       early_stopping=model_params['early_stopping'],
-                                                       validation_fraction=model_params['validation_fraction'],
-                                                       n_iter_no_change=model_params['n_iter_no_change'],
-                                                       warm_start=model_params['warm_start'],
-                                                       average=model_params['average'],
+            self.model = MultiLayerPerceptronRegressor(**model_params,
                                                        random_state=13)
         elif not grid_params and param_dict is None:
             self.model = MultiLayerPerceptronRegressor()
@@ -198,29 +162,41 @@ class MLPRegressor:
         :param params_dict: The parameter of the hyperparameter grid that we check
         :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
+        :param grid_n_jobs: The number of jobs to run in parallel.
         """
-        model_params = self.__default_params
+        model_params = self.get_default_grid_param_values()
         if params_dict is not None:
             for param in params_dict:
-                if param not in self.__default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                check_param(grid_param=param,
-                            value=params_dict[param],
-                            param_type=self.__default_param_types[param],
-                            setting_param_type=type(self.__default_params[param]))
+                check_params_list(grid_param=param,
+                                  value=params_dict[param],
+                                  param_type=self.__default[param].ptype)
                 model_params[param] = params_dict[param]
 
-        for param in [p for p in model_params if p not in self.__locked_params]:
-            model_params[param] = get_choosed_params(model_params[param], count=count)
-
+        for param in [p for p in model_params if not self.__default[p].is_locked]:
+            if count > 0:
+                if param not in params_dict:
+                    model_params[param] = [self.__default[param].def_val] + \
+                                          get_choosed_params(params=model_params[param],
+                                                             count=count - 1,
+                                                             ltype=self.__default[param].ptype)
+                else:
+                    model_params[param] = model_params[param]
+            else:
+                model_params[param] = [self.__default[param].def_val]
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
-                             locked_params=self.__locked_params,
+                             locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
         model = MultiLayerPerceptronRegressor(random_state=13)
-        grid = GridSearchCV(model, model_params, cv=cross_validation)
+        grid = GridSearchCV(estimator=model,
+                            param_grid=model_params,
+                            cv=cross_validation,
+                            n_jobs=grid_n_jobs,
+                            scoring='neg_mean_absolute_error')
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
@@ -229,31 +205,40 @@ class MLPRegressor:
         """
         :return: This method return the list of locked params
         """
-        return self.__locked_params
+        return [p for p in self.__default if self.__default[p].is_locked]
 
     def get_non_locked_params(self) -> List[str]:
         """
         :return: This method return the list of non locked params
         """
-        return [p for p in self.__default_params if p not in self.__locked_params]
+        return [p for p in self.__default if not self.__default[p].is_locked]
 
     def get_default_param_types(self) -> dict:
         """
         :return: This method return default model param types
         """
-        return self.__default_param_types
+        default_param_types = {}
+        for default in self.__default:
+            default_param_types[default] = self.__default[default].ptype
+        return default_param_types
 
     def get_default_param_values(self) -> dict:
         """
         :return: This method return default model param values
         """
-        return self.__default_param
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_val
+        return default_param_values
 
     def get_default_grid_param_values(self) -> dict:
         """
         :return: This method return default model param values for grid search
         """
-        return self.__default_params
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_vals
+        return default_param_values
 
     def get_is_model_fit(self) -> bool:
         f"""

@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 
 def show_grid_params(params: dict, locked_params: list, single_model_time, n_jobs: int):
@@ -39,7 +40,7 @@ def conf_params(min_val: int or float,
         return list(set([float(min_val + val * step) for val in range(count)]))
 
 
-def get_choosed_params(params: list, count: int, ltype: type) -> list:
+def get_choosed_params(params: list, count: int, ltype: List[type]) -> list:
     """
     This method calculates the values with the specified step
     :param params: The list of input parameters
@@ -74,7 +75,7 @@ def get_choosed_params(params: list, count: int, ltype: type) -> list:
         index = float(len(params)) / float(((count + 1) - 2))
         remains_params = [params[0], params[-1]]
         for i in range(((count + 1) - 2)):
-            if ltype == int:
+            if int in ltype:
                 remains_params.append(int(math.ceil(params[i] * index)))
             else:
                 remains_params.append(params[i] * index)
@@ -85,52 +86,36 @@ def get_choosed_params(params: list, count: int, ltype: type) -> list:
     return remains_params
 
 
-def check_param(grid_param: str,
-                value: list or int or str,
-                param_type: type,
-                setting_param_type: type):
-    """
-    This method switches the check between two methods "_check_params"[for checking values as lists] and
-    "_check_param"[for checking values as simplest]
-    :param grid_param: The parameter of the hyperparameter grid that we check
-    :param value: Values that will be passed to the " grid"
-    :param param_type: The data type acceptable for this parameter
-    :param setting_param_type: The parameter responsible for selecting the method that will check the input values
-    """
-    if setting_param_type == list:
-        check_params_list(grid_param, value, param_type)
-    else:
-        check_param_value(grid_param, value, param_type)
-
-
 def check_param_value(grid_param: str,
                       value: str or int,
-                      param_type: type):
+                      param_type: List[type]):
     """
     This method checks the correctness of the data types passed for training
-    :param grid_param: The parameter of the hyperparameter grid that we check
+    :param grid_param: The parameter name of the hyperparameter grid that we check
     :param value: Values that will be passed to the " grid"
     :param param_type: The data type acceptable for this parameter
     """
-    if not isinstance(value, param_type):
-        raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
-                        f" byt was \'{type(value)}\'")
+    for pt in param_type:
+        if not isinstance(value, pt):
+            raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
+                            f" byt was \'{type(value)}\'")
 
 
 def check_params_list(grid_param: str,
                       value: list,
-                      param_type: type):
+                      param_type: List[type]):
     """
     This method checks the correctness of the data types passed to the " grid"
-    :param grid_param: The parameter of the hyperparameter grid that we check
+    :param grid_param: The parameter name of the hyperparameter grid that we check
     :param value: Values that will be passed to the " grid"
     :param param_type: The data type acceptable for this parameter
     """
     if isinstance(value, list) and len(value):
-        for val in value:
-            if not isinstance(val, param_type) and val is not None:
-                raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
-                                f" byt was \'<{type(val)}>\'")
+        for pt in param_type:
+            for val in value:
+                if not isinstance(val, pt) and val is not None:
+                    raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
+                                    f" byt was \'<{type(val)}>\'")
     else:
         raise Exception(f"The value of the '{grid_param}' parameter must be a non-empty list")
 

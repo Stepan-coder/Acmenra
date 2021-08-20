@@ -85,7 +85,6 @@ class LogRegressor:
 
     def __str__(self):
         table = PrettyTable()
-        is_fited = self.__is_model_fit
         table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
         table.field_names = ["Error", "Result"]
         if self.__is_model_fit:
@@ -107,7 +106,7 @@ class LogRegressor:
             grid_params: bool = False,
             n_jobs: int = 1,
             verbose: int = 0):
-        f"""
+        """
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
@@ -116,44 +115,20 @@ class LogRegressor:
         :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = LogisticRegression(penalty=self.__grid_best_params['penalty'],
-                                            dual=self.__grid_best_params['dual'],
-                                            tol=self.__grid_best_params['tol'],
-                                            C=self.__grid_best_params['C'],
-                                            fit_intercept=self.__grid_best_params['fit_intercept'],
-                                            intercept_scaling=self.__grid_best_params['intercept_scaling'],
-                                            class_weight=self.__grid_best_params['class_weight'],
-                                            solver=self.__grid_best_params['solver'],
-                                            max_iter=self.__grid_best_params['max_iter'],
-                                            multi_class=self.__grid_best_params['multi_class'],
-                                            warm_start=self.__grid_best_params['warm_start'],
-                                            l1_ratio=self.__grid_best_params['l1_ratio'],
+            self.model = LogisticRegression(**self.__grid_best_params,
                                             n_jobs=n_jobs,
                                             verbose=verbose,
                                             random_state=13)
         elif not grid_params and param_dict is not None:
-            model_params = self.__default_param
+            model_params = self.get_default_grid_param_values()
             for param in param_dict:
-                if param not in self.__default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                check_param(param,
-                            param_dict[param],
-                            self.__default_param_types[param],
-                            type(self.__default_param[param]))
+                check_param_value(grid_param=param,
+                                  value=param_dict[param],
+                                  param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-
-            self.model = LogisticRegression(penalty=model_params['penalty'],
-                                            dual=model_params['dual'],
-                                            tol=model_params['tol'],
-                                            C=model_params['C'],
-                                            fit_intercept=model_params['fit_intercept'],
-                                            intercept_scaling=model_params['intercept_scaling'],
-                                            class_weight=model_params['class_weight'],
-                                            solver=model_params['solver'],
-                                            max_iter=model_params['max_iter'],
-                                            multi_class=model_params['multi_class'],
-                                            warm_start=model_params['warm_start'],
-                                            l1_ratio=model_params['l1_ratio'],
+            self.model = LogisticRegression(**model_params,
                                             n_jobs=n_jobs,
                                             verbose=verbose,
                                             random_state=13)
@@ -179,36 +154,38 @@ class LogRegressor:
         :param cross_validation: The number of sections into which the dataset will be divided for training
         :param grid_n_jobs: The number of jobs to run in parallel.
         """
-        model_params = self.__default_params
+        model_params = self.get_default_grid_param_values()
         if params_dict is not None:
             for param in params_dict:
-                if param not in self.__default_params.keys():
+                if param not in self.__default.keys():
                     raise Exception(f"The column {param} does not exist in the set of allowed parameters!")
-                check_param(grid_param=param,
-                            value=params_dict[param],
-                            param_type=self.__default_param_types[param],
-                            setting_param_type=type(self.__default_params[param]))
+                check_params_list(grid_param=param,
+                                  value=params_dict[param],
+                                  param_type=self.__default[param].ptype)
                 model_params[param] = params_dict[param]
 
-        for param in [p for p in model_params if p not in self.__locked_params]:
-            if count != 0:
-                model_params[param] = get_choosed_params(model_params[param],
-                                                         count=count,
-                                                         ltype=self.__default_param_types[param])
+        for param in [p for p in model_params if not self.__default[p].is_locked]:
+            if count > 0:
+                if param not in params_dict:
+                    model_params[param] = [self.__default[param].def_val] + \
+                                          get_choosed_params(params=model_params[param],
+                                                             count=count - 1,
+                                                             ltype=self.__default[param].ptype)
+                else:
+                    model_params[param] = model_params[param]
             else:
-                model_params[param] = [self.__default_param[param]]
-
+                model_params[param] = [self.__default[param].def_val]
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
-                             locked_params=self.__locked_params,
+                             locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
         model = LogisticRegression(n_jobs=1,
                                    verbose=0,
                                    random_state=13)
-        grid = GridSearchCV(model,
-                            model_params,
+        grid = GridSearchCV(estimator=model,
+                            param_grid=model_params,
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
@@ -220,31 +197,40 @@ class LogRegressor:
         """
         :return: This method return the list of locked params
         """
-        return self.__locked_params
+        return [p for p in self.__default if self.__default[p].is_locked]
 
     def get_non_locked_params(self) -> List[str]:
         """
         :return: This method return the list of non locked params
         """
-        return [p for p in self.__default_params if p not in self.__locked_params]
+        return [p for p in self.__default if not self.__default[p].is_locked]
 
     def get_default_param_types(self) -> dict:
         """
         :return: This method return default model param types
         """
-        return self.__default_param_types
+        default_param_types = {}
+        for default in self.__default:
+            default_param_types[default] = self.__default[default].ptype
+        return default_param_types
 
     def get_default_param_values(self) -> dict:
         """
         :return: This method return default model param values
         """
-        return self.__default_param
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_val
+        return default_param_values
 
     def get_default_grid_param_values(self) -> dict:
         """
         :return: This method return default model param values for grid search
         """
-        return self.__default_params
+        default_param_values = {}
+        for default in self.__default:
+            default_param_values[default] = self.__default[default].def_vals
+        return default_param_values
 
     def get_is_model_fit(self) -> bool:
         f"""
