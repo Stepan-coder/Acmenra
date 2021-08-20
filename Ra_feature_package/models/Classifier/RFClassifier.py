@@ -28,7 +28,9 @@ class RFClassifier:
         """
         self.__text_name = "RandomForestClassifier"
         count = len(task.keys()) + 1
-        self.__default = {}
+        self.__default = {
+            
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

@@ -99,15 +99,15 @@ class MTENRegressor:
             self.model = MultiTaskElasticNet()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        if show:
+        if self.__show:
             print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train)
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 0,
-                 cross_validation: int or type(None) = 3,
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them

@@ -100,14 +100,15 @@ class MLPRegressor:
             self.model = MultiLayerPerceptronRegressor()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.__text_name}...")
+        if self.__show:
+            print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
-                 cross_validation: int = 3,
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them

@@ -113,8 +113,8 @@ class LCVRegressor:
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
-                 cross_validation: int = 3,
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
