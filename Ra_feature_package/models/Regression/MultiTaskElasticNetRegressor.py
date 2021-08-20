@@ -73,9 +73,8 @@ class MTENRegressor:
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
             n_jobs: int = 1,
-            verbose: int = 0,
-            show: bool = False):
-        f"""
+            verbose: int = 0):
+        """
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
@@ -83,7 +82,6 @@ class MTENRegressor:
         :param n_jobs: The number of jobs to run in parallel.
         :param verbose: Learning-show param
         """
-
         if grid_params and param_dict is None:
             self.model = MultiTaskElasticNet(**self.__grid_best_params)
         elif not grid_params and param_dict is not None:

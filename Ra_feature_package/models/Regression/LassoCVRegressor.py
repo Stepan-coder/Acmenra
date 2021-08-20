@@ -74,7 +74,7 @@ class LCVRegressor:
             grid_params: bool = False,
             n_jobs: int = 1,
             verbose: int = 0):
-        f"""
+        """
         This method trains the model {self.__text_name}, it is possible to use the parameters from "fit_grid"
         :param param_dict: The parameter of the hyperparameter grid that we check
         :param grid_params: The switcher which is responsible for the ability to use all the ready-made parameters
