@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
-from Ra_feature_package.models.param_class import *
+from Ra_feature_package.models.Param import *
 
 
 class RFRegressor:
@@ -197,14 +197,20 @@ class RFRegressor:
                 model_params[param] = params_dict[param]
 
         for param in [p for p in model_params if not self.__default[p].is_locked]:
-            if count > 0:
-                if param not in params_dict:
+            if count > 0:  # Если идёт поиск по полной сетке
+                if params_dict is None:  # Если пользователь не задал параметры
                     model_params[param] = [self.__default[param].def_val] + \
                                           get_choosed_params(params=model_params[param],
-                                                             count=count - 1,
+                                                             count=count,
                                                              ltype=self.__default[param].ptype)
                 else:
-                    model_params[param] = model_params[param]
+                    if param not in params_dict:  # Если пользователь, не трогал это поле
+                        model_params[param] = [self.__default[param].def_val] + \
+                                              get_choosed_params(params=model_params[param],
+                                                                 count=count,
+                                                                 ltype=self.__default[param].ptype)
+                    else:
+                        model_params[param] = model_params[param]
             else:
                 model_params[param] = [self.__default[param].def_val]
         if self.__show:

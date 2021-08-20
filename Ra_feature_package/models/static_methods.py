@@ -113,9 +113,10 @@ def check_params_list(grid_param: str,
     if isinstance(value, list) and len(value):
         for pt in param_type:
             for val in value:
-                if not isinstance(val, pt) and val is not None:
+                print(val, pt, isinstance(val, pt))
+                if not isinstance(val, pt) and val is not None and isinstance(pt, type(None)):
                     raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
-                                    f" byt was \'<{type(val)}>\'")
+                                    f" byt was \'{type(val)}\'")
     else:
         raise Exception(f"The value of the '{grid_param}' parameter must be a non-empty list")
 
