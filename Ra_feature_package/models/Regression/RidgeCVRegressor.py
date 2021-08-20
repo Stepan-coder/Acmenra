@@ -53,6 +53,10 @@ class RCVRegressor:
         return f"'<Ra.{RCVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
+        """
+        This method predicting values on data
+        :param data:
+        """
         return self.model.predict(data)
 
     def fit(self,

@@ -66,6 +66,13 @@ class DTClassifier:
     def __repr__(self):
         return f"'<Ra.{DTClassifier.__name__} model>'"
 
+    def predict(self, data: pd.DataFrame):
+        """
+        This method predicting values on data
+        :param data:
+        """
+        return self.model.predict(data)
+
     def fit(self,
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False):
