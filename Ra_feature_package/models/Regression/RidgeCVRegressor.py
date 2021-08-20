@@ -28,35 +28,10 @@ class RCVRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "RidgeCVRegressor"
-        self.__default_param_types = {'alphas': type(np.ndarray),
-                                      'fit_intercept': bool,
-                                      'normalize': bool,
-                                      'scoring': str,
-                                      'cv': int,
-                                      'gcv_mode': str,
-                                      'store_cv_values': bool,
-                                      'alpha_per_target': bool}
-
-        self.__default_param = {'alphas': np.array([0.1, 1.0, 10.0]),
-                                'fit_intercept': True,
-                                'normalize': False,
-                                'scoring': None,
-                                'cv': None,
-                                'gcv_mode': 'auto',
-                                'store_cv_values': False,
-                                'alpha_per_target': False}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'alphas': [np.array(list(x / 10 for x in range(1, 101)))],
-                                 'fit_intercept': [True, False],
-                                 'normalize': [True, False],
-                                 'scoring': [None],
-                                 'cv': [None],
-                                 'gcv_mode': ['auto', 'svd', 'eigen'],
-                                 'store_cv_values': [True, False],
-                                 'alpha_per_target': [True, False]}
-        self.__locked_params = ['fit_intercept', 'normalize', 'scoring', 'gcv_mode',
-                                'store_cv_values', 'alpha_per_target']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

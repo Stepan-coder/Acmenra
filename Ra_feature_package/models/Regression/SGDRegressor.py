@@ -28,63 +28,10 @@ class SGDRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "StochasticGradientDescentRegressor"
-        self.__default_param_types = {'loss': str,
-                                      'penalty': str,
-                                      'alpha': float,
-                                      'l1_ratio': float,
-                                      'fit_intercept': bool,
-                                      'max_iter': int,
-                                      'tol': float,
-                                      'shuffle': bool,
-                                      'epsilon': float,
-                                      'learning_rate': float,
-                                      'eta0': float,
-                                      'power_t': float,
-                                      'early_stopping': bool,
-                                      'validation_fraction': float,
-                                      'n_iter_no_change': int,
-                                      'warm_start': bool,
-                                      'average': bool}
-
-        self.__default_param = {'loss': 'squared_loss',
-                                'penalty': 'l2',
-                                'alpha': 0.0001,
-                                'l1_ratio': 0.15,
-                                'fit_intercept': True,
-                                'max_iter': 1000,
-                                'tol': 1e-3,
-                                'shuffle': True,
-                                'epsilon': 0.1,
-                                'learning_rate': 'invscaling',
-                                'eta0': 0.01,
-                                'power_t': 0.25,
-                                'early_stopping': False,
-                                'validation_fraction': 0.1,
-                                'n_iter_no_change': 5,
-                                'warm_start': False,
-                                'average': False}
-
-        # Доделать
         count = len(task.keys()) + 1
-        self.__default_params = {'loss': ['squared_loss', 'huber', 'epsilon_insensitive', 'squared_epsilon_insensitive'],
-                                 'penalty': ['l2', 'l1', 'elasticnet'],
-                                 'alpha': conf_params(min_val=0, max_val=count*0.00005, count=count, ltype=float),
-                                 'l1_ratio': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'fit_intercept': [True, False],
-                                 'max_iter': conf_params(min_val=2, count=count*100, ltype=int),
-                                 'tol': conf_params(min_val=2, max_val=count*0.00005, count=count, ltype=float),
-                                 'shuffle': [True, False],
-                                 'epsilon': conf_params(min_val=0, max_val=count*0.05, count=count, ltype=float),
-                                 'learning_rate': ['constant', 'invscaling', 'adaptive'],
-                                 'eta0': conf_params(min_val=2, max_val=count*0.005, count=count, ltype=float),
-                                 'power_t': conf_params(min_val=0, max_val=count*0.025, count=count,  ltype=float),
-                                 'early_stopping': [True, False],
-                                 'validation_fraction': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'n_iter_no_change': conf_params(min_val=2, count=count, ltype=int),
-                                 'warm_start': [True, False],
-                                 'average': [True, False]}
-        self.__locked_params = ['loss', 'penalty', 'fit_intercept', 'shuffle', 'learning_rate', 'early_stopping',
-                                'warm_start', 'average']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

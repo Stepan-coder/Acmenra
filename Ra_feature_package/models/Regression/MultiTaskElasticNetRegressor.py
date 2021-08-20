@@ -29,38 +29,10 @@ class MTENRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "MultiTaskElasticNetRegressor"
-        self.__default_param_types = {'alpha': float,
-                                      'l1_ratio': float,
-                                      'fit_intercept': bool,
-                                      'normalize': bool,
-                                      'copy_X': bool,
-                                      'max_iter': int,
-                                      'tol': float,
-                                      'warm_start': bool,
-                                      'selection': str}
-
-        self.__default_param = {'alpha': 1.0,
-                                'l1_ratio': 0.5,
-                                'fit_intercept': True,
-                                'normalize': False,
-                                'copy_X': True,
-                                'max_iter': 1000,
-                                'tol': [1e-4],
-                                'warm_start': False,
-                                'selection': 'cyclic'}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'alpha': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'l1_ratio': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'fit_intercept': [True, False],
-                                 'normalize': [True, False],
-                                 'copy_X': [True, False],
-                                 'max_iter': conf_params(min_val=100, max_val=count * 100, count=count, ltype=int),
-                                 'tol': [1e-4],
-                                 'warm_start': [True, False],
-                                 'selection': ['cyclic', 'random']}
-        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X',
-                                'warm_start', 'selection']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

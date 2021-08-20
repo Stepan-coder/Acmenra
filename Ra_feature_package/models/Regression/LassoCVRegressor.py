@@ -29,43 +29,10 @@ class LCVRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "LassoCVRegressor"
-        self.__default_param_types = {'eps': float,
-                                      'n_alphas': int,
-                                      'fit_intercept': bool,
-                                      'normalize': bool,
-                                      'precompute': str,
-                                      'max_iter': int,
-                                      'tol': float,
-                                      'copy_X': bool,
-                                      'cv': int,
-                                      'positive': bool,
-                                      'selection': str}
-
-        self.__default_param = {'eps': 1e-3,
-                                'n_alphas': 100,
-                                'fit_intercept': True,
-                                'normalize': False,
-                                'precompute': 'auto',
-                                'max_iter': 1000,
-                                'tol': 0.0001,
-                                'copy_X': True,
-                                'cv': None,
-                                'positive': False,
-                                'selection': 'cyclic'}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'eps': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'n_alphas': conf_params(min_val=1, max_val=count * 5, count=count, ltype=int),
-                                 'fit_intercept': [True, False],
-                                 'normalize': [True, False],
-                                 'precompute': ['auto'],
-                                 'max_iter': conf_params(min_val=0, max_val=100 * count, count=count, ltype=int),
-                                 'tol': conf_params(min_val=0, max_val=1, count=count, ltype=float),
-                                 'copy_X': [True, False],
-                                 'cv': [None],
-                                 'positive': [True, False],
-                                 'selection': ['random', 'cyclic']}
-        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X', 'positive', 'selection']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

@@ -29,22 +29,10 @@ class LinRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "LinearRegression"
-        self.__default_param_types = {'fit_intercept': bool,
-                                      'normalize': bool,
-                                      'copy_X': bool,
-                                      'positive': bool}
-
-        self.__default_param = {'fit_intercept': True,
-                                'normalize': False,
-                                'copy_X': True,
-                                'positive': False}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'fit_intercept': [True, False],
-                                 'normalize': [True, False],
-                                 'copy_X': [True, False],
-                                 'positive': [True, False]}
-        self.__locked_params = ['fit_intercept', 'normalize', 'copy_X', 'positive']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

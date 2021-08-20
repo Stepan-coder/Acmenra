@@ -13,28 +13,35 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
 
-class RForestClassifier:
-    def __init__(self, data_df, target, train_split, show=False):
-        self.importance = {}
-        self.is_grif_fit = False
-        self.is_model_fit = False
-        self.grid_best_params = None
-        self.show = show
-        self.data_len = len(data_df)
-        self.keys = list(data_df.keys())
-        self.keys_len = len(self.keys)
-        self.target = target
-        self.train_split = train_split
-        self.X_train, self.x_test, self.Y_train, self.y_test = train_test_split(data_df.drop(self.target, axis=1),
-                                                                                data_df[self.target],
-                                                                                train_size=self.train_split,
-                                                                                random_state=13)
-        self.types = {'n_estimators': int,
-                      'max_depth': int,
-                      'max_features': str,
-                      'min_samples_leaf': int,
-                      'min_samples_split': int,
-                      'criterion': str}
+class RFClassifier:
+    def __init__(self,
+                 task: pd.DataFrame,
+                 target: pd.DataFrame,
+                 train_split: int,
+                 show: bool = False):
+        """
+        This method is the initiator of the RFClassifier class
+        :param task: The training part of the dataset
+        :param target: The target part of the dataset
+        :param train_split: The coefficient of splitting into training and training samples
+        :param show: The parameter responsible for displaying the progress of work
+        """
+        self.__text_name = "RandomForestClassifier"
+        count = len(task.keys()) + 1
+        self.__default = {}
+        self.__importance = {}
+        self.__is_model_fit = False
+        self.__is_grid_fit = False
+
+        self.__show = show
+        self.model = None
+        self.__grid_best_params = None
+        self.__keys = task.keys()
+        self.__keys_len = len(task.keys())
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
+                                                                                        target,
+                                                                                        train_size=train_split,
+                                                                                        random_state=13)
 
     def __str__(self):
         table = PrettyTable()
@@ -49,7 +56,7 @@ class RForestClassifier:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{RFRegressor.__name__} model>'"
+        return f"'<Ra.{RFClassifier.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         return self.model.predict(data)

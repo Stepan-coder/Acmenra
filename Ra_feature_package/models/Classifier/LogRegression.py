@@ -29,46 +29,10 @@ class LogRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "LogisticRegression"
-        self.__default_param_types = {'penalty': str,
-                                      'dual': bool,
-                                      'tol': float,
-                                      'C': float,
-                                      'fit_intercept': bool,
-                                      'intercept_scaling': float,
-                                      'class_weight': dict,
-                                      'solver': str,
-                                      'max_iter': int,
-                                      'multi_class': str,
-                                      'warm_start': bool,
-                                      'l1_ratio': float}
-
-        self.__default_param = {'penalty': "l2",
-                                'dual': False,
-                                'tol': 1e-4,
-                                'C': 1.0,
-                                'fit_intercept': True,
-                                'intercept_scaling': 1,
-                                'class_weight': None,
-                                'solver': "lbfgs",
-                                'max_iter': 100,
-                                'multi_class': 'auto',
-                                'warm_start': False,
-                                'l1_ratio': None}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'penalty': ["l2", "elasticnet", "none"],
-                                 'dual': [False],
-                                 'tol': [1e-4],  # Лучше не трогать
-                                 'C': [1.0],  # Лучше не трогать
-                                 'fit_intercept': [True, False],
-                                 'intercept_scaling': [1],
-                                 'class_weight': [None],  # Лучше не трогать
-                                 'solver': ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga'],
-                                 'max_iter': conf_params(min_val=2, max_val=count, count=count, ltype=int),
-                                 'multi_class': ['auto', 'ovr', 'multinomial'],
-                                 'warm_start': [True, False],
-                                 'l1_ratio': [None]}
-        self.__locked_params = ['penalty', 'fit_intercept', 'solver', 'multi_class', 'warm_start']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

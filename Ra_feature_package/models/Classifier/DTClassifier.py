@@ -33,54 +33,23 @@ class DTClassifier:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.text_name = "DecisionTreeClassifier"
-        self.default_param_types = {'criterion': str,
-                                    'splitter': str,
-                                    'max_depth': int,
-                                    'min_samples_split': int or float,
-                                    'min_samples_leaf': int or float,
-                                    'min_weight_fraction_leaf': float,
-                                    'max_features': str,
-                                    'max_leaf_nodes': int,
-                                    'min_impurity_decrease': float,
-                                    'min_impurity_split': float,
-                                    'ccp_alpha': float}
+        count = len(task.keys()) + 1
+        self.__default = {
 
-        self.default_param = {'criterion': "mse",
-                              'splitter': "best",
-                              'max_depth': None,
-                              'min_samples_split': 2,
-                              'min_samples_leaf': 1,
-                              'min_weight_fraction_leaf': 0.0,
-                              'max_features': None,
-                              'max_leaf_nodes': None,
-                              'min_impurity_decrease': 0.,
-                              'min_impurity_split': None,
-                              'ccp_alpha': 0.0}
+        }
+        self.__importance = {}
+        self.__is_model_fit = False
+        self.__is_grid_fit = False
 
-        self.default_params = {'criterion': ["mse", "friedman_mse", "mae", "poisson"],
-                               'splitter': ["best", "random"],
-                               'max_depth': [i for i in range(1, self.keys_len + 1)],
-                               'min_samples_split': [i for i in range(2, self.keys_len + 1)],
-                               'min_samples_leaf': [i for i in range(1, self.keys_len + 1)],
-                               'min_weight_fraction_leaf': [0.],
-                               'max_features': ['sqrt', 'auto', 'log2', None],
-                               'max_leaf_nodes': [None],
-                               'min_impurity_decrease': [0.0],
-                               'min_impurity_split': [None],
-                               'ccp_alpha': [0.0]}
-        self.importance = {}
-        self.is_model_fit = False
-        self.is_grid_fit = False
-
-        self.show = show
+        self.__show = show
         self.model = None
-        self.grid_best_params = None
-        self.keys = task.keys()
-        self.keys_len = len(task.keys())
-        self.X_train, self.x_test, self.Y_train, self.y_test = train_test_split(task,
-                                                                                target,
-                                                                                train_size=train_split,
-                                                                                random_state=13)
+        self.__grid_best_params = None
+        self.__keys = task.keys()
+        self.__keys_len = len(task.keys())
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
+                                                                                        target,
+                                                                                        train_size=train_split,
+                                                                                        random_state=13)
 
     def __str__(self):
         table = PrettyTable()

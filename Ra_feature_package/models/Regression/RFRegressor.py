@@ -15,6 +15,7 @@ from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.param_class import *
 
+
 class RFRegressor:
     def __init__(self,
                  task: pd.DataFrame,

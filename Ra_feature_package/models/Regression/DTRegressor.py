@@ -28,43 +28,10 @@ class DTRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "DecisionTreeRegressor"
-        self.__default_param_types = {'criterion': str,
-                                      'splitter': str,
-                                      'max_depth': int,
-                                      'min_samples_split': int or float,
-                                      'min_samples_leaf': int or float,
-                                      'min_weight_fraction_leaf': float,
-                                      'max_features': str,
-                                      'max_leaf_nodes': int,
-                                      'min_impurity_decrease': float,
-                                      'min_impurity_split': float,
-                                      'ccp_alpha': float}
-
-        self.__default_param = {'criterion': "mse",
-                                'splitter': "best",
-                                'max_depth': None,
-                                'min_samples_split': 2,
-                                'min_samples_leaf': 1,
-                                'min_weight_fraction_leaf': 0.0,
-                                'max_features': None,
-                                'max_leaf_nodes': None,
-                                'min_impurity_decrease': 0.,
-                                'min_impurity_split': None,
-                                'ccp_alpha': 0.0}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'criterion': ["mse", "friedman_mse", "mae", "poisson"],
-                                 'splitter': ["best", "random"],
-                                 'max_depth': conf_params(min_val=2, max_val=count, count=count, ltype=int),
-                                 'min_samples_split': conf_params(min_val=2, count=count, ltype=int),
-                                 'min_samples_leaf': conf_params(min_val=2, count=count, ltype=int),
-                                 'min_weight_fraction_leaf': [0.],
-                                 'max_features': ['sqrt', 'auto', 'log2', None],
-                                 'max_leaf_nodes': [None],
-                                 'min_impurity_decrease': [0.0],
-                                 'min_impurity_split': [None],
-                                 'ccp_alpha': [0.0]}
-        self.__locked_params = ['criterion', 'splitter', 'max_features']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

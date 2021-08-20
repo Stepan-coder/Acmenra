@@ -29,50 +29,10 @@ class ENCVRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "ElasticNetCVRegressor"
-        self.__default_param_types = {'l1_ratio': float or List[float],
-                                      'eps': float,
-                                      'n_alphas': int,
-                                      'alphas': type(None),
-                                      'fit_intercept': bool,
-                                      'normalize': bool,
-                                      'precompute': str,
-                                      'max_iter': int,
-                                      'tol': float,
-                                      'cv': type(None),
-                                      'copy_X': bool,
-                                      'positive': bool,
-                                      'selection': str}
-
-        self.__default_param = {'l1_ratio': 0.5,
-                                'eps': 1e-3,
-                                'n_alphas': 100,
-                                'alphas': None,
-                                'fit_intercept': True,
-                                'normalize': False,
-                                'precompute': 'auto',
-                                'max_iter': 1000,
-                                'tol': 1e-4,
-                                'cv': None,
-                                'copy_X': True,
-                                'positive': False,
-                                'selection': 'cyclic'}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'l1_ratio': conf_params(min_val=0.1, max_val=1, count=count, ltype=float),
-                                 'eps': [1e-3],
-                                 'n_alphas': conf_params(min_val=1, max_val=count * 10, count=count, ltype=int),
-                                 'alphas': [None],
-                                 'fit_intercept': [True, False],
-                                 'normalize': [True, False],
-                                 'precompute': ['auto'],
-                                 'max_iter': conf_params(min_val=100, max_val=count * 100, count=count, ltype=int),
-                                 'tol': [1e-4],
-                                 'cv': [None],
-                                 'copy_X': [True, False],
-                                 'positive': [True, False],
-                                 'selection': ['cyclic', 'random']}
-        self.__locked_params = ['selection', 'positive', 'copy_X', 'precompute',
-                                'normalize', 'fit_intercept']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False

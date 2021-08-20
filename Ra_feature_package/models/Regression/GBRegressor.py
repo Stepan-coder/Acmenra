@@ -29,67 +29,10 @@ class GBRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "GradientBoostingRegressor"
-        self.__default_param_types = {'loss': str or type(None),
-                                      'learning_rate': float or type(None),
-                                      'n_estimators': int or type(None),
-                                      'subsample': float or type(None),
-                                      'criterion': str or type(None),
-                                      'min_samples_split': int or float or type(None),
-                                      'min_samples_leaf': int or float or type(None),
-                                      'min_weight_fraction_leaf': float or type(None),
-                                      'max_depth': int or type(None),
-                                      'min_impurity_decrease': float or type(None),
-                                      'init': str or type(None),
-                                      'max_features': str or type(None),
-                                      'alpha': float or type(None),
-                                      'max_leaf_nodes': int or type(None),
-                                      'warm_start': bool or type(None),
-                                      'validation_fraction': float or type(None),
-                                      'n_iter_no_change': int or type(None),
-                                      'tol': float or type(None),
-                                      'ccp_alpha': float or type(None)}
-
-        self.__default_param = {'loss': 'ls',
-                                'learning_rate': 0.1,
-                                'n_estimators': 100,
-                                'subsample': 1.0,
-                                'criterion': 'friedman_mse',
-                                'min_samples_split': 2,
-                                'min_samples_leaf': 1,
-                                'min_weight_fraction_leaf': 0.0,
-                                'max_depth': 3,
-                                'min_impurity_decrease': 0.0,
-                                'init': None,
-                                'max_features': None,
-                                'alpha': 0.9,
-                                'max_leaf_nodes': None,
-                                'warm_start': False,
-                                'validation_fraction': 0.1,
-                                'n_iter_no_change': None,
-                                'tol': 1e-4,
-                                'ccp_alpha': 0.0}
-
         count = len(task.keys()) + 1
-        self.__default_params = {'loss': ['ls', 'lad', 'huber', 'quantile'],
-                                 'learning_rate': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'n_estimators': conf_params(min_val=2, count=count, ltype=int),
-                                 'subsample': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'criterion': ['friedman_mse', 'mse'],
-                                 'min_samples_split': conf_params(min_val=2, count=count, ltype=int),
-                                 'min_samples_leaf': conf_params(min_val=2, count=count, ltype=int),
-                                 'min_weight_fraction_leaf':conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'max_depth': conf_params(min_val=2, max_val=count * 10, count=count, ltype=int),
-                                 'min_impurity_decrease': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'init': [None],
-                                 'max_features': ['auto', 'sqrt', 'log2'],
-                                 'alpha': conf_params(min_val=0, max_val=0.5, count=count,  ltype=float),
-                                 'max_leaf_nodes': conf_params(min_val=2, count=count, ltype=int),
-                                 'warm_start': [True, False],
-                                 'validation_fraction': conf_params(min_val=0, max_val=0.5, count=count, ltype=float),
-                                 'n_iter_no_change': [None],
-                                 'tol': [1e-4],
-                                 'ccp_alpha': conf_params(min_val=0, max_val=0.5, count=count, ltype=float)}
-        self.__locked_params = ['loss', 'criterion', 'max_features', 'warm_start']
+        self.__default = {
+
+        }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
