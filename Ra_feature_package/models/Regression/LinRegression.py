@@ -13,6 +13,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class LinRegressor:
@@ -30,8 +31,22 @@ class LinRegressor:
         """
         self.__text_name = "LinearRegression"
         count = len(task.keys()) + 1
-        self.__default = {
-
+        self.__default = {'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'normalize': Param(ptype=[bool],
+                                             def_val=False,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'copy_X': Param(ptype=[bool],
+                                          def_val=True,
+                                          def_vals=[True, False],
+                                          is_locked=True),
+                          'positive': Param(ptype=[bool],
+                                            def_val=False,
+                                            def_vals=[True, False],
+                                            is_locked=True),
         }
         self.__importance = {}
         self.__is_model_fit = False

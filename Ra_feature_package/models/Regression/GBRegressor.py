@@ -13,6 +13,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingRegressor
 from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class GBRegressor:
@@ -30,7 +31,53 @@ class GBRegressor:
         """
         self.__text_name = "GradientBoostingRegressor"
         count = len(task.keys()) + 1
-        self.__default = {
+        self.__default = {"loss": Param(ptype=[str],
+                                        def_val='ls',
+                                        def_vals=['ls', 'lad', 'huber', 'quantile'],
+                                        is_locked=True),
+                          'learning_rate': Param(ptype=[float],
+                                                 def_val=0.1,
+                                                 def_vals=conf_params(min_val=0.0,
+                                                                      max_val=1.0,
+                                                                      count=count,
+                                                                      ltype=float)),
+                          'n_estimators': Param(ptype=[int],
+                                                def_val=100,
+                                                def_vals=conf_params(min_val=50,
+                                                                     max_val=count * 2 * 50,
+                                                                     count=count,
+                                                                     ltype=int)),
+                          'subsample': Param(ptype=[float],
+                                             def_val=1.0,
+                                             def_vals=conf_params(min_val=0.0,
+                                                                  max_val=1.0,
+                                                                  count=count,
+                                                                  ltype=float)),
+                          'criterion': Param(ptype=[str],
+                                             def_val="friedman_mse",
+                                             def_vals=["friedman_mse", "mse", "mae"],
+                                             is_locked=True),
+                          'min_samples_split': Param(ptype=[int],
+                                                     def_val=2,
+                                                     def_vals=conf_params(min_val=2,
+                                                                          max_val=count * 2,
+                                                                          count=count,
+                                                                          ltype=int)),
+                          'min_samples_leaf': Param(ptype=[int],
+                                                    def_val=1,
+                                                    def_vals=conf_params(min_val=2,
+                                                                         max_val=count * 2,
+                                                                         count=count,
+                                                                         ltype=int)),
+                          'min_weight_fraction_leaf': Param(ptype=[float],
+                                                            def_val=0.0,
+                                                            def_vals=[0.]),
+                          'max_depth': Param(ptype=[int, type(None)],
+                                             def_val=None,
+                                             def_vals=conf_params(min_val=2,
+                                                                  max_val=count * 2,
+                                                                  count=count,
+                                                                  ltype=int)),
 
         }
         self.__importance = {}

@@ -1,7 +1,18 @@
 from Ra_feature_package.DataSet.DataSet import *
 from Ra_feature_package.Preprocessing.Preprocessing import *
+
+from Ra_feature_package.models.Classifier.LogRegression import *
+from Ra_feature_package.models.Classifier.DTClassifier import *
+from Ra_feature_package.models.Classifier.RFClassifier import *
+
+from Ra_feature_package.models.Regression.LinRegression import *
+from Ra_feature_package.models.Regression.DTRegressor import *
 from Ra_feature_package.models.Regression.RFRegressor import *
+from Ra_feature_package.models.Regression.GBRegressor import *
+from Ra_feature_package.models.Regression.SGDRegressor import *
 from Ra_feature_package.models.Regression.LassoCVRegressor import *
+from Ra_feature_package.models.Regression.RidgeCVRegressor import *
+
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -26,9 +37,9 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = RFRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-rfr.fit_grid(params_dict={'n_estimators': [50, 150], 'max_samples': [32]}, count=3, grid_n_jobs=3)
-rfr.fit(grid_params=False, n_jobs=-1)
+rfr = LinRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr.fit_grid(count=3, grid_n_jobs=3)
+rfr.fit(grid_params=True, n_jobs=-1)
 # print(rfr.get_mean_absolute_error())
 # rfr.get_predict_test_plt(show=True)
 print(rfr)

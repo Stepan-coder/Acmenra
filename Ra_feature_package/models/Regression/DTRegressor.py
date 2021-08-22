@@ -12,7 +12,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
-
+from Ra_feature_package.models.Param import *
 
 class DTRegressor:
     def __init__(self,
@@ -29,7 +29,54 @@ class DTRegressor:
         """
         self.__text_name = "DecisionTreeRegressor"
         count = len(task.keys()) + 1
-        self.__default = {
+        self.__default = {'criterion': Param(ptype=[str],
+                                             def_val="mse",
+                                             def_vals=['mse', 'friedman_mse', 'mae', 'poisson'],
+                                             is_locked=True),
+                          'splitter': Param(ptype=[str],
+                                            def_val="best",
+                                            def_vals=['best', 'random'],
+                                            is_locked=True),
+                          'max_depth': Param(ptype=[int, None],
+                                             def_val=None,
+                                             def_vals=conf_params(min_val=2,
+                                                                  max_val=count * 2,
+                                                                  count=count,
+                                                                  ltype=int)),
+                          'min_samples_split': Param(ptype=[int, None],
+                                                     def_val=2,
+                                                     def_vals=conf_params(min_val=2,
+                                                                          max_val=count * 2,
+                                                                          count=count,
+                                                                          ltype=int)),
+                          'min_samples_leaf': Param(ptype=[int],
+                                                    def_val=1,
+                                                    def_vals=conf_params(min_val=2,
+                                                                         max_val=count * 2,
+                                                                         count=count,
+                                                                         ltype=int)),
+                          'min_weight_fraction_leaf': Param(ptype=[float],
+                                                            def_val=0.0,
+                                                            def_vals=[0.]),
+                          'max_features': Param(ptype=[str, type(None)],
+                                                def_val="auto",
+                                                def_vals=['sqrt', 'auto', 'log2', None],
+                                                is_locked=True),
+                          'max_leaf_nodes': Param(ptype=[int, type(None)],
+                                                  def_val=None,
+                                                  def_vals=conf_params(min_val=2,
+                                                                       max_val=count * 2,
+                                                                       count=count,
+                                                                       ltype=int)),
+                          'min_impurity_decrease': Param(ptype=[float, type(None)],
+                                                         def_val=0.0,
+                                                         def_vals=[0.]),
+                          'min_impurity_split': Param(ptype=[float, type(None)],
+                                                      def_val=0.0,
+                                                      def_vals=[0.]),
+                          'ccp_alpha': Param(ptype=[float, type(None)],
+                                             def_val=0.0,
+                                             def_vals=[0.]),
 
         }
         self.__importance = {}
