@@ -37,9 +37,12 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = LinRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-rfr.fit_grid(count=3, grid_n_jobs=3)
-rfr.fit(grid_params=True, n_jobs=-1)
+rfr = SGDRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr.fit_grid(params_dict={"tol": [1e-4],
+                          "max_iter": [250, 500, 750, 1000, 1500, 2500, 5000, 10000, 20000, 3000]},
+             count=0,
+             grid_n_jobs=3)
+rfr.fit(grid_params=False, n_jobs=-1)
 # print(rfr.get_mean_absolute_error())
 # rfr.get_predict_test_plt(show=True)
 print(rfr)

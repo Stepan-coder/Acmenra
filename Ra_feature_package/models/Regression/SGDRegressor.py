@@ -7,11 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Dict, List
+from prettytable import PrettyTable
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import SGDRegressor as StochasticGradientDescentRegressor
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class SGDRegressor:
@@ -29,9 +31,69 @@ class SGDRegressor:
         """
         self.__text_name = "StochasticGradientDescentRegressor"
         count = len(task.keys()) + 1
-        self.__default = {
-
-        }
+        self.__default = {'loss': Param(ptype=[str],
+                                        def_val='squared_loss',
+                                        def_vals=['squared_loss', 'huber', 'epsilon_insensitive',
+                                                  'squared_epsilon_insensitive'],
+                                        is_locked=True),
+                          'penalty': Param(ptype=[str],
+                                           def_val="l2",
+                                           def_vals=['l2', 'l1', 'elasticnet'],
+                                           is_locked=True),
+                          'alpha': Param(ptype=[float],
+                                         def_val=0.0001,
+                                         def_vals=[0.0001]),
+                          'l1_ratio': Param(ptype=[float],
+                                            def_val=0.15,
+                                            def_vals=[0.15]),
+                          'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'max_iter': Param(ptype=[int],
+                                            def_val=1000,
+                                            def_vals=conf_params(min_val=250,
+                                                                 max_val=count * 250,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-3,
+                                       def_vals=[1e-3]),
+                          'shuffle': Param(ptype=[bool],
+                                           def_val=True,
+                                           def_vals=[True, False],
+                                           is_locked=True),
+                          'epsilon': Param(ptype=[float],
+                                           def_val=0.,
+                                           def_vals=[0.1]),
+                          'learning_rate': Param(ptype=[str],
+                                                 def_val="invscaling",
+                                                 def_vals=["constant", "optimal", "invscaling", "adaptive"],
+                                                 is_locked=True),
+                          'eta0': Param(ptype=[float],
+                                        def_val=0.01,
+                                        def_vals=[0.01]),
+                          'power_t': Param(ptype=[float],
+                                           def_val=0.25,
+                                           def_vals=[0.25]),
+                          'early_stopping': Param(ptype=[bool],
+                                                  def_val=False,
+                                                  def_vals=[True, False],
+                                                  is_locked=True),
+                          'validation_fraction': Param(ptype=[float],
+                                                       def_val=0.1,
+                                                       def_vals=[0.1]),
+                          'n_iter_no_change': Param(ptype=[int],
+                                                    def_val=5,
+                                                    def_vals=[5]),
+                          'warm_start': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'average': Param(ptype=[bool],
+                                           def_val=False,
+                                           def_vals=[True, False],
+                                           is_locked=True)}
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -47,7 +109,16 @@ class SGDRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{SGDRegressor.__name__} model>'"
+        table = PrettyTable()
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
 
     def __repr__(self):
         return f"'<Ra.{SGDRegressor.__name__} model>'"
@@ -136,7 +207,13 @@ class SGDRegressor:
                     else:
                         model_params[param] = model_params[param]
             else:
-                model_params[param] = [self.__default[param].def_val]
+                if params_dict is None:
+                    model_params[param] = [self.__default[param].def_val]
+                else:
+                    if param not in params_dict:  # Если пользователь, не трогал это поле
+                        model_params[param] = [self.__default[param].def_val]
+                    else:
+                        model_params[param] = model_params[param]
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,

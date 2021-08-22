@@ -149,7 +149,13 @@ class LCVRegressor:
                     else:
                         model_params[param] = model_params[param]
             else:
-                model_params[param] = [self.__default[param].def_val]
+                if params_dict is None:
+                    model_params[param] = [self.__default[param].def_val]
+                else:
+                    if param not in params_dict:  # Если пользователь, не трогал это поле
+                        model_params[param] = [self.__default[param].def_val]
+                    else:
+                        model_params[param] = model_params[param]
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,

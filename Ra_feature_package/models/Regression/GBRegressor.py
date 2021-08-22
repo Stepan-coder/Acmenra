@@ -55,7 +55,7 @@ class GBRegressor:
                                                                   ltype=float)),
                           'criterion': Param(ptype=[str],
                                              def_val="friedman_mse",
-                                             def_vals=["friedman_mse", "mse", "mae"],
+                                             def_vals=["friedman_mse", "mse"],
                                              is_locked=True),
                           'min_samples_split': Param(ptype=[int],
                                                      def_val=2,
@@ -65,7 +65,7 @@ class GBRegressor:
                                                                           ltype=int)),
                           'min_samples_leaf': Param(ptype=[int],
                                                     def_val=1,
-                                                    def_vals=conf_params(min_val=2,
+                                                    def_vals=conf_params(min_val=1,
                                                                          max_val=count * 2,
                                                                          count=count,
                                                                          ltype=int)),
@@ -73,13 +73,49 @@ class GBRegressor:
                                                             def_val=0.0,
                                                             def_vals=[0.]),
                           'max_depth': Param(ptype=[int, type(None)],
-                                             def_val=None,
-                                             def_vals=conf_params(min_val=2,
+                                             def_val=3,
+                                             def_vals=conf_params(min_val=1,
                                                                   max_val=count * 2,
                                                                   count=count,
                                                                   ltype=int)),
-
-        }
+                          'min_impurity_decrease': Param(ptype=[float],
+                                                         def_val=0.0,
+                                                         def_vals=[0.0]),
+                          'min_impurity_split': Param(ptype=[float],
+                                                      def_val=None,
+                                                      def_vals=[None]),
+                          'init': Param(ptype=[str, type(None)],
+                                        def_val=None,
+                                        def_vals=[None, 'zero']),
+                          'max_features': Param(ptype=[str, type(None)],
+                                                def_val=None,
+                                                def_vals=['auto', 'sqrt', 'log2', None],
+                                                is_locked=True),
+                          'alpha': Param(ptype=[float],
+                                         def_val=0.9,
+                                         def_vals=[0.9]),
+                          'max_leaf_nodes': Param(ptype=[int, type(None)],
+                                                  def_val=None,
+                                                  def_vals=conf_params(min_val=1,
+                                                                       max_val=count * 2,
+                                                                       count=count,
+                                                                       ltype=int)),
+                          'warm_start': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'validation_fraction': Param(ptype=[float],
+                                                       def_val=0.1,
+                                                       def_vals=[0.1]),
+                          'n_iter_no_change': Param(ptype=[int, type(None)],
+                                                    def_val=None,
+                                                    def_vals=[None]),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-4,
+                                       def_vals=[1e-4]),
+                          'ccp_alpha': Param(ptype=[float],
+                                             def_val=0.0,
+                                             def_vals=[0.0])}
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -193,7 +229,13 @@ class GBRegressor:
                     else:
                         model_params[param] = model_params[param]
             else:
-                model_params[param] = [self.__default[param].def_val]
+                if params_dict is None:
+                    model_params[param] = [self.__default[param].def_val]
+                else:
+                    if param not in params_dict:  # Если пользователь, не трогал это поле
+                        model_params[param] = [self.__default[param].def_val]
+                    else:
+                        model_params[param] = model_params[param]
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
