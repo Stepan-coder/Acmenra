@@ -41,8 +41,8 @@ rfr = SGDRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train
 rfr.fit_grid(params_dict={"tol": [1e-4, 1e-5, 1e-6],
                           "max_iter": [250, 500, 750, 1000, 1500, 2500, 5000, 7500, 10000, 20000, 30000]},
              count=0,
-             grid_n_jobs=3)
-rfr.fit(grid_params=Tr, n_jobs=-1)
+             grid_n_jobs=-1)
+rfr.fit(grid_params=True, n_jobs=-1)
 # print(rfr.get_mean_absolute_error())
 # rfr.get_predict_test_plt(show=True)
 print(rfr)
