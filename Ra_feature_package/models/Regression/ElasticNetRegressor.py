@@ -8,32 +8,35 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import RidgeCV
-from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
+from sklearn.linear_model import ElasticNet
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class RidgeCVRegressor:
+class ENetRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the RidgeRegressor class
+        This method is the initiator of the ENetRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "RidgeRegressor"
+        self.__text_name = "ElasticNetRegressor"
         count = len(task.keys()) + 1
-        self.__default = {'alphas': Param(ptype=[tuple],
-                                          def_val=np.array([0.1, 1.0, 10.0]),
-                                          def_vals=[np.array([0.1, 1.0, 10.0])]),
+        self.__default = {'alpha': Param(ptype=[float],
+                                         def_val=1.0,
+                                         def_vals=[1.0]),
+                          'l1_ratio': Param(ptype=[float],
+                                            def_val=0.5,
+                                            def_vals=[0.5]),
                           'fit_intercept': Param(ptype=[bool],
                                                  def_val=True,
                                                  def_vals=[True, False],
@@ -42,24 +45,36 @@ class RidgeCVRegressor:
                                              def_val=False,
                                              def_vals=[True, False],
                                              is_locked=True),
-                          'scoring': Param(ptype=[type(None)],
-                                           def_val=None,
-                                           def_vals=[None]),
-                          'cv': Param(ptype=[type(None)],
-                                      def_val=None,
-                                      def_vals=[None]),
-                          'gcv_mode': Param(ptype=[str],
-                                            def_val='auto',
-                                            def_vals=['auto', 'svd', 'eigen'],
+                          'precompute': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'max_iter': Param(ptype=[int],
+                                            def_val=1000,
+                                            def_vals=conf_params(min_val=250,
+                                                                 max_val=count,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'copy_X': Param(ptype=[bool],
+                                          def_val=True,
+                                          def_vals=[True, False],
+                                          is_locked=True),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-4,
+                                       def_vals=[1e-4]),
+
+                          'warm_start': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'positive': Param(ptype=[bool],
+                                            def_val=False,
+                                            def_vals=[True, False],
                                             is_locked=True),
-                          'store_cv_values': Param(ptype=[bool],
-                                                   def_val=False,
-                                                   def_vals=[True, False],
-                                                   is_locked=True),
-                          'alpha_per_target': Param(ptype=[bool],
-                                                    def_val=False,
-                                                    def_vals=[True, False],
-                                                    is_locked=True)}
+                          'selection': Param(ptype=[str],
+                                             def_val='cyclic',
+                                             def_vals=['cyclic', 'random'],
+                                             is_locked=True)}
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -87,7 +102,7 @@ class RidgeCVRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{RidgeCVRegressor.__name__} model>'"
+        return f"'<Ra.{ENetRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """
@@ -110,7 +125,7 @@ class RidgeCVRegressor:
         :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = RidgeCV(**self.__grid_best_params)
+            self.model = ElasticNet(**self.__grid_best_params)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -120,9 +135,9 @@ class RidgeCVRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = RidgeCV(**model_params)
+            self.model = ElasticNet(**model_params)
         elif not grid_params and param_dict is None:
-            self.model = RidgeCV()
+            self.model = ElasticNet()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -181,7 +196,7 @@ class RidgeCVRegressor:
                              locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = RidgeCV()
+        model = ElasticNet()
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -336,7 +351,7 @@ class RidgeCVRegressor:
             print("An error occurred when calculating the \"Median Absolute Error\" error")
         return error
 
-    def get_predict_text_plt(self,
+    def get_predict_test_plt(self,
                              save_path: str = None,
                              show: bool = False):
         """
@@ -365,7 +380,7 @@ class RidgeCVRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = RidgeCV()
+        model = ElasticNet()
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start

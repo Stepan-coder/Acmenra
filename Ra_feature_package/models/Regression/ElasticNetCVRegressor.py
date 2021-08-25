@@ -16,14 +16,14 @@ from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class ENCVRegressor:
+class ENetCVRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the ENCVRegressor class
+        This method is the initiator of the ENetRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
@@ -106,7 +106,7 @@ class ENCVRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{ENCVRegressor.__name__} model>'"
+        return f"'<Ra.{ENetCVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """

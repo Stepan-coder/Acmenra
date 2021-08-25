@@ -10,9 +10,12 @@ from Ra_feature_package.models.Regression.DTRegressor import *
 from Ra_feature_package.models.Regression.RFRegressor import *
 from Ra_feature_package.models.Regression.GBRegressor import *
 from Ra_feature_package.models.Regression.SGDRegressor import *
+from Ra_feature_package.models.Regression.LassoRegressor import *
 from Ra_feature_package.models.Regression.LassoCVRegressor import *
+from Ra_feature_package.models.Regression.RidgeRegressor import *
 from Ra_feature_package.models.Regression.RidgeCVRegressor import *
 from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
+from Ra_feature_package.models.Regression.ElasticNetRegressor import *
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -37,7 +40,7 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = ENCVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr = ENetRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,
              grid_n_jobs=-1)
 rfr.fit(grid_params=True, n_jobs=-1)

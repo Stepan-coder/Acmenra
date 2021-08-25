@@ -16,14 +16,14 @@ from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class LCVRegressor:
+class LassoCVRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the LCVRegressor class
+        This method is the initiator of the LassoCVRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
@@ -108,7 +108,7 @@ class LCVRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{LCVRegressor.__name__} model>'"
+        return f"'<Ra.{LassoCVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """
