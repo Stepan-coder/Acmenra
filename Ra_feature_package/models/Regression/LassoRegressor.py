@@ -29,7 +29,7 @@ class LassoRegressor:
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "LassoCVRegressor"
+        self.__text_name = "ABoostRegressor"
         count = len(task.keys()) + 1
         self.__default = {'alpha': Param(ptype=[float],
                                          def_val=1.0,

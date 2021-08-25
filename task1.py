@@ -8,6 +8,7 @@ from Ra_feature_package.models.Classifier.RFClassifier import *
 from Ra_feature_package.models.Regression.LinRegression import *
 from Ra_feature_package.models.Regression.DTRegressor import *
 from Ra_feature_package.models.Regression.RFRegressor import *
+from Ra_feature_package.models.Regression.ETRegressor import *
 from Ra_feature_package.models.Regression.GBRegressor import *
 from Ra_feature_package.models.Regression.SGDRegressor import *
 from Ra_feature_package.models.Regression.LassoRegressor import *
@@ -21,6 +22,8 @@ from Ra_feature_package.models.Regression.LarsRegressor import *
 from Ra_feature_package.models.Regression.LarsCVRegressor import *
 from Ra_feature_package.models.Regression.HuberRegressor import *
 from Ra_feature_package.models.Regression.BayesianRidgeRegressor import *
+from Ra_feature_package.models.Regression.AdaBoostRegressor import *
+from Ra_feature_package.models.Regression.BaggingRegressor import *
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -45,7 +48,7 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = BayesianRidgeRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr = ETRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,
              grid_n_jobs=-1)
 rfr.fit(grid_params=True, n_jobs=-1)

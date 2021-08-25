@@ -4,7 +4,7 @@
 -DataSetColumn
 -Errors
 -DTRegressor
--RFRegressor
+-ETRegressor
 -LinRegression
 Ко всем моделям надо исправить отображение параметров сетки, а так же сделать обучение в % вместо шага
 НЕ Работает:

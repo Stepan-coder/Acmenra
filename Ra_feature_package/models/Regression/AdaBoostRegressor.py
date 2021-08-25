@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import LassoCV
+from sklearn.ensemble import AdaBoostRegressor
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
@@ -16,7 +16,7 @@ from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class LassoCVRegressor:
+class ABoostRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
@@ -31,56 +31,19 @@ class LassoCVRegressor:
         """
         self.__text_name = "ABoostRegressor"
         count = len(task.keys()) + 1
-        self.__default = {'eps': Param(ptype=[float],
-                                       def_val=1e-3,
-                                       def_vals=[1e-3]),
-                          'n_alphas': Param(ptype=[int],
-                                            def_val=100,
-                                            def_vals=conf_params(min_val=50,
-                                                                 max_val=count * 50,
-                                                                 count=count,
-                                                                 ltype=int)),
-                          'alphas': Param(ptype=[type(None)],
-                                          def_val=None,
-                                          def_vals=[None]),
-                          'fit_intercept': Param(ptype=[bool],
-                                                 def_val=True,
-                                                 def_vals=[True, False],
-                                                 is_locked=True),
-                          'normalize': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'precompute': Param(ptype=[str],
-                                              def_val='auto',
-                                              def_vals=['auto'],
-                                              is_locked=True),
-                          'max_iter': Param(ptype=[int],
-                                            def_val=1000,
-                                            def_vals=conf_params(min_val=250,
-                                                                 max_val=count,
-                                                                 count=count,
-                                                                 ltype=int)),
-                          'tol': Param(ptype=[float],
-                                       def_val=1e-4,
-                                       def_vals=[1e-4]),
-                          'copy_X': Param(ptype=[bool],
-                                          def_val=True,
-                                          def_vals=[True, False],
-                                          is_locked=True),
-                          'cv': Param(ptype=[type(None)],
-                                      def_val=None,
-                                      def_vals=[None]),
-                          'positive': Param(ptype=[bool],
-                                            def_val=False,
-                                            def_vals=[True, False],
-                                            is_locked=True),
-                          'selection': Param(ptype=[str],
-                                             def_val='cyclic',
-                                             def_vals=['cyclic', 'random'],
-                                             is_locked=True),
-
-        }
+        self.__default = {'base_estimator': Param(ptype=[type(None)],
+                                                  def_val=None,
+                                                  def_vals=[None]),
+                          'n_estimators': Param(ptype=[int],
+                                                def_val=50,
+                                                def_vals=conf_params(min_val=20,
+                                                                     max_val=count * 50,
+                                                                     count=count,
+                                                                     ltype=int)),
+                          'loss': Param(ptype=[str],
+                                        def_val='linear',
+                                        def_vals=['linear', 'square', 'exponential'],
+                                        is_locked=True)}
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -108,7 +71,7 @@ class LassoCVRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{LassoCVRegressor.__name__} model>'"
+        return f"'<Ra.{ABoostRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """
@@ -131,10 +94,8 @@ class LassoCVRegressor:
         :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = LassoCV(**self.__grid_best_params,
-                                 n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
+            self.model = AdaBoostRegressor(**self.__grid_best_params,
+                                           random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -144,14 +105,10 @@ class LassoCVRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = LassoCV(**model_params,
-                                 n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
+            self.model = AdaBoostRegressor(**model_params,
+                                           random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = LassoCV(n_jobs=n_jobs,
-                                 verbose=verbose,
-                                 random_state=13)
+            self.model = AdaBoostRegressor(random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -210,9 +167,7 @@ class LassoCVRegressor:
                              locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = LassoCV(n_jobs=1,
-                        verbose=0,
-                        random_state=13)
+        model = AdaBoostRegressor(random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -396,7 +351,7 @@ class LassoCVRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = LassoCV(random_state=13)
+        model = AdaBoostRegressor(random_state=13)
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
