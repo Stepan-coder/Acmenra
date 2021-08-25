@@ -14,10 +14,13 @@ from Ra_feature_package.models.Regression.RidgeCVRegressor import *
 from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
 from Ra_feature_package.models.Regression.ElasticNetRegressor import *
 
+from Ra_feature_package.models.Regression.LarsRegressor import *
+from Ra_feature_package.models.Regression.LarsCVRegressor import *
+from Ra_feature_package.models.Regression.HuberRegressor import *
+from Ra_feature_package.models.Regression.BayesianRidgeRegressor import *
+
 
 # Оставшиеся модели
-from sklearn.linear_model import LarsCV
-from sklearn.linear_model import BayesianRidge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import LinearSVR
 from sklearn.svm import SVR
@@ -25,4 +28,3 @@ from sklearn.ensemble import AdaBoostRegressor
 from sklearn.ensemble import BaggingRegressor
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import KFold
-LarsRegressor
