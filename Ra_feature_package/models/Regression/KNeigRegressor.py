@@ -9,93 +9,61 @@ import matplotlib.pyplot as plt
 from typing import Dict, List
 from prettytable import PrettyTable
 from Ra_feature_package.Errors import Errors
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class ETRegressor:
+class KNRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
                  train_split: int,
                  show: bool = False):
         """
-        This method is the initiator of the ETRegressor class
+        This method is the initiator of the KNRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "ExtraTreesRegressor"
+        self.__text_name = "KNeighborsRegressor"
         count = len(task.keys()) + 1
-        self.__default = {'n_estimators': Param(ptype=[int],
-                                                def_val=100,
-                                                def_vals=conf_params(min_val=2,
-                                                                     max_val=count * 2,
-                                                                     count=count,
-                                                                     ltype=int)),
-                          'criterion': Param(ptype=[str],
-                                             def_val="mse",
-                                             def_vals=["mse", "mae"],
+        self.__default = {'n_neighbors': Param(ptype=[int],
+                                               def_val=5,
+                                               def_vals=conf_params(min_val=1,
+                                                                    max_val=count * 15,
+                                                                    count=count,
+                                                                    ltype=int)),
+                          'weights': Param(ptype=[str],
+                                           def_val='uniform',
+                                           def_vals=['uniform', 'distance'],
+                                           is_locked=True),
+                          'algorithm': Param(ptype=[str],
+                                             def_val='auto',
+                                             def_vals=['auto', 'ball_tree', 'kd_tree', 'brute'],
                                              is_locked=True),
-                          'max_depth': Param(ptype=[int, type(None)],
-                                             def_val=None,
-                                             def_vals=conf_params(min_val=1,
-                                                                  max_val=count * 2,
+                          'leaf_size': Param(ptype=[int],
+                                             def_val=30,
+                                             def_vals=conf_params(min_val=5,
+                                                                  max_val=count * 15,
                                                                   count=count,
                                                                   ltype=int)),
-                          'min_samples_split': Param(ptype=[int],
-                                                     def_val=2,
-                                                     def_vals=conf_params(min_val=2,
-                                                                          max_val=count * 2,
-                                                                          count=count,
-                                                                          ltype=int)),
-                          'min_samples_leaf': Param(ptype=[int],
-                                                    def_val=1,
-                                                    def_vals=conf_params(min_val=2,
-                                                                         max_val=count * 2,
-                                                                         count=count,
-                                                                         ltype=int)),
-                          'min_weight_fraction_leaf': Param(ptype=[float],
-                                                            def_val=0.0,
-                                                            def_vals=[0.0]),
-                          'max_features': Param(ptype=[str, type(None)],
-                                                def_val="auto",
-                                                def_vals=['sqrt', 'auto', 'log2', None],
-                                                is_locked=True),
-                          'max_leaf_nodes': Param(ptype=[int, type(None)],
-                                                  def_val=None,
-                                                  def_vals=conf_params(min_val=2,
-                                                                       max_val=count * 2,
-                                                                       count=count,
-                                                                       ltype=int)),
-                          'min_impurity_decrease': Param(ptype=[float, type(None)],
-                                                         def_val=0.0,
-                                                         def_vals=[0.]),
-                          'bootstrap': Param(ptype=[bool],
-                                             def_val=True,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'oob_score': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[False],
-                                             is_locked=True),
-                          'warm_start': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
-                                              is_locked=True),
-                          'ccp_alpha': Param(ptype=[float, type(None)],
-                                             def_val=0.0,
-                                             def_vals=[0.]),
-                          'max_samples': Param(ptype=[int, type(None)],
-                                               def_val=None,
-                                               def_vals=conf_params(min_val=1,
-                                                                    max_val=count * 2,
-                                                                    count=count,
-                                                                    ltype=int))}
+                          'p': Param(ptype=[int],
+                                     def_val=2,
+                                     def_vals=conf_params(min_val=2,
+                                                          max_val=count * 2,
+                                                          count=count,
+                                                          ltype=int)),
+                          'metric': Param(ptype=[str],
+                                          def_val='minkowski',
+                                          def_vals=['minkowski'],
+                                          is_locked=True),
+                          'metric_params': Param(ptype=[dict, type(None)],
+                                                 def_val=None,
+                                                 def_vals=[None])}
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -123,7 +91,7 @@ class ETRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{ETRegressor.__name__} model>'"
+        return f"'<Ra.{KNRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """
@@ -146,10 +114,8 @@ class ETRegressor:
         :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = ExtraTreesRegressor(**self.__grid_best_params,
-                                             n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = KNeighborsRegressor(**self.__grid_best_params,
+                                             n_jobs=n_jobs)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -159,14 +125,10 @@ class ETRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = ExtraTreesRegressor(**model_params,
-                                             n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = KNeighborsRegressor(**model_params,
+                                             n_jobs=n_jobs)
         elif not grid_params and param_dict is None:
-            self.model = ExtraTreesRegressor(n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = KNeighborsRegressor(n_jobs=n_jobs)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -225,9 +187,7 @@ class ETRegressor:
                              locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = ExtraTreesRegressor(n_jobs=1,
-                                    verbose=0,
-                                    random_state=13)
+        model = KNeighborsRegressor(n_jobs=1)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -411,8 +371,7 @@ class ETRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = ExtraTreesRegressor(random_state=13)
-        model.fit(self.__X_train, self.__Y_train.values.ravel())
+        model = KNeighborsRegressor(n_jobs=1)
+        model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
-

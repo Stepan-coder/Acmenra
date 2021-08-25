@@ -5,6 +5,7 @@ from Ra_feature_package.models.Classifier.LogRegression import *
 from Ra_feature_package.models.Classifier.DTClassifier import *
 from Ra_feature_package.models.Classifier.RFClassifier import *
 
+
 from Ra_feature_package.models.Regression.LinRegression import *
 from Ra_feature_package.models.Regression.DTRegressor import *
 from Ra_feature_package.models.Regression.RFRegressor import *
@@ -17,13 +18,15 @@ from Ra_feature_package.models.Regression.RidgeRegressor import *
 from Ra_feature_package.models.Regression.RidgeCVRegressor import *
 from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
 from Ra_feature_package.models.Regression.ElasticNetRegressor import *
-
 from Ra_feature_package.models.Regression.LarsRegressor import *
 from Ra_feature_package.models.Regression.LarsCVRegressor import *
 from Ra_feature_package.models.Regression.HuberRegressor import *
-from Ra_feature_package.models.Regression.BayesianRidgeRegressor import *
-from Ra_feature_package.models.Regression.AdaBoostRegressor import *
-from Ra_feature_package.models.Regression.BaggingRegressor import *
+from Ra_feature_package.models.Regression.BayesRidgeRegressor import *
+from Ra_feature_package.models.Regression.ABoostRegressor import *
+from Ra_feature_package.models.Regression.BagRegressor import *
+from Ra_feature_package.models.Regression.KNeigRegressor import *
+from Ra_feature_package.models.Regression.SVRegressor import *
+from Ra_feature_package.models.Regression.LinSVRegressor import *
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -48,13 +51,19 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = ETRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr = SVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,
              grid_n_jobs=-1)
 rfr.fit(grid_params=True, n_jobs=-1)
-# print(rfr.get_mean_absolute_error())
-# rfr.get_predict_test_plt(show=True)
 print(rfr)
+# etr = ABoostRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+# etr.fit_grid(params_dict={'base_estimator': [rfr.model]},
+#              count=0,
+#              grid_n_jobs=-1)
+# etr.fit(grid_params=True, n_jobs=-1)
+# # print(rfr.get_mean_absolute_error())
+# # rfr.get_predict_test_plt(show=True)
+# print(etr)
 
 
 

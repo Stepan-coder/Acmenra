@@ -10,13 +10,13 @@ from typing import Dict, List
 from prettytable import PrettyTable
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.svm import LinearSVR
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class ETRegressor:
+class LinSVRegressor:
     def __init__(self,
                  task: pd.DataFrame,
                  target: pd.DataFrame,
@@ -29,73 +29,39 @@ class ETRegressor:
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "ExtraTreesRegressor"
+        self.__text_name = "SVRegressor"
         count = len(task.keys()) + 1
-        self.__default = {'n_estimators': Param(ptype=[int],
-                                                def_val=100,
-                                                def_vals=conf_params(min_val=2,
-                                                                     max_val=count * 2,
-                                                                     count=count,
-                                                                     ltype=int)),
-                          'criterion': Param(ptype=[str],
-                                             def_val="mse",
-                                             def_vals=["mse", "mae"],
-                                             is_locked=True),
-                          'max_depth': Param(ptype=[int, type(None)],
-                                             def_val=None,
-                                             def_vals=conf_params(min_val=1,
-                                                                  max_val=count * 2,
-                                                                  count=count,
-                                                                  ltype=int)),
-                          'min_samples_split': Param(ptype=[int],
-                                                     def_val=2,
-                                                     def_vals=conf_params(min_val=2,
-                                                                          max_val=count * 2,
-                                                                          count=count,
-                                                                          ltype=int)),
-                          'min_samples_leaf': Param(ptype=[int],
-                                                    def_val=1,
-                                                    def_vals=conf_params(min_val=2,
-                                                                         max_val=count * 2,
-                                                                         count=count,
-                                                                         ltype=int)),
-                          'min_weight_fraction_leaf': Param(ptype=[float],
-                                                            def_val=0.0,
-                                                            def_vals=[0.0]),
-                          'max_features': Param(ptype=[str, type(None)],
-                                                def_val="auto",
-                                                def_vals=['sqrt', 'auto', 'log2', None],
-                                                is_locked=True),
-                          'max_leaf_nodes': Param(ptype=[int, type(None)],
-                                                  def_val=None,
-                                                  def_vals=conf_params(min_val=2,
-                                                                       max_val=count * 2,
-                                                                       count=count,
-                                                                       ltype=int)),
-                          'min_impurity_decrease': Param(ptype=[float, type(None)],
-                                                         def_val=0.0,
-                                                         def_vals=[0.]),
-                          'bootstrap': Param(ptype=[bool],
-                                             def_val=True,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'oob_score': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[False],
-                                             is_locked=True),
-                          'warm_start': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
-                                              is_locked=True),
-                          'ccp_alpha': Param(ptype=[float, type(None)],
-                                             def_val=0.0,
-                                             def_vals=[0.]),
-                          'max_samples': Param(ptype=[int, type(None)],
-                                               def_val=None,
-                                               def_vals=conf_params(min_val=1,
-                                                                    max_val=count * 2,
-                                                                    count=count,
-                                                                    ltype=int))}
+        self.__default = {'epsilon': Param(ptype=[float],
+                                           def_val=0.0,
+                                           def_vals=[0.0]),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-4,
+                                       def_vals=[1e-4]),
+                          'C': Param(ptype=[float],
+                                     def_val=1.0,
+                                     def_vals=[1.0]),
+                          'loss': Param(ptype=[str, type(None)],
+                                        def_val="epsilon_insensitive",
+                                        def_vals=['epsilon_insensitive', 'squared_epsilon_insensitive'],
+                                        is_locked=True),
+                          'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'intercept_scaling': Param(ptype=[float],
+                                                     def_val=1.0,
+                                                     def_vals=[1.0]),
+                          'dual': Param(ptype=[bool],
+                                        def_val=True,
+                                        def_vals=[True, False],
+                                        is_locked=True),
+                          'max_iter': Param(ptype=[int],
+                                            def_val=1000,
+                                            def_vals=conf_params(min_val=250,
+                                                                 max_val=count,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          }
         self.__importance = {}
         self.__is_model_fit = False
         self.__is_grid_fit = False
@@ -123,7 +89,7 @@ class ETRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{ETRegressor.__name__} model>'"
+        return f"'<Ra.{LinSVRegressor.__name__} model>'"
 
     def predict(self, data: pd.DataFrame):
         """
@@ -146,10 +112,9 @@ class ETRegressor:
         :param verbose: Learning-show param
         """
         if grid_params and param_dict is None:
-            self.model = ExtraTreesRegressor(**self.__grid_best_params,
-                                             n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = LinearSVR(**self.__grid_best_params,
+                                   verbose=verbose,
+                                   random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -159,14 +124,12 @@ class ETRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = ExtraTreesRegressor(**model_params,
-                                             n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = LinearSVR(**model_params,
+                                   verbose=verbose,
+                                   random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = ExtraTreesRegressor(n_jobs=n_jobs,
-                                             verbose=verbose,
-                                             random_state=13)
+            self.model = LinearSVR(verbose=verbose,
+                                   random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -225,9 +188,8 @@ class ETRegressor:
                              locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = ExtraTreesRegressor(n_jobs=1,
-                                    verbose=0,
-                                    random_state=13)
+        model = LinearSVR(verbose=0,
+                          random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -411,7 +373,7 @@ class ETRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = ExtraTreesRegressor(random_state=13)
+        model = LinearSVR(random_state=13)
         model.fit(self.__X_train, self.__Y_train.values.ravel())
         time_end = time.time()
         return time_end - time_start
