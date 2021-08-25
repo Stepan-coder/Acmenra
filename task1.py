@@ -12,7 +12,7 @@ from Ra_feature_package.models.Regression.GBRegressor import *
 from Ra_feature_package.models.Regression.SGDRegressor import *
 from Ra_feature_package.models.Regression.LassoCVRegressor import *
 from Ra_feature_package.models.Regression.RidgeCVRegressor import *
-
+from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -37,10 +37,8 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = SGDRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-rfr.fit_grid(params_dict={"tol": [1e-4, 1e-5, 1e-6],
-                          "max_iter": [250, 500, 750, 1000, 1500, 2500, 5000, 7500, 10000, 20000, 30000]},
-             count=0,
+rfr = ENCVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr.fit_grid(count=0,
              grid_n_jobs=-1)
 rfr.fit(grid_params=True, n_jobs=-1)
 # print(rfr.get_mean_absolute_error())

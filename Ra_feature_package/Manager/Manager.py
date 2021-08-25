@@ -8,8 +8,9 @@ from Ra_feature_package.models.Regression.RFRegressor import *
 from Ra_feature_package.models.Regression.GBRegressor import *
 from Ra_feature_package.models.Regression.SGDRegressor import *
 from Ra_feature_package.models.Regression.LassoCVRegressor import *
-from Ra_feature_package.models.Regression.RidgeCVRegressor import *
 
+from Ra_feature_package.models.Regression.RidgeCVRegressor import *
+from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
 
 
 

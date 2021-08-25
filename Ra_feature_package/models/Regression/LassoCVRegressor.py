@@ -13,6 +13,7 @@ from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class LCVRegressor:
@@ -30,7 +31,54 @@ class LCVRegressor:
         """
         self.__text_name = "LassoCVRegressor"
         count = len(task.keys()) + 1
-        self.__default = {
+        self.__default = {'eps': Param(ptype=[float],
+                                       def_val=1e-3,
+                                       def_vals=[1e-3]),
+                          'n_alphas': Param(ptype=[int],
+                                            def_val=100,
+                                            def_vals=conf_params(min_val=50,
+                                                                 max_val=count * 50,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'alphas': Param(ptype=[type(None)],
+                                          def_val=None,
+                                          def_vals=[None]),
+                          'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'normalize': Param(ptype=[bool],
+                                             def_val=False,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'precompute': Param(ptype=[str],
+                                              def_val='auto',
+                                              def_vals=['auto'],
+                                              is_locked=True),
+                          'max_iter': Param(ptype=[int],
+                                            def_val=1000,
+                                            def_vals=conf_params(min_val=250,
+                                                                 max_val=count,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-4,
+                                       def_vals=[1e-4]),
+                          'copy_X': Param(ptype=[bool],
+                                          def_val=True,
+                                          def_vals=[True, False],
+                                          is_locked=True),
+                          'cv': Param(ptype=[type(None)],
+                                      def_val=None,
+                                      def_vals=[None]),
+                          'positive': Param(ptype=[bool],
+                                            def_val=False,
+                                            def_vals=[True, False],
+                                            is_locked=True),
+                          'selection': Param(ptype=[str],
+                                             def_val='cyclic',
+                                             def_vals=['cyclic', 'random'],
+                                             is_locked=True),
 
         }
         self.__importance = {}

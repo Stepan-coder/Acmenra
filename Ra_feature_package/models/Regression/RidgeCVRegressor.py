@@ -7,11 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from typing import Dict, List
+from prettytable import PrettyTable
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class RCVRegressor:
@@ -29,7 +31,35 @@ class RCVRegressor:
         """
         self.__text_name = "RidgeCVRegressor"
         count = len(task.keys()) + 1
-        self.__default = {
+        self.__default = {'alphas': Param(ptype=[tuple],
+                                          def_val=np.array([0.1, 1.0, 10.0]),
+                                          def_vals=[np.array([0.1, 1.0, 10.0])]),
+                          'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'normalize': Param(ptype=[bool],
+                                             def_val=False,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'scoring': Param(ptype=[type(None)],
+                                           def_val=None,
+                                           def_vals=[None]),
+                          'cv': Param(ptype=[type(None)],
+                                      def_val=None,
+                                      def_vals=[None]),
+                          'gcv_mode': Param(ptype=[str],
+                                            def_val='auto',
+                                            def_vals=['auto', 'svd', 'eigen'],
+                                            is_locked=True),
+                          'store_cv_values': Param(ptype=[bool],
+                                                   def_val=False,
+                                                   def_vals=[True, False],
+                                                   is_locked=True),
+                          'alpha_per_target': Param(ptype=[bool],
+                                                    def_val=False,
+                                                    def_vals=[True, False],
+                                                    is_locked=True),
 
         }
         self.__importance = {}
@@ -47,7 +77,16 @@ class RCVRegressor:
                                                                                         random_state=13)
 
     def __str__(self):
-        return f"'<Ra.{RCVRegressor.__name__} model>'"
+        table = PrettyTable()
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
 
     def __repr__(self):
         return f"'<Ra.{RCVRegressor.__name__} model>'"
