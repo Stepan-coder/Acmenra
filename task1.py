@@ -51,11 +51,16 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-rfr = SVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,
              grid_n_jobs=-1)
+params = rfr.get_grid_best_params()
 rfr.fit(grid_params=True, n_jobs=-1)
 print(rfr)
+rfr1 = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+rfr1.fit(param_dict=params, n_jobs=-1)
+print(rfr1)
+
 # etr = ABoostRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 # etr.fit_grid(params_dict={'base_estimator': [rfr.model]},
 #              count=0,

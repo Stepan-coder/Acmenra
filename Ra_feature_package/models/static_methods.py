@@ -96,7 +96,7 @@ def check_param_value(grid_param: str,
     :param param_type: The data type acceptable for this parameter
     """
     for pt in param_type:
-        if not isinstance(value, pt):
+        if not isinstance(value, pt) and isinstance(pt, type(None)):
             raise Exception(f"The value of the \'{grid_param}\' parameter must be a \'{param_type}\',"
                             f" byt was \'{type(value)}\'")
 
