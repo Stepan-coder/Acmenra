@@ -31,7 +31,7 @@ class BagRegressor:
         """
         self.__text_name = "BagRegressor"
         self.__importance = {}
-        self.is_dataset_set = False
+        self.__is_dataset_set = False
         self.__is_model_fit = False
         self.__is_grid_fit = False
 
@@ -121,7 +121,7 @@ class BagRegressor:
                                                                                         target,
                                                                                         train_size=train_split,
                                                                                         random_state=13)
-        self.is_dataset_set = True
+        self.__is_dataset_set = True
 
     def predict(self, data: pd.DataFrame):
         """
@@ -145,6 +145,8 @@ class BagRegressor:
         :param n_jobs: The number of jobs to run in parallel.
         :param verbose: Learning-show param
         """
+        if not self.__is_dataset_set:
+            raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
             self.model = BaggingRegressor(**self.__grid_best_params,
                                           n_jobs=n_jobs,
@@ -186,6 +188,8 @@ class BagRegressor:
         :param cross_validation: The number of sections into which the dataset will be divided for training
         :param grid_n_jobs: The number of jobs to run in parallel.
         """
+        if not self.__is_dataset_set:
+            raise Exception('At first you need set dataset!')
         model_params = self.get_default_grid_param_values()
         if params_dict is not None:
             for param in params_dict:

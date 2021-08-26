@@ -31,7 +31,7 @@ class MLPRegressor:
         """
         self.__text_name = "MultiLayerPerceptronRegressor"
         self.__importance = {}
-        self.is_dataset_set = False
+        self.__is_dataset_set = False
         self.__is_model_fit = False
         self.__is_grid_fit = False
 
@@ -92,7 +92,7 @@ class MLPRegressor:
                                                                                         target,
                                                                                         train_size=train_split,
                                                                                         random_state=13)
-        self.is_dataset_set = True
+        self.__is_dataset_set = True
 
     def predict(self, data: pd.DataFrame):
         """
@@ -116,6 +116,8 @@ class MLPRegressor:
         :param n_jobs: The number of jobs to run in parallel.
         :param verbose: Learning-show param
         """
+        if not self.__is_dataset_set:
+            raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
             self.model = MultiLayerPerceptronRegressor(**self.__grid_best_params,
                                                        random_state=13)
@@ -151,6 +153,8 @@ class MLPRegressor:
         :param cross_validation: The number of sections into which the dataset will be divided for training
         :param grid_n_jobs: The number of jobs to run in parallel.
         """
+        if not self.__is_dataset_set:
+            raise Exception('At first you need set dataset!')
         model_params = self.get_default_grid_param_values()
         if params_dict is not None:
             for param in params_dict:

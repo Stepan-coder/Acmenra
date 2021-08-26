@@ -29,6 +29,7 @@ task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
 
+
 blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 quit()
 
