@@ -66,6 +66,8 @@ class RFClassifier:
         This method predicting values on data
         :param data:
         """
+        if not self.__is_grid_fit:
+            raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
     def fit(self,
@@ -83,9 +85,9 @@ class RFClassifier:
         """
         if grid_params and param_dict is None:
             self.model = RandomForestClassifier(**self.__grid_best_params,
-                                               n_jobs=n_jobs,
-                                               verbose=verbose,
-                                               random_state=13)
+                                                n_jobs=n_jobs,
+                                                verbose=verbose,
+                                                random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -96,13 +98,13 @@ class RFClassifier:
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
             self.model = RandomForestClassifier(**model_params,
-                                               n_jobs=n_jobs,
-                                               verbose=verbose,
-                                               random_state=13)
+                                                n_jobs=n_jobs,
+                                                verbose=verbose,
+                                                random_state=13)
         elif not grid_params and param_dict is None:
             self.model = RandomForestClassifier(n_jobs=n_jobs,
-                                               verbose=verbose,
-                                               random_state=13)
+                                                verbose=verbose,
+                                                random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:

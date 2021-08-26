@@ -94,6 +94,8 @@ class RidgeCVRegressor:
         This method predicting values on data
         :param data:
         """
+        if not self.__is_model_fit:
+            raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
     def fit(self,
