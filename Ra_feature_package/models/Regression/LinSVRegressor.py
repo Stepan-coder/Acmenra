@@ -15,6 +15,8 @@ from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
+import time
+
 
 class LinSVRegressor:
     def __init__(self,
@@ -74,7 +76,7 @@ class LinSVRegressor:
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
                                                                                         target,
                                                                                         train_size=train_split,
-                                                                                        random_state=13)
+                                                                                        random_state=int(time.time()))
 
     def __str__(self):
         table = PrettyTable()

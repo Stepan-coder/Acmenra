@@ -18,9 +18,9 @@ from Ra_feature_package.models.Param import *
 
 class LinRegressor:
     def __init__(self,
-                 task: pd.DataFrame or list,
-                 target: pd.DataFrame or list,
-                 train_split: int,
+                 task: pd.DataFrame or list = None,
+                 target: pd.DataFrame or list = None,
+                 train_split: int = None,
                  show: bool = False):
         """
         This method is the initiator of the LinRegressor class
@@ -46,21 +46,24 @@ class LinRegressor:
                           'positive': Param(ptype=[bool],
                                             def_val=False,
                                             def_vals=[True, False],
-                                            is_locked=True),
-        }
+                                            is_locked=True)}
         self.__importance = {}
+        self.is_dataset_set = False
         self.__is_model_fit = False
         self.__is_grid_fit = False
 
         self.__show = show
         self.model = None
         self.__grid_best_params = None
-        self.__keys = task.keys()
-        self.__keys_len = len(task.keys())
-        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
-                                                                                        target,
-                                                                                        train_size=train_split,
-                                                                                        random_state=13)
+        self.__keys = None
+        self.__keys_len = None
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = None, None, None, None
+
+        if task is not None and target is not None and train_split is not None:
+            self.set_params(task=task,
+                            target=target,
+                            train_split=train_split,
+                            show=show)
 
     def __str__(self):
         table = PrettyTable()
@@ -76,6 +79,20 @@ class LinRegressor:
 
     def __repr__(self):
         return f"'<Ra.{LinRegressor.__name__} model>'"
+
+    def set_params(self,
+                   task: pd.DataFrame or list,
+                   target: pd.DataFrame or list,
+                   train_split: int,
+                   show: bool = False):
+        self.__show = show
+        self.__keys = task.keys()
+        self.__keys_len = len(task.keys())
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
+                                                                                        target,
+                                                                                        train_size=train_split,
+                                                                                        random_state=13)
+        self.is_dataset_set = True
 
     def predict(self, data: pd.DataFrame):
         """
@@ -239,10 +256,9 @@ class LinRegressor:
         This method return the dict of best params for this model
         :return: dict of best params for this model
         """
-        if self.__is_grid_fit:
-            return self.__grid_best_params
-        else:
+        if not self.__is_grid_fit:
             raise Exception('At first you need to learn grid')
+        return self.__grid_best_params
 
     def get_roc_auc_score(self) -> float:
         """

@@ -1,32 +1,7 @@
+from Ra_feature_package.Manager.Manager import *
 from Ra_feature_package.DataSet.DataSet import *
 from Ra_feature_package.Preprocessing.Preprocessing import *
 
-from Ra_feature_package.models.Classifier.LogRegression import *
-from Ra_feature_package.models.Classifier.DTClassifier import *
-from Ra_feature_package.models.Classifier.RFClassifier import *
-
-
-from Ra_feature_package.models.Regression.LinRegression import *
-from Ra_feature_package.models.Regression.DTRegressor import *
-from Ra_feature_package.models.Regression.RFRegressor import *
-from Ra_feature_package.models.Regression.ETRegressor import *
-from Ra_feature_package.models.Regression.GBRegressor import *
-from Ra_feature_package.models.Regression.SGDRegressor import *
-from Ra_feature_package.models.Regression.LassoRegressor import *
-from Ra_feature_package.models.Regression.LassoCVRegressor import *
-from Ra_feature_package.models.Regression.RidgeRegressor import *
-from Ra_feature_package.models.Regression.RidgeCVRegressor import *
-from Ra_feature_package.models.Regression.ElasticNetCVRegressor import *
-from Ra_feature_package.models.Regression.ElasticNetRegressor import *
-from Ra_feature_package.models.Regression.LarsRegressor import *
-from Ra_feature_package.models.Regression.LarsCVRegressor import *
-from Ra_feature_package.models.Regression.HuberRegressor import *
-from Ra_feature_package.models.Regression.BayesRidgeRegressor import *
-from Ra_feature_package.models.Regression.ABoostRegressor import *
-from Ra_feature_package.models.Regression.BagRegressor import *
-from Ra_feature_package.models.Regression.KNeigRegressor import *
-from Ra_feature_package.models.Regression.SVRegressor import *
-from Ra_feature_package.models.Regression.LinSVRegressor import *
 
 original_dataset = DataSet(dataset_project_name="Original dataset")
 original_dataset.load_csv_dataset(csv_file="pizza_v1.csv", delimiter=",")
@@ -51,51 +26,18 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
+
+blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
+quit()
 rfr = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,
              grid_n_jobs=-1)
 params = rfr.get_grid_best_params()
+print(params)
+rfr.fit(grid_params=True, n_jobs=-1)
+print(rfr)
 rfr.fit(grid_params=True, n_jobs=-1)
 print(rfr)
 rfr1 = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr1.fit(param_dict=params, n_jobs=-1)
 print(rfr1)
-
-# etr = ABoostRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-# etr.fit_grid(params_dict={'base_estimator': [rfr.model]},
-#              count=0,
-#              grid_n_jobs=-1)
-# etr.fit(grid_params=True, n_jobs=-1)
-# # print(rfr.get_mean_absolute_error())
-# # rfr.get_predict_test_plt(show=True)
-# print(etr)
-
-
-
-# "   -Param 'n_estimators'(1): [100]
-#    -Param 'criterion'(2): ['mse', 'mae']
-#    -Param 'max_depth'(1): [None]
-#    -Param 'min_samples_split'(1): [2]
-#    -Param 'min_samples_leaf'(1): [1]
-#    -Param 'min_weight_fraction_leaf'(1): [0.0]
-#    -Param 'max_features'(4): ['sqrt', 'auto', 'log2', None]
-#    -Param 'max_leaf_nodes'(1): [None]
-#    -Param 'min_impurity_decrease'(1): [0.0]
-#    -Param 'bootstrap'(2): [True, False]
-#    -Param 'oob_score'(1): [False]
-#    -Param 'verbose'(1): [0]
-#    -Param 'warm_start'(2): [True, False]
-#    -Param 'ccp_alpha'(1): [0.0]
-#    -Param 'max_samples'(1): [None]"
-
-# +--------------------------------------------+
-# |       "RandomForestRegressor" model        |
-# +-----------------------+--------------------+
-# |         Error         |       Result       |
-# +-----------------------+--------------------+
-# |     ROC AUC score     |        inf         |
-# |    R-Squared_error    | 0.9332411200753861 |
-# |  Mean Absolute Error  | 6776.551724137931  |
-# |   Mean Squared Error  | 73119270.68965517  |
-# | Median Absolute Error |       5300.0       |
-# +-----------------------+--------------------+
