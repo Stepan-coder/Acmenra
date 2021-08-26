@@ -30,23 +30,6 @@ class LinRegressor:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "LinearRegression"
-        count = len(task.keys()) + 1
-        self.__default = {'fit_intercept': Param(ptype=[bool],
-                                                 def_val=True,
-                                                 def_vals=[True, False],
-                                                 is_locked=True),
-                          'normalize': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'copy_X': Param(ptype=[bool],
-                                          def_val=True,
-                                          def_vals=[True, False],
-                                          is_locked=True),
-                          'positive': Param(ptype=[bool],
-                                            def_val=False,
-                                            def_vals=[True, False],
-                                            is_locked=True)}
         self.__importance = {}
         self.is_dataset_set = False
         self.__is_model_fit = False
@@ -57,7 +40,11 @@ class LinRegressor:
         self.__grid_best_params = None
         self.__keys = None
         self.__keys_len = None
-        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = None, None, None, None
+        self.__default = None
+        self.__X_train = None
+        self.__x_test = None
+        self.__Y_train = None
+        self.__y_test = None
 
         if task is not None and target is not None and train_split is not None:
             self.set_params(task=task,
@@ -94,6 +81,23 @@ class LinRegressor:
                    target: pd.DataFrame or list,
                    train_split: int,
                    show: bool = False):
+        count = len(task.keys()) + 1
+        self.__default = {'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'normalize': Param(ptype=[bool],
+                                             def_val=False,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'copy_X': Param(ptype=[bool],
+                                          def_val=True,
+                                          def_vals=[True, False],
+                                          is_locked=True),
+                          'positive': Param(ptype=[bool],
+                                            def_val=False,
+                                            def_vals=[True, False],
+                                            is_locked=True)}
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())

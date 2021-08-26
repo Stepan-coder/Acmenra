@@ -1,24 +1,26 @@
 import os
 import math
 import time
-from typing import List, Dict
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from typing import Dict, List
 from prettytable import PrettyTable
-
-from sklearn.model_selection import train_test_split
+from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from Ra_feature_package.models.static_methods import *
+from Ra_feature_package.models.Param import *
 
 
 class RFClassifier:
     def __init__(self,
-                 task: pd.DataFrame,
-                 target: pd.DataFrame,
-                 train_split: int,
+                 task: pd.DataFrame or list = None,
+                 target: pd.DataFrame or list = None,
+                 train_split: int = None,
                  show: bool = False):
         """
         This method is the initiator of the RFClassifier class
@@ -28,23 +30,27 @@ class RFClassifier:
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "RandomForestClassifier"
-        count = len(task.keys()) + 1
-        self.__default = {
-
-        }
         self.__importance = {}
+        self.is_dataset_set = False
         self.__is_model_fit = False
         self.__is_grid_fit = False
 
         self.__show = show
         self.model = None
         self.__grid_best_params = None
-        self.__keys = task.keys()
-        self.__keys_len = len(task.keys())
-        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
-                                                                                        target,
-                                                                                        train_size=train_split,
-                                                                                        random_state=13)
+        self.__keys = None
+        self.__keys_len = None
+        self.__default = None
+        self.__X_train = None
+        self.__x_test = None
+        self.__Y_train = None
+        self.__y_test = None
+
+        if task is not None and target is not None and train_split is not None:
+            self.set_params(task=task,
+                            target=target,
+                            train_split=train_split,
+                            show=show)
 
     def __str__(self):
         table = PrettyTable()
@@ -69,6 +75,23 @@ class RFClassifier:
             table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
+
+    def set_params(self,
+                   task: pd.DataFrame or list,
+                   target: pd.DataFrame or list,
+                   train_split: int,
+                   show: bool = False):
+        count = len(task.keys()) + 1
+        self.__default = {
+
+        }
+        self.__show = show
+        self.__keys = task.keys()
+        self.__keys_len = len(task.keys())
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
+                                                                                        target,
+                                                                                        train_size=train_split,
+                                                                                        random_state=13)
 
     def predict(self, data: pd.DataFrame):
         """

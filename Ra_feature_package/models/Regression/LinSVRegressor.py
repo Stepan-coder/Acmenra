@@ -15,23 +15,72 @@ from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
-import time
-
 
 class LinSVRegressor:
     def __init__(self,
-                 task: pd.DataFrame,
-                 target: pd.DataFrame,
-                 train_split: int,
+                 task: pd.DataFrame or list = None,
+                 target: pd.DataFrame or list = None,
+                 train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the ETRegressor class
+        This method is the initiator of the SVRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
         self.__text_name = "SVRegressor"
+        self.__importance = {}
+        self.is_dataset_set = False
+        self.__is_model_fit = False
+        self.__is_grid_fit = False
+
+        self.__show = show
+        self.model = None
+        self.__grid_best_params = None
+        self.__keys = None
+        self.__keys_len = None
+        self.__default = None
+        self.__X_train = None
+        self.__x_test = None
+        self.__Y_train = None
+        self.__y_test = None
+
+        if task is not None and target is not None and train_split is not None:
+            self.set_params(task=task,
+                            target=target,
+                            train_split=train_split,
+                            show=show)
+
+    def __str__(self):
+        table = PrettyTable()
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
+
+    def __repr__(self):
+        table = PrettyTable()
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
+
+    def set_params(self,
+                   task: pd.DataFrame or list,
+                   target: pd.DataFrame or list,
+                   train_split: int,
+                   show: bool = False):
         count = len(task.keys()) + 1
         self.__default = {'epsilon': Param(ptype=[float],
                                            def_val=0.0,
@@ -63,44 +112,14 @@ class LinSVRegressor:
                                                                  max_val=count,
                                                                  count=count,
                                                                  ltype=int))}
-        self.__importance = {}
-        self.__is_psrams_set = False
-        self.__is_model_fit = False
-        self.__is_grid_fit = False
-
         self.__show = show
-        self.model = None
-        self.__grid_best_params = None
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = train_test_split(task,
                                                                                         target,
                                                                                         train_size=train_split,
-                                                                                        random_state=int(time.time()))
-
-    def __str__(self):
-        table = PrettyTable()
-        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
-        table.field_names = ["Error", "Result"]
-        if self.__is_model_fit:
-            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
-            table.add_row(["R-Squared_error", self.get_r_squared_error()])
-            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
-            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
-            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
-        return str(table)
-
-    def __repr__(self):
-        table = PrettyTable()
-        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
-        table.field_names = ["Error", "Result"]
-        if self.__is_model_fit:
-            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
-            table.add_row(["R-Squared_error", self.get_r_squared_error()])
-            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
-            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
-            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
-        return str(table)
+                                                                                        random_state=13)
+        self.is_dataset_set = True
 
     def predict(self, data: pd.DataFrame):
         """
