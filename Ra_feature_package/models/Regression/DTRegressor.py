@@ -14,6 +14,7 @@ from Ra_feature_package.Errors import Errors
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
+
 class DTRegressor:
     def __init__(self,
                  task: pd.DataFrame,

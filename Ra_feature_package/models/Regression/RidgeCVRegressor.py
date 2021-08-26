@@ -87,7 +87,16 @@ class RidgeCVRegressor:
         return str(table)
 
     def __repr__(self):
-        return f"'<Ra.{RidgeCVRegressor.__name__} model>'"
+        table = PrettyTable()
+        table.title = f"{'Untrained ' if not self.__is_model_fit else ''}\"{self.__text_name}\" model"
+        table.field_names = ["Error", "Result"]
+        if self.__is_model_fit:
+            table.add_row(["ROC AUC score", self.get_roc_auc_score()])
+            table.add_row(["R-Squared_error", self.get_r_squared_error()])
+            table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
+            table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
+        return str(table)
 
     def predict(self, data: pd.DataFrame):
         """
