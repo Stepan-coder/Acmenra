@@ -19,9 +19,9 @@ from Ra_feature_package.models.Param import *
 
 class ETRegressor:
     def __init__(self,
-                 task: pd.DataFrame,
-                 target: pd.DataFrame,
-                 train_split: int,
+                 task: pd.DataFrame or list = None,
+                 target: pd.DataFrame or list = None,
+                 train_split: int = None,
                  show: bool = False):
         """
         This method is the initiator of the ETRegressor class

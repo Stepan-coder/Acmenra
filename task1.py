@@ -1,5 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
-
 from Ra_feature_package.Manager.Manager import *
 from Ra_feature_package.DataSet.DataSet import *
 from Ra_feature_package.Preprocessing.Preprocessing import *
@@ -28,10 +29,8 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-
-
-# blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-# quit()
+blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=False)
+quit()
 
 rfr = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
 rfr.fit_grid(count=0,

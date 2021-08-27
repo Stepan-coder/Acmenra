@@ -322,7 +322,7 @@ class SVRegressor:
         :return: copy of this class
         """
         return copy.copy(self)
-    
+
     def get_roc_auc_score(self) -> float:
         """
         This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
