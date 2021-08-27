@@ -1,6 +1,7 @@
 import os
 import math
 import time
+import copy
 
 import numpy as np
 import pandas as pd
@@ -277,6 +278,13 @@ class DTClassifier:
         for index in range(len(self.model.feature_importances_)):
             self.importance[self.keys[index]] = self.model.feature_importances_[index]
         return {k: v for k, v in sorted(self.importance.items(), key=lambda item: item[1], reverse=True)}
+
+    def copy(self) -> self:
+        """
+        This method return copy of this class
+        :return: copy of this class
+        """
+        return copy.copy(self)
 
     def get_roc_auc_score(self) -> float:
         """

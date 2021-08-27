@@ -1,6 +1,8 @@
 import os
 import math
 import time
+import copy
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
