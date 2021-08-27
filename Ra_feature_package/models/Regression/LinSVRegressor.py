@@ -311,6 +311,13 @@ class LinSVRegressor:
             self.__importance[self.__keys[index]] = self.model.feature_importances_[index]
         return {k: v for k, v in sorted(self.__importance.items(), key=lambda item: item[1], reverse=True)}
 
+    def copy(self):
+        """
+        This method return copy of this class
+        :return: copy of this class
+        """
+        return copy.copy(self)
+
     def get_roc_auc_score(self) -> float:
         """
         This method calculates the "ROC AUC score" for the {self.__text_name} on the test data

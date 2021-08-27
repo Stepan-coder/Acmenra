@@ -279,7 +279,7 @@ class DTClassifier:
             self.importance[self.keys[index]] = self.model.feature_importances_[index]
         return {k: v for k, v in sorted(self.importance.items(), key=lambda item: item[1], reverse=True)}
 
-    def copy(self) -> self:
+    def copy(self):
         """
         This method return copy of this class
         :return: copy of this class

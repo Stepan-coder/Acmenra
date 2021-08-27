@@ -280,6 +280,25 @@ class LinRegressor:
             raise Exception('At first you need to learn grid')
         return self.__grid_best_params
 
+    def get_feature_importance(self) -> dict:
+        """
+        This method return dict of feature importance where key is the column of input dataset, and value is importance
+        of this column
+        :return: dict of column importance
+        """
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        for index in range(len(self.model.feature_importances_)):
+            self.__importance[self.__keys[index]] = self.model.feature_importances_[index]
+        return {k: v for k, v in sorted(self.__importance.items(), key=lambda item: item[1], reverse=True)}
+
+    def copy(self):
+        """
+        This method return copy of this class
+        :return: copy of this class
+        """
+        return copy.copy(self)
+
     def get_roc_auc_score(self) -> float:
         """
         This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
