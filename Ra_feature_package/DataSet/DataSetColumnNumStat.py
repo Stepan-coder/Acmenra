@@ -1,9 +1,8 @@
 import math
-from typing import Dict, List
-
 import numpy as np
+import pandas as pd
 from scipy import stats
-
+from typing import Dict, List
 
 class NormalDistribution:
     def __init__(self, values: List[int or float] = None):
@@ -208,18 +207,18 @@ class NormalDistribution:
 
 
 class NumericalIndicators:
-    def __init__(self, values: List[int or float] = None, normal_distribution: bool = False):
+    def __init__(self, values: List[int or float] = None, extended: bool = False):
         self.__min = None
         self.__mean = None
         self.__median = None
         self.__max = None
         self.normal_distribution = None
-        self.__use_normal_distribution = normal_distribution
+        self.__use_normal_distribution = extended
         self.__is_numerical_indicators = False  # Отвечает за наличие данных в классе NumericalIndicators
         self.__is_normal_distribution = False  # Отвечает за наличие данных в классе NormalDistribution
         if values is not None:
             self.__fill_numerical_indicators(values=values,
-                                             normal_distribution=normal_distribution)
+                                             extended=extended)
 
     def get_min(self):
         """
@@ -262,7 +261,7 @@ class NumericalIndicators:
         """
         return self.__is_numerical_indicators
 
-    def set_values(self, values: List[int or float], extended: bool = False):
+    def set_values(self, values: List[int or float], extended: bool):
         """
         This method init the filling params of this class
         :param values: Values from DataSetColumn - values of column from the dataset
@@ -308,12 +307,14 @@ class NumericalIndicators:
             data['Normal distribution'] = self.normal_distribution.to_json()
         return data
 
-    def __fill_numerical_indicators(self, values: List[int or float], extended: bool = False):
+    def __fill_numerical_indicators(self, values: List[int or float] or pd.DataFrame, extended: bool = False):
         """
         This method fill this class when we use values
         :param values: list of column values
         :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
+        values = values.tolist()
+        values = [val for val in values if not math.isnan(val)]
         self.__min = min(values)
         self.__max = max(values)
         self.__mean = np.mean(values)

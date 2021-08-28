@@ -40,7 +40,7 @@ class DataSet:
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:
-                column = self.get_column_info(column_name=key, extended=True)
+                column = self.get_column_info(column_name=key, extended=False)
 
                 if column.get_dtype() == 'variable':
                     dtype = "\033[32m {}\033[0m".format(column.get_dtype())
@@ -281,6 +281,19 @@ class DataSet:
             self.__dataset_analytics.pop(column)
         self.__update_dataset_base_info()
 
+    def dropna(self):
+        self.__dataset = self.__dataset.dropna()
+        self.__update_dataset_base_info()
+
+    def fillna(self):
+        for key in self.__dataset_keys:
+            column_type = self.get_column_info(column_name=key, extended=False).get_type()
+            if column_type.startswith('str'):
+                self.__dataset[key] = self.__dataset[key].fillna("")
+            elif column_type.startswith('int') or column_type.startswith('float'):
+                self.__dataset[key] = self.__dataset[key].fillna(0)
+        self.update_dataset_info()
+
     def get_column_info(self, column_name: str, extended: bool) -> DataSetColumn:
         """
         This method returns statistical analytics for a given column
@@ -338,6 +351,7 @@ class DataSet:
             elif field in exception:
                 self.set_field_type(field_name=field,
                                     new_field_type=exception[field])
+        self.__update_dataset_base_info()
 
     def set_field_type(self, field_name: str, new_field_type: type):
         """
@@ -348,18 +362,17 @@ class DataSet:
         if new_field_type != str and new_field_type != int and new_field_type != float:
             raise Exception(f"'{new_field_type}' is an invalid data type for conversion. Valid types: int, float, str")
         if field_name in self.__dataset:
-            primary_type = type(self.__dataset[field_name][0]).__name__
+            primary_type = str(self.__dataset[field_name].dtype)
             if new_field_type == float or new_field_type == int:
                 self.__dataset[field_name] = self.__dataset[field_name].replace(",", ".", regex=True) \
                     .replace(" ", "", regex=True) \
-                    .replace(u'\xa0', u'', regex=True) \
                     .fillna(0)
                 self.__dataset[field_name] = self.__dataset[field_name].astype(float)
                 if new_field_type == int:
                     self.__dataset[field_name] = self.__dataset[field_name].astype(int)
             else:
                 self.__dataset[field_name] = self.__dataset[field_name].astype(new_field_type)
-            secondary_type = type(self.__dataset[field_name][0]).__name__
+            secondary_type = str(self.__dataset[field_name].dtype)
             if self.__show:
                 print(f"Convert DataSet field \'{field_name}\': {primary_type} -> {secondary_type}")
         else:
@@ -505,7 +518,7 @@ class DataSet:
                            "columns": {}}
             for key in self.__dataset_keys:
                 if key not in self.__dataset_analytics:
-                    self.update_dataset_analytics()
+                    self.__update_dataset_analytics()
                 json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                          self.__dataset_analytics[key].to_json())
             with open(os.path.join(folder, f"{dataset_filename}.json"), 'w') as json_file:

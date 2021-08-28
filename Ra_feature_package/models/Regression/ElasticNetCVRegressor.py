@@ -62,6 +62,7 @@ class ENetCVRegressor:
             table.add_row(["R-Squared_error", self.get_r_squared_error()])
             table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
             table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Root Mean Squared Error", self.get_root_mean_squared_error()])
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
@@ -74,6 +75,7 @@ class ENetCVRegressor:
             table.add_row(["R-Squared_error", self.get_r_squared_error()])
             table.add_row(["Mean Absolute Error", self.get_mean_absolute_error()])
             table.add_row(["Mean Squared Error", self.get_mean_squared_error()])
+            table.add_row(["Root Mean Squared Error", self.get_root_mean_squared_error()])
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
@@ -390,6 +392,20 @@ class ENetCVRegressor:
             error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
             print("An error occurred when calculating the \"Mean Squared Error\" error")
+        return error
+
+    def get_root_mean_squared_error(self) -> float:
+        """
+        This method calculates the "root_mean_squared_error" for the {self.text_name} on the test data
+        :return: Root Mean Squared Error
+        """
+        error = float("inf")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        try:
+            error = Errors.get_root_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
+        except:
+            print("An error occurred when calculating the \"Root Mean Squared Error\" error")
         return error
 
     def get_median_absolute_error(self) -> float:

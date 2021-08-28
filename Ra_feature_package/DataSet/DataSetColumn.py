@@ -57,7 +57,7 @@ class DataSetColumn:
         return str(table)
 
     def fill_dataset_column(self,
-                            values: list,
+                            values: list or pd.DataFrame,
                             categorical: int = 25,
                             extended: bool = False,
                             rounding_factor: int = 2):
@@ -69,7 +69,7 @@ class DataSetColumn:
         self.__values = values
         self.__count = len(self.__values)
         self.__count_unique = len(list(set(self.__values)))
-        self.__field_type = type(self.__values[0]).__name__
+        self.__field_type = self.get_column_type()
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
         self.__nan_count = self.__get_nan_count()
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
@@ -106,14 +106,15 @@ class DataSetColumn:
             raise Exception("The values were not loaded!")
         return self.__nan_count
 
-    def get_type(self):
+    def get_type(self) -> str:
         if self.__field_type is None:
             raise Exception("The values were not loaded!")
         return self.__field_type
 
-    def get_dtype(self):
+    def get_dtype(self, categorical: int = 25):
         if self.__field_dtype is None:
             raise Exception("The values were not loaded!")
+        self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
         return self.__field_dtype
 
     def get_min(self) -> int or float or bool:
@@ -223,6 +224,18 @@ class DataSetColumn:
     def get_is_extended(self) -> bool:
         return self.__use_extended
 
+    def get_column_type(self) -> str:
+        types = []
+        for i in range(len(self.__values)):
+            types.append(type(self.__values[i]).__name__)
+        types = list(set(types))
+        if len(types) == 1:
+            return types[0]
+        else:
+            if len(types) == 2 and 'str' in types:
+                return 'str'
+            return "object"
+
     def get_from_json(self, data: dict, values: dict) -> None:
         """
         This method load DataSet indicators from json
@@ -241,7 +254,6 @@ class DataSetColumn:
         self.__nan_count = data["count_NaN"]
         self.__field_type = data["type"]
         self.__field_dtype = data["dtype"]
-
         if "Numerical indicators" in data:
             self.__num_stat: NumericalIndicators = NumericalIndicators()
             self.__num_stat.get_from_json(data=data["Numerical indicators"])
