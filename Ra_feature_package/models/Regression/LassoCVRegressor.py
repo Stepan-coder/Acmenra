@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import LassoCV
+from sklearn.linear_model import LassoCV, PassiveAggressiveRegressor
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
@@ -432,6 +432,10 @@ class LassoCVRegressor:
         if show:
             plt.show()
         plt.close()
+
+    def set_train_test(self, X_train, x_test, Y_train, y_test):
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
+        self.__is_dataset_set = True
 
     def __get_default_model_fit_time(self) -> float:
         """

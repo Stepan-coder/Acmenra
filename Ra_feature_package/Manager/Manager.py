@@ -28,6 +28,32 @@ from Ra_feature_package.models.Regression.LinSVRegressor import *
 from Ra_feature_package.models.Regression.ABoostRegressor import *
 from Ra_feature_package.models.Regression.BagRegressor import *
 
+# All regressions
+# [<class 'sklearn.ensemble.forest.RandomForestRegressor'>,
+# <class 'sklearn.ensemble.forest.ExtraTreesRegressor'>,
+# <class 'sklearn.ensemble.bagging.BaggingRegressor'>,
+# <class 'sklearn.ensemble.gradient_boosting.GradientBoostingRegressor'>,
+# <class 'sklearn.ensemble.weight_boosting.AdaBoostRegressor'>,
+# <class 'sklearn.gaussian_process.gpr.GaussianProcessRegressor'>,
+# <class 'sklearn.isotonic.IsotonicRegression'>,
+# <class 'sklearn.linear_model.bayes.ARDRegression'>,
+# <class 'sklearn.linear_model.huber.HuberRegressor'>,
+# <class 'sklearn.linear_model.base.LinearRegression'>,
+# <class 'sklearn.linear_model.logistic.LogisticRegression'>,
+# <class 'sklearn.linear_model.logistic.LogisticRegressionCV'>,
+# <class 'sklearn.linear_model.passive_aggressive.PassiveAggressiveRegressor'>,
+# <class 'sklearn.linear_model.randomized_l1.RandomizedLogisticRegression'>,
+# <class 'sklearn.linear_model.stochastic_gradient.SGDRegressor'>, <class
+# 'sklearn.linear_model.theil_sen.TheilSenRegressor'>, <class
+# 'sklearn.linear_model.ransac.RANSACRegressor'>, <class
+# 'sklearn.multioutput.MultiOutputRegressor'>, <class
+# 'sklearn.neighbors.regression.KNeighborsRegressor'>, <class
+# 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>, <class
+# 'sklearn.neural_network.multilayer_perceptron.MLPRegressor'>, <class
+# 'sklearn.tree.tree.DecisionTreeRegressor'>, <class
+# 'sklearn.tree.tree.ExtraTreeRegressor'>, <class
+# 'sklearn.svm.classes.SVR'>]
+
 # Кароче, пропиши везде защиты (проверка на то, что модель/сетка обучены) \
 # и сделай везде сет перамс
 # Ну и добавь метод self.copy() для каждого класса, чтобы происходило именно копирование...
@@ -62,30 +88,35 @@ def blitz_test_regressor(task: pd.DataFrame,
                          target: pd.DataFrame,
                          train_split: int,
                          show: bool = False,
-                         N: int = 5):
+                         prefit: bool = False,
+                         n_jobs: int = 1):
     models_params = {}
     results = []
+    X_train, x_test, Y_train, y_test = train_test_split(task, target, train_size=train_split, random_state=13)
     for model in models:
         try:
             this_model = models[model].copy()
-            this_model.set_params(task=task,
-                                  target=target,
-                                  train_split=train_split,
-                                  show=show)
-            # this_model.fit_grid(count=0, grid_n_jobs=-1)
-            # models_params[model] = this_model.get_grid_best_params()
-            # this_model.fit(param_dict=models_params[model], n_jobs=1)
-            this_model.fit(n_jobs=-1)
+            this_model.set_params(task=task, target=target, train_split=train_split, show=False)
+            this_model.set_train_test(X_train=X_train, x_test=x_test,
+                                      Y_train=Y_train, y_test=y_test)
+            if prefit:
+                this_model.fit_grid(count=0, grid_n_jobs=n_jobs)
+                models_params[model] = this_model.get_grid_best_params()
+                this_model.fit(grid_params=True, n_jobs=n_jobs)
+            else:
+                models_params[model] = this_model.get_default_param_values()
+                this_model.fit(n_jobs=n_jobs)
             results.append([model,
                             this_model.get_roc_auc_score(),
                             this_model.get_r_squared_error(),
                             this_model.get_mean_absolute_error(),
                             this_model.get_mean_squared_error(),
                             this_model.get_median_absolute_error()])
+
         except:
             results.append([model, float("inf"), float("inf"), float("inf"), float("inf"), float("inf")])
     results.sort(key=itemgetter(1, 2, 3, 4, 5), reverse=False)
-    if True:
+    if show:
         table = PrettyTable()
         table.title = f"Regression model results"
         table.field_names = ["Model", "ROC AUC Score", "R-Squared Error",
@@ -93,5 +124,6 @@ def blitz_test_regressor(task: pd.DataFrame,
         for result in results:
             table.add_row(result)
         print(table)
+    return results[0][0], models_params[results[0][0]]
 
 

@@ -29,18 +29,9 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='price_rupiah')
 target = original_dataset.get_column(column='price_rupiah')
 target_analitic = original_dataset.get_column_info(column_name='price_rupiah', extended=True)
-blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=False)
-quit()
 
-rfr = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-rfr.fit_grid(count=0,
-             grid_n_jobs=-1)
-params = rfr.get_grid_best_params()
-print(params)
-rfr.fit(grid_params=True, n_jobs=-1)
-print(rfr)
-rfr.fit(grid_params=True, n_jobs=-1)
-print(rfr)
-rfr1 = LinSVRegressor(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=100, show=True)
-rfr1.fit(param_dict=params, n_jobs=-1)
-print(rfr1)
+print(blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target),
+                           train_split=100, show=False,
+                           prefit=True,
+                           n_jobs=-1))
+quit()

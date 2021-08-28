@@ -379,6 +379,10 @@ class MTENRegressor:
             plt.show()
         plt.close()
 
+    def set_train_test(self, X_train, x_test, Y_train, y_test):
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
+        self.__is_dataset_set = True
+
     def __get_default_model_fit_time(self) -> float:
         """
         This method return time of fit model with defualt params

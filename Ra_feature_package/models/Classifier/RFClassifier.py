@@ -369,3 +369,7 @@ class RFClassifier:
                                     format(param, types[param], type(p)))
         else:
             raise Exception('The value of the "{0}" parameter must be a non-empty list'.format(param))
+
+    def set_train_test(self, X_train, x_test, Y_train, y_test):
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
+        self.__is_dataset_set = True

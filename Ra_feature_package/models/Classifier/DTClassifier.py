@@ -356,6 +356,10 @@ class DTClassifier:
             print("An error occurred when calculating the \"Median Absolute Error\" error")
         return error
 
+    def set_train_test(self, X_train, x_test, Y_train, y_test):
+        self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
+        self.__is_dataset_set = True
+
     @staticmethod
     def show_grid_params(params: dict):
         """
