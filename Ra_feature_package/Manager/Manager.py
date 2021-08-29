@@ -1,11 +1,6 @@
 import copy
 from operator import itemgetter
-
-from Ra_feature_package.models.Classifier.LogRegression import *
-from Ra_feature_package.models.Classifier.DTClassifier import *
-from Ra_feature_package.models.Classifier.RFClassifier import *
-
-
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, Normalizer
 from Ra_feature_package.models.Regression.LinRegression import *
 from Ra_feature_package.models.Regression.DTRegressor import *
 from Ra_feature_package.models.Regression.RFRegressor import *
@@ -54,76 +49,136 @@ from Ra_feature_package.models.Regression.BagRegressor import *
 # 'sklearn.tree.tree.ExtraTreeRegressor'>, <class
 # 'sklearn.svm.classes.SVR'>]
 
-# Кароче, пропиши везде защиты (проверка на то, что модель/сетка обучены) \
-# и сделай везде сет перамс
-# Ну и добавь метод self.copy() для каждого класса, чтобы происходило именно копирование...
 
+class Regression:
+    def __init__(self,
+                 task: pd.DataFrame,
+                 target: pd.DataFrame,
+                 train_split: int):
+        self.task = task
+        self.target = target
+        self.train_split = train_split
 
-#  Нужен блитц тест моделей
-#  Надо сделать так, чтобы значения об ошибках усреднялись (заметил прикол, \
-#  что если перезапускать модель, резы отличаются
-models = {"LinearRegression": LinRegressor(),
-          "DecisionTreeRegressor": DTRegressor(),
-          "RandomForestRegressor": RFRegressor(),
-          "ExtraTreesRegressor": ETRegressor(),
-          "GradientBoostingRegressor": GBRegressor(),
-          "StochasticGradientDescentRegressor": SGDRegressor(),
-          "LassoRegressor": LassoRegressor(),
-          "LassoCVRegressor": LassoCVRegressor(),
-          "RidgeRegressor": RidgeRegressor(),
-          "RidgeCVRegressor": RidgeCVRegressor(),
-          "BayesianRidgeRegressor": BayesianRidgeRegressor(),
-          "ElasticNetRegressor": ENetRegressor(),
-          "ElasticNetCVRegressor": ENetCVRegressor(),
-          "LarsRegressor": LarsRegressor(),
-          "LarsCVRegressor": LarsCVRegressor(),
-          "HuberRegressor": HuberRRegressor(),
-          "KNeighborsRegressor": KNRegressor(),
-          "SVRegressor": SVRegressor(),
-          "LinSVRegressor": LinSVRegressor(),
-          "ABoostRegressor": ABoostRegressor()}
+        self.models = {"LinearRegression": LinRegressor(),
+                       "DecisionTreeRegressor": DTRegressor(),
+                       "RandomForestRegressor": RFRegressor(),
+                       "ExtraTreesRegressor": ETRegressor(),
+                       "GradientBoostingRegressor": GBRegressor(),
+                       "StochasticGradientDescentRegressor": SGDRegressor(),
+                       "LassoRegressor": LassoRegressor(),
+                       "LassoCVRegressor": LassoCVRegressor(),
+                       "RidgeRegressor": RidgeRegressor(),
+                       "RidgeCVRegressor": RidgeCVRegressor(),
+                       "BayesianRidgeRegressor": BayesianRidgeRegressor(),
+                       "ElasticNetRegressor": ENetRegressor(),
+                       "ElasticNetCVRegressor": ENetCVRegressor(),
+                       "LarsRegressor": LarsRegressor(),
+                       "LarsCVRegressor": LarsCVRegressor(),
+                       "HuberRegressor": HuberRRegressor(),
+                       "KNeighborsRegressor": KNRegressor(),
+                       "SVRegressor": SVRegressor(),
+                       "LinSVRegressor": LinSVRegressor(),
+                       "ABoostRegressor": ABoostRegressor()}
 
+    def blitz_test(self,
+                   N: int = 3,
+                   show: bool = False,
+                   prefit: bool = False,
+                   n_jobs: int = 1):
+        results = {}
+        task = self.task
+        target = self.target
+        X_train, x_test, Y_train, y_test = train_test_split(task,
+                                                            target,
+                                                            train_size=self.train_split,
+                                                            random_state=13)
+        simple_test = self.__blitz_test(X_train=X_train,
+                                        x_test=x_test,
+                                        Y_train=Y_train,
+                                        y_test=y_test,
+                                        suffix="Simple",
+                                        prefit=prefit,
+                                        n_jobs=n_jobs)
 
-def blitz_test_regressor(task: pd.DataFrame,
-                         target: pd.DataFrame,
-                         train_split: int,
-                         show: bool = False,
-                         prefit: bool = False,
-                         n_jobs: int = 1):
-    models_params = {}
-    results = []
-    X_train, x_test, Y_train, y_test = train_test_split(task, target, train_size=train_split, random_state=13)
-    for model in models:
-        try:
-            this_model = models[model].copy()
-            this_model.set_params(task=task, target=target, train_split=train_split, show=False)
-            this_model.set_train_test(X_train=X_train, x_test=x_test,
-                                      Y_train=Y_train, y_test=y_test)
-            if prefit:
-                this_model.fit_grid(count=0, grid_n_jobs=n_jobs)
-                models_params[model] = this_model.get_grid_best_params()
-                this_model.fit(grid_params=True, n_jobs=n_jobs)
-            else:
-                models_params[model] = this_model.get_default_param_values()
-                this_model.fit(n_jobs=n_jobs)
-            results.append([model,
-                            this_model.get_roc_auc_score(),
-                            this_model.get_r_squared_error(),
-                            this_model.get_mean_absolute_error(),
-                            this_model.get_mean_squared_error(),
-                            this_model.get_median_absolute_error()])
+        SS = StandardScaler()
+        SS_task = SS.fit_transform(self.task)
 
-        except:
-            results.append([model, float("inf"), float("inf"), float("inf"), float("inf"), float("inf")])
-    results.sort(key=itemgetter(1, 2, 3, 4, 5), reverse=False)
-    if show:
-        table = PrettyTable()
-        table.title = f"Regression model results"
-        table.field_names = ["Model", "ROC AUC Score", "R-Squared Error",
-                             "Mean Absolute Error", "Mean Squared Error", "Median Absolute Error"]
-        for result in results:
-            table.add_row(result)
-        print(table)
-    return results[0][0], models_params[results[0][0]]
+        SS_X_train, SS_x_test, SS_Y_train, SS_y_test = train_test_split(SS_task,
+                                                                        self.target,
+                                                                        train_size=self.train_split,
+                                                                        random_state=13)
+        SS_test = self.__blitz_test(X_train=SS_X_train,
+                                    x_test=SS_x_test,
+                                    Y_train=SS_Y_train,
+                                    y_test=SS_y_test,
+                                    suffix="SS",
+                                    prefit=prefit,
+                                    n_jobs=n_jobs)
 
+        MM = StandardScaler()
+        MM_task = MM.fit_transform(self.task)
+
+        MM_X_train, MM_x_test, MM_Y_train, MM_y_test = train_test_split(MM_task,
+                                                                        self.target,
+                                                                        train_size=self.train_split,
+                                                                        random_state=13)
+        MM_test = self.__blitz_test(X_train=MM_X_train,
+                                    x_test=MM_x_test,
+                                    Y_train=MM_Y_train,
+                                    y_test=MM_y_test,
+                                    suffix="MM",
+                                    prefit=prefit,
+                                    n_jobs=n_jobs)
+
+        N = Normalizer()
+        N_task = N.fit_transform(self.task)
+        N_X_train, N_x_test, N_Y_train, N_y_test = train_test_split(N_task,
+                                                                    self.target,
+                                                                    train_size=self.train_split,
+                                                                    random_state=13)
+        N_test = self.__blitz_test(X_train=N_X_train,
+                                   x_test=N_x_test,
+                                   Y_train=N_Y_train,
+                                   y_test=N_y_test,
+                                   suffix="N",
+                                   prefit=prefit,
+                                   n_jobs=n_jobs)
+
+        results = {**results, **simple_test, **SS_test, **MM_test, **N_test}
+        results = dict(sorted(results.items(), key=lambda x: x[1]))
+        if show:
+            table = PrettyTable()
+            table.title = f"Regression model results"
+            table.field_names = ["Model", "ROC AUC Score", "R-Squared Error", "Mean Absolute Error",
+                                 "Mean Squared Error", "Root Mean Squared Error", "Median Absolute Error"]
+            for result in results:
+                table.add_row([result] + results[result])
+            print(table)
+
+    def __blitz_test(self, X_train, x_test, Y_train, y_test, suffix: str, prefit: bool = False, n_jobs: int = 1):
+        results = {}
+        for model in self.models:
+            try:
+                this_model = self.models[model].copy()
+                this_model.set_params(task=self.task, target=self.target, train_split=1)
+                this_model.set_train_test(X_train=X_train, x_test=x_test,
+                                          Y_train=Y_train, y_test=y_test)
+                if prefit:
+                    this_model.fit_grid(count=0, grid_n_jobs=n_jobs)
+                    this_model.fit(grid_params=True, n_jobs=n_jobs)
+                else:
+                    this_model.fit(n_jobs=n_jobs)
+                results[f"{model}_{suffix}"] = [this_model.get_roc_auc_score(),
+                                           this_model.get_r_squared_error(),
+                                           this_model.get_mean_absolute_error(),
+                                           this_model.get_mean_squared_error(),
+                                           this_model.get_root_mean_squared_error(),
+                                           this_model.get_median_absolute_error()]
+
+            except:
+                results[f"{model}_{suffix}"] = [float("inf"), float("inf"), float("inf"),
+                                                float("inf"), float("inf"), float("inf")]
+        # Сделай возвращение классов, где будет указано, что за модель, какие настройки и что использовано, \
+        # можешь сразу возвращать SS, MM, N 
+        return results
 

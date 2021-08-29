@@ -25,9 +25,6 @@ task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='SalePrice')
 target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
-
-print(blitz_test_regressor(task=task.get_dataframe(), target=pd.DataFrame(target),
-                           train_split=100, show=True,
-                           prefit=True,
-                           n_jobs=-1))
+reg = Regression(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200)
+reg.blitz_test(prefit=True, n_jobs=-1, show=True)
 quit()
