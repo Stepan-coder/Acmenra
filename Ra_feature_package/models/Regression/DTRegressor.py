@@ -240,7 +240,7 @@ class DTRegressor:
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
-                             locked_params=self.get_locked_params(),
+                             locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
         model = DecisionTreeRegressor(random_state=13)
@@ -253,13 +253,13 @@ class DTRegressor:
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
-    def get_locked_params(self) -> List[str]:
+    def get_locked_params_names(self) -> List[str]:
         """
         :return: This method return the list of locked params
         """
         return [p for p in self.__default if self.__default[p].is_locked]
 
-    def get_non_locked_params(self) -> List[str]:
+    def get_non_locked_params_names(self) -> List[str]:
         """
         :return: This method return the list of non locked params
         """
