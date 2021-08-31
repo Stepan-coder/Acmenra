@@ -259,6 +259,7 @@ class RFRegressor:
                         model_params[param] = [self.__default[param].def_val]
                     else:
                         model_params[param] = model_params[param]
+
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
