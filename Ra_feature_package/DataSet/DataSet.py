@@ -54,9 +54,6 @@ class DataSet:
                                column.get_nan_count()])
         return str(table)
 
-    def stat_info(self):
-        pass  # Сдесь должно быть то же самое, что и просто в str у колонки, но для всех колонок и сведено в 1 таблицу
-
     def head(self, n: int = 5):
         """
         This method ...
@@ -281,19 +278,6 @@ class DataSet:
             self.__dataset_analytics.pop(column)
         self.__update_dataset_base_info()
 
-    def dropna(self):
-        self.__dataset = self.__dataset.dropna()
-        self.__update_dataset_base_info()
-
-    def fillna(self):
-        for key in self.__dataset_keys:
-            column_type = self.get_column_info(column_name=key, extended=False).get_type()
-            if column_type.startswith('str'):
-                self.__dataset[key] = self.__dataset[key].fillna("")
-            elif column_type.startswith('int') or column_type.startswith('float'):
-                self.__dataset[key] = self.__dataset[key].fillna(0)
-        self.update_dataset_info()
-
     def get_column_info(self, column_name: str, extended: bool) -> DataSetColumn:
         """
         This method returns statistical analytics for a given column
@@ -309,32 +293,21 @@ class DataSet:
                                                                   extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_dataframe(self) -> pd.DataFrame:
-        """
-        This method return dataset as pd.DataFrame
-        :return: dataset as pd.DataFrame
-        """
-        if self.__dataset is not None:
-            return self.__dataset
-        else:
-            raise Exception("The dataset has not been uploaded yet!")
-
-    def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
-        """
-        This method attaches a new dataset to the current one
-        :param dataset: The dataset to be attached to the current one
-        :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
-        """
-        if len(dataset) == 0:
-            raise Exception("You are trying to add an empty dataset")
-        if len(self.__dataset) != len(dataset):
-            if not dif_len:
-                raise Exception("The pd.DataFrames must have the same size!")
-        columns_names = list(self.__dataset.keys()) + list(dataset.keys())
-        if len(set(columns_names)) != len(columns_names):
-            raise Exception("The current dataset and the new dataset have the same column names!")
-        self.__dataset = self.__dataset.join(dataset)
+    def dropna(self):
+        self.__dataset = self.__dataset.dropna()
         self.__update_dataset_base_info()
+
+    def fillna(self):
+        for key in self.__dataset_keys:
+            column_type = self.get_column_info(column_name=key, extended=False).get_type()
+            if column_type.startswith('str'):
+                self.__dataset[key] = self.__dataset[key].fillna("")
+            elif column_type.startswith('int') or column_type.startswith('float'):
+                self.__dataset[key] = self.__dataset[key].fillna(0)
+        self.update_dataset_info()
+
+    def label_encode(self, k = 50):
+        pass
 
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
         """
@@ -387,6 +360,23 @@ class DataSet:
             self.__dataset_analytics[key] = DataSetColumn(column_name=key,
                                                           values=self.__dataset[key],
                                                           extended=is_extended)
+
+    def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
+        """
+        This method attaches a new dataset to the current one
+        :param dataset: The dataset to be attached to the current one
+        :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
+        """
+        if len(dataset) == 0:
+            raise Exception("You are trying to add an empty dataset")
+        if len(self.__dataset) != len(dataset):
+            if not dif_len:
+                raise Exception("The pd.DataFrames must have the same size!")
+        columns_names = list(self.__dataset.keys()) + list(dataset.keys())
+        if len(set(columns_names)) != len(columns_names):
+            raise Exception("The current dataset and the new dataset have the same column names!")
+        self.__dataset = self.__dataset.join(dataset)
+        self.__update_dataset_base_info()
 
     def create_empty_dataset(self,
                              columns_names: list = None,
@@ -473,6 +463,16 @@ class DataSet:
                                                   encoding=self.__encoding)
             self.__read_dataset_info_from_json(dataset_info)
         self.__is_dataset_loaded = True
+
+    def get_DataFrame(self) -> pd.DataFrame:
+        """
+        This method return dataset as pd.DataFrame
+        :return: dataset as pd.DataFrame
+        """
+        if self.__dataset is not None:
+            return self.__dataset
+        else:
+            raise Exception("The dataset has not been uploaded yet!")
 
     def export(self,
                dataset_name: str = None,

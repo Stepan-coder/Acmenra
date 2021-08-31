@@ -282,7 +282,7 @@ class SGDRegressor:
             if param in self.get_locked_params_names():
                 locked[param] = self.__grid_best_params[param]
         return locked
-    
+
     def get_locked_params_names(self) -> List[str]:
         """
         :return: This method return the list of locked params
