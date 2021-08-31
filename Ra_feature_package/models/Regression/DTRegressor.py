@@ -253,6 +253,18 @@ class DTRegressor:
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
+    def get_grid_locked_params(self) -> dict:
+        """
+        :return: This method returns a dictionary of "locked" parameters
+        """
+        if not self.__is_grid_fit:
+            raise Exception('At first you need to learn grid')
+        locked = {}
+        for param in self.__grid_best_params:
+            if param in self.get_locked_params_names():
+                locked[param] = self.__grid_best_params[param]
+        return locked
+
     def get_locked_params_names(self) -> List[str]:
         """
         :return: This method return the list of locked params
