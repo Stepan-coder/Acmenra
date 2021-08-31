@@ -331,7 +331,7 @@ class LinRegressor:
         try:
             error = Errors.get_roc_auc_score(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"ROC AUC score\" error")
+            warnings.warn("An error occurred when calculating the \"ROC AUC score\" error!")
         return error
 
     def get_r_squared_error(self) -> float:
@@ -345,7 +345,7 @@ class LinRegressor:
         try:
             error = Errors.get_r_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"R-Squared_error\" error")
+            warnings.warn("An error occurred when calculating the \"R-Squared_error\" error!")
         return error
 
     def get_mean_absolute_error(self) -> float:
@@ -359,7 +359,7 @@ class LinRegressor:
         try:
             error = Errors.get_mean_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"Mean Absolute Error\" error")
+            warnings.warn("An error occurred when calculating the \"Mean Absolute Error\" error!")
         return error
 
     def get_mean_squared_error(self) -> float:
@@ -373,7 +373,7 @@ class LinRegressor:
         try:
             error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"Mean Squared Error\" error")
+            warnings.warn("An error occurred when calculating the \"Mean Squared Error\" error!")
         return error
 
     def get_root_mean_squared_error(self) -> float:
@@ -387,7 +387,7 @@ class LinRegressor:
         try:
             error = Errors.get_root_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"Root Mean Squared Error\" error")
+            warnings.warn("An error occurred when calculating the \"Root Mean Squared Error\" error!")
         return error
 
     def get_median_absolute_error(self) -> float:
@@ -401,7 +401,7 @@ class LinRegressor:
         try:
             error = Errors.get_median_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            print("An error occurred when calculating the \"Median Absolute Error\" error")
+            warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
         return error
 
     def get_predict_test_plt(self,
