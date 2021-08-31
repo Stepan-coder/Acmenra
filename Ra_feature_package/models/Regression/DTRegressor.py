@@ -185,7 +185,8 @@ class DTRegressor:
             self.model = DecisionTreeRegressor(random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.__text_name}...")
+        if self.__show:
+            print(f"Learning {self.__text_name}...")
         self.model.fit(self.__X_train, self.__Y_train)
         self.__is_model_fit = True
 
