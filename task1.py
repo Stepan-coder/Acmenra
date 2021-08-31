@@ -6,11 +6,12 @@ from Ra_feature_package.DataSet.DataSet import *
 from Ra_feature_package.Preprocessing.Preprocessing import *
 
 
-# warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore")
 
 original_dataset = DataSet(dataset_project_name="Original DataSet", show=True)
 original_dataset.load_csv_dataset(csv_file="OriginalData/train.csv", delimiter=",")
 original_dataset.fillna()
+print(original_dataset)
 encoders = {}
 for key in original_dataset.get_keys():
     key_column = original_dataset.get_column_info(column_name=key, extended=True)
