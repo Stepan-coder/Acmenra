@@ -27,11 +27,6 @@ task.delete_column(column='SalePrice')
 target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
 
-rfr = RFRegressor()
-rfr.set_params(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200, show=True)
-rfr.fit_grid(count=3)
-quit()
-
 manager = Manager()
 regs = manager.blitz_test_regressions(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=False, n_jobs=-1, show=True)
@@ -53,8 +48,8 @@ elif regs[0].converter_name == "Normalizer":
 if converter is not None:
     converted_task = converter.fit_transform(converted_task)
 model.set_params(task=pd.DataFrame(converted_task), target=pd.DataFrame(target), train_split=1200, show=True)
-model.fit_grid(count=1, grid_n_jobs=6)
-model.fit(grid_params=True, n_jobs=6)
+model.fit_grid(count=1, grid_n_jobs=-1)
+model.fit(grid_params=True, n_jobs=-1)
 locked_params = model.get_grid_locked_params()
 print(model)
 # Кароче, регрессию он почти решает... Но надо много ещё чего сделать
