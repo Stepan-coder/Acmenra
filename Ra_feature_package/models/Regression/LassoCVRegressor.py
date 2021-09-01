@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import LassoCV, PassiveAggressiveRegressor
+from sklearn.linear_model import LassoCV
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
@@ -24,7 +24,7 @@ class LassoCVRegressor:
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the ABoostRegressor class
+        This method is the initiator of the LassoCVRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples

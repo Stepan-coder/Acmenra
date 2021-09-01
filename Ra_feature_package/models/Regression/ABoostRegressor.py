@@ -24,13 +24,13 @@ class ABoostRegressor:
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the ABoostRegressor class
+        This method is the initiator of the AdaBoostRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "ABoostRegressor"
+        self.__text_name = "AdaBoostRegressor"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False

@@ -9,29 +9,28 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
+from sklearn.gaussian_process import GaussianProcessRegressor
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-# НЕ РАБОТАЕТ НАДО ЗАПОЛНИТЬ ПАРАМЕТРЫ
-class DTClassifier:
+class GaussPRegressor:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the DecisionTreeClassifier class
+        This method is the initiator of the GaussianProcessRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "DecisionTreeClassifier"
+        self.__text_name = "GaussianProcessRegressor"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -86,9 +85,27 @@ class DTClassifier:
                    train_split: int,
                    show: bool = False):
         count = len(task.keys()) + 1
-        self.__default = {
-
-        }
+        self.__default = {'kernel': Param(ptype=[type(None)],
+                                          def_val=None,
+                                          def_vals=[None]),
+                          'alpha': Param(ptype=[float],
+                                         def_val=1e-10,
+                                         def_vals=[1e-10]),
+                          'optimizer': Param(ptype=[str],
+                                             def_val='fmin_l_bfgs_b',
+                                             def_vals=['fmin_l_bfgs_b'],
+                                             is_locked=True),
+                          'n_restarts_optimizer': Param(ptype=[int],
+                                                        def_val=0,
+                                                        def_vals=[0]),
+                          'normalize_y': Param(ptype=[bool],
+                                               def_val=False,
+                                               def_vals=[True, False],
+                                               is_locked=True),
+                          'copy_X_train': Param(ptype=[bool],
+                                                def_val=True,
+                                                def_vals=[True, False],
+                                                is_locked=True)}
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
@@ -103,7 +120,7 @@ class DTClassifier:
         This method predicting values on data
         :param data:
         """
-        if not self.__is_grid_fit:
+        if not self.__is_model_fit:
             raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
@@ -123,8 +140,8 @@ class DTClassifier:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = DecisionTreeClassifier(**self.__grid_best_params,
-                                                random_state=13)
+            self.model = GaussianProcessRegressor(**self.__grid_best_params,
+                                                  random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -134,10 +151,10 @@ class DTClassifier:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = DecisionTreeClassifier(**model_params,
-                                                random_state=13)
+            self.model = GaussianProcessRegressor(**model_params,
+                                                  random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = DecisionTreeClassifier()
+            self.model = GaussianProcessRegressor(random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -147,13 +164,15 @@ class DTClassifier:
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 step: int = 1,
-                 cross_validation: int = 3):
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
+                 grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
         :param params_dict: The parameter of the hyperparameter grid that we check
-        :param step: The step with which to return the values
+        :param count: The step with which to return the values
         :param cross_validation: The number of sections into which the dataset will be divided for training
+        :param grid_n_jobs: The number of jobs to run in parallel.
         """
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
@@ -203,15 +222,15 @@ class DTClassifier:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = DecisionTreeClassifier(random_state=13)
+        model = GaussianProcessRegressor(random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
-        grid.fit(self.X_train, self.Y_train.values.ravel())
-        self.grid_best_params = grid.best_params_
-        self.is_grid_fit = True
+        grid.fit(self.__X_train, self.__Y_train.values.ravel())
+        self.__grid_best_params = grid.best_params_
+        self.__is_grid_fit = True
 
     def get_grid_locked_params(self) -> dict:
         """
@@ -266,25 +285,25 @@ class DTClassifier:
 
     def get_is_model_fit(self) -> bool:
         f"""
-         This method return flag is_model_fit
-         :return: is_model_fit
-         """
-        return self.is_model_fit
+        This method return flag is_model_fit
+        :return: is_model_fit
+        """
+        return self.__is_model_fit
 
     def get_is_grid_fit(self) -> bool:
         f"""
-         This method return flag get_is_grid_fit
-         :return: get_is_grid_fit
-         """
-        return self.is_grid_fit
+        This method return flag get_is_grid_fit
+        :return: get_is_grid_fit
+        """
+        return self.__is_grid_fit
 
     def get_grid_best_params(self) -> dict:
         """
         This method return the dict of best params for this model
         :return: dict of best params for this model
         """
-        if self.is_grid_fit:
-            return self.grid_best_params
+        if self.__is_grid_fit:
+            return self.__grid_best_params
         else:
             raise Exception('At first you need to learn grid')
 
@@ -294,11 +313,11 @@ class DTClassifier:
         of this column
         :return: dict of column importance
         """
-        if not self.is_model_fit:
-            raise Exception(f"You haven't trained the {self.text_name} yet!")
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
         for index in range(len(self.model.feature_importances_)):
-            self.importance[self.keys[index]] = self.model.feature_importances_[index]
-        return {k: v for k, v in sorted(self.importance.items(), key=lambda item: item[1], reverse=True)}
+            self.__importance[self.__keys[index]] = self.model.feature_importances_[index]
+        return {k: v for k, v in sorted(self.__importance.items(), key=lambda item: item[1], reverse=True)}
 
     def copy(self):
         """
@@ -391,21 +410,40 @@ class DTClassifier:
             warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
         return error
 
+    def get_predict_test_plt(self,
+                             save_path: str = None,
+                             show: bool = False):
+        """
+        This method automates the display/saving of a graph of prediction results with a real graph
+        :param save_path: The path to save the graph on
+        :param show: The parameter responsible for displaying the plot of prediction
+        """
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        values = [i for i in range(len(self.__x_test))]
+        plt.title(f'Predict {self.__text_name} at test data')
+        plt.plot(values, self.__y_test, 'g-', label='test')
+        plt.plot(values, self.model.predict(self.__x_test), 'r-', label='predict')
+        plt.legend(loc='best')
+        if save_path is not None:
+            if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
+                raise Exception("The specified path was not found!")
+            plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+        if show:
+            plt.show()
+        plt.close()
+
     def set_train_test(self, X_train, x_test, Y_train, y_test):
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
         self.__is_dataset_set = True
 
-    @staticmethod
-    def show_grid_params(params: dict):
+    def __get_default_model_fit_time(self) -> float:
         """
-        This method show grid parameters from dict 'params'
-        :param params: Dict of grid params
+        This method return time of fit model with defualt params
+        :return: time of fit model with defualt params
         """
-        count_elements = []
-        multiply = 1
-        for param in params:
-            print("Param({0}[{2}]): {1}".format(param, params[param], len(params[param])))
-            count_elements.append(len(params[param]))
-        for ce in count_elements:
-            multiply *= ce
-        print("Total({1}): {0}".format(" X ".join([str(e) for e in count_elements]), multiply))
+        time_start = time.time()
+        model = GaussianProcessRegressor(random_state=13)
+        model.fit(self.__X_train, self.__Y_train)
+        time_end = time.time()
+        return time_end - time_start

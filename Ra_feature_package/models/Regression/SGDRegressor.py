@@ -24,7 +24,7 @@ class SGDRegressor:
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the SGDRegressor class
+        This method is the initiator of the StochasticGradientDescentRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
