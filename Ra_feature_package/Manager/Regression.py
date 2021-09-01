@@ -28,42 +28,44 @@ from Ra_feature_package.models.Regression.ARDRegression import *
 from Ra_feature_package.models.Regression.TSenRegressor import *
 from Ra_feature_package.models.Regression.ABoostRegressor import *
 from Ra_feature_package.models.Regression.BagRegressor import *
+from Ra_feature_package.models.Regression.MLPRegressor import *
+from Ra_feature_package.models.Regression.RadNeigRegressor import *
 
 # All regressions
-# <class 'sklearn.linear_model.theil_sen.TheilSenRegressor'>,
 # <class 'sklearn.linear_model.ransac.RANSACRegressor'>,
-# <class 'sklearn.multioutput.MultiOutputRegressor'>,
-# <class 'sklearn.neighbors.regression.RadiusNeighborsRegressor'>,]
+# <class 'sklearn.multioutput.MultiOutputRegressor'>]
 
 
 class Regression:
     def __init__(self):
-        self.__models = {"LinearRegression": LinRegressor(),
-                         "DecisionTreeRegressor": DTRegressor(),
-                         "RandomForestRegressor": RFRegressor(),
-                         "ExtraTreesRegressor": ETRegressor(),
-                         "PasAggrRegressor": PasAggrRegressor(),
-                         "GradientBoostingRegressor": GBRegressor(),
-                         "StochasticGradientDescentRegressor": SGDRegressor(),
-                         "LassoRegressor": LassoRegressor(),
-                         "LassoCVRegressor": LassoCVRegressor(),
-                         "RidgeRegressor": RidgeRegressor(),
-                         "RidgeCVRegressor": RidgeCVRegressor(),
-                         "BayesianRidgeRegressor": BayesianRidgeRegressor(),
-                         "ElasticNetRegressor": ENetRegressor(),
-                         "ElasticNetCVRegressor": ENetCVRegressor(),
-                         "LarsRegressor": LarsRegressor(),
-                         "LarsCVRegressor": LarsCVRegressor(),
-                         "HuberRegressor": HuberRRegressor(),
-                         "KNeighborsRegressor": KNRegressor(),
-                         "SVRegressor": SVRegressor(),
-                         "LinSVRegressor": LinSVRegressor(),
-                         "GaussPRegressor": GaussPRegressor(),
-                         "IsoRegression": IsoRegression(),
+        self.__models = {"AdaBoostRegressor": ABoostRegressor(),
                          "ARDRegression": ARDRegression(),
-                         "TSenRegressor": TSenRegressor(),
-                         "ABoostRegressor": ABoostRegressor(),
-                         "BagRegressor": BagRegressor()}
+                         "BaggingRegressor": BagRegressor(),
+                         "BayesRidgeRegressor": BayesRidgeRegressor(),
+                         "DecisionTreeRegressor": DTRegressor(),
+                         "ElasticNetCVRegressor": ENetCVRegressor(),
+                         "ElasticNetRegressor": ENetRegressor(),
+                         "ExtraTreesRegressor": ETRegressor(),
+                         "GaussianProcessRegressor": GaussPRegressor(),
+                         "GradientBoostingRegressor": GBRegressor(),
+                         "HuberRegressor": HuberRRegressor(),
+                         "IsoRegression": IsoRegression(),
+                         "KNeighborsRegressor": KNRegressor(),
+                         "LarsCVRegressor": LarsCVRegressor(),
+                         "LarsRegressor": LarsRegressor(),
+                         "LassoCVRegressor": LassoCVRegressor(),
+                         "LassoRegressor": LassoRegressor(),
+                         "LinearRegression": LinRegressor(),
+                         "LinSVRegressor": LinSVRegressor(),
+                         "MultiLayerPerceptronRegressor": MLPRegressor(),
+                         "PassiveAggressiveRegressor": PasAggrRegressor(),
+                         "RadiusNeighborsRegressor": RadNeigRegressor(),
+                         "RandomForestRegressor": RFRegressor(),
+                         "RidgeCVRegressor": RidgeCVRegressor(),
+                         "RidgeRegressor": RidgeRegressor(),
+                         "StochasticGradientDescentRegressor": SGDRegressor(),
+                         "SVRegressor": SVRegressor(),
+                         "TSenRegressor": TSenRegressor()}
 
     def get_model(self, model_name: str):
         if model_name not in self.__models:
@@ -144,7 +146,7 @@ class Regression:
                      reverse=False)
         if show:
             table = PrettyTable()
-            table.title = f"Regression model results"
+            table.title = f"Regression results X {len(results)} models"
             table.field_names = ["Model", "Converter",
                                  "ROC AUC Score", "R-Squared Error", "Mean Absolute Error",
                                  "Mean Squared Error", "Root Mean Squared Error", "Median Absolute Error"]

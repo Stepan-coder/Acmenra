@@ -30,10 +30,11 @@ target_analitic = original_dataset.get_column_info(column_name='SalePrice', exte
 
 manager = Manager()
 regs = manager.blitz_test_regressions(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200,
-                                      prefit=False, n_jobs=-1, show=True)
+                                      prefit=True, n_jobs=-1, show=True)
 model = manager.get_model(model_name=regs[0].model_name)
 converter_name = regs[0].converter_name
-
+print(len(regs))
+quit()
 converter = None
 converted_task = task.get_DataFrame()
 if regs[0].converter_name == "StandardScaler":

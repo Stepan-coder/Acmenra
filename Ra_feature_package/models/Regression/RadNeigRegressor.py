@@ -9,28 +9,28 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import Lasso
 from Ra_feature_package.Errors import Errors
 from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import RadiusNeighborsRegressor
 from sklearn.model_selection import train_test_split
 from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class LassoRegressor:
+class RadNeigRegressor:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the LassoRegressor class
+        This method is the initiator of the RadiusNeighborsRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "LassoRegressor"
+        self.__text_name = "RadiusNeighborsRegressor"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -85,46 +85,34 @@ class LassoRegressor:
                    train_split: int,
                    show: bool = False):
         count = len(task.keys()) + 1
-        self.__default = {'alpha': Param(ptype=[float],
-                                         def_val=1.0,
-                                         def_vals=[1.0]),
-                          'fit_intercept': Param(ptype=[bool],
-                                                 def_val=True,
-                                                 def_vals=[True, False],
-                                                 is_locked=True),
-                          'normalize': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[True, False],
+        self.__default = {'radius': Param(ptype=[float],
+                                          def_val=1.0,
+                                          def_vals=[1.0]),
+                          'weights': Param(ptype=[str],
+                                           def_val="uniform",
+                                           def_vals=['uniform', 'distance'],
+                                           is_locked=True),
+                          'algorithm': Param(ptype=[str],
+                                             def_val="auto",
+                                             def_vals=['auto', 'ball_tree', 'kd_tree', 'brute'],
                                              is_locked=True),
-                          'precompute': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
-                                              is_locked=True),
-                          'copy_X': Param(ptype=[bool],
-                                          def_val=True,
-                                          def_vals=[True, False],
+                          'leaf_size': Param(ptype=[int],
+                                             def_val=30,
+                                             def_vals=conf_params(min_val=5,
+                                                                  max_val=count * 5,
+                                                                  count=count,
+                                                                  ltype=int)),
+                          'p': Param(ptype=[int],
+                                     def_val=2,
+                                     def_vals=[1, 2],
+                                     is_locked=True),
+                          'metric': Param(ptype=[bool],
+                                          def_val="minkowski",
+                                          def_vals=["minkowski"],
                                           is_locked=True),
-                          'max_iter': Param(ptype=[int],
-                                            def_val=1000,
-                                            def_vals=conf_params(min_val=250,
-                                                                 max_val=count,
-                                                                 count=count,
-                                                                 ltype=int)),
-                          'tol': Param(ptype=[float],
-                                       def_val=1e-4,
-                                       def_vals=[1e-4]),
-                          'warm_start': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
-                                              is_locked=True),
-                          'positive': Param(ptype=[bool],
-                                            def_val=False,
-                                            def_vals=[True, False],
-                                            is_locked=True),
-                          'selection': Param(ptype=[str],
-                                             def_val='cyclic',
-                                             def_vals=['cyclic', 'random'],
-                                             is_locked=True)}
+                          'metric_params': Param(ptype=[dict, type(None)],
+                                                 def_val=None,
+                                                 def_vals=[None])}
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
@@ -159,8 +147,8 @@ class LassoRegressor:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = Lasso(**self.__grid_best_params,
-                               random_state=13)
+            self.model = RadiusNeighborsRegressor(**self.__grid_best_params,
+                                                  n_jobs=n_jobs)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -170,10 +158,11 @@ class LassoRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = Lasso(**model_params,
-                               random_state=13)
+            self.model = RadiusNeighborsRegressor(**model_params,
+                                                  n_jobs=n_jobs)
         elif not grid_params and param_dict is None:
-            self.model = Lasso(random_state=13)
+            self.model = RadiusNeighborsRegressor(verbose=verbose,
+                                                  n_jobs=n_jobs)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -241,7 +230,7 @@ class LassoRegressor:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = Lasso(random_state=13)
+        model = RadiusNeighborsRegressor(n_jobs=1)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -462,7 +451,8 @@ class LassoRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = Lasso(random_state=13)
-        model.fit(self.__X_train, self.__Y_train)
+        model = RadiusNeighborsRegressor()
+        model.fit(self.__X_train, self.__Y_train.values.ravel())
         time_end = time.time()
         return time_end - time_start
+

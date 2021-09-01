@@ -17,20 +17,20 @@ from Ra_feature_package.models.static_methods import *
 from Ra_feature_package.models.Param import *
 
 
-class BayesianRidgeRegressor:
+class BayesRidgeRegressor:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the BayesianRidgeRegressor class
+        This method is the initiator of the BayesRidgeRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "BayesianRidgeRegressor"
+        self.__text_name = "BayesRidgeRegressor"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
