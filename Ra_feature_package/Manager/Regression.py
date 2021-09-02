@@ -30,10 +30,10 @@ from Ra_feature_package.models.Regression.ABoostRegressor import *
 from Ra_feature_package.models.Regression.BagRegressor import *
 from Ra_feature_package.models.Regression.MLPRegressor import *
 from Ra_feature_package.models.Regression.RadNeigRegressor import *
+from Ra_feature_package.models.Regression.RANSACRegressor import *
 
 # All regressions
-# <class 'sklearn.linear_model.ransac.RANSACRegressor'>,
-# <class 'sklearn.multioutput.MultiOutputRegressor'>]
+# <class 'sklearn.linear_model.ransac.RANSACRegressor'>
 
 
 class Regression:
@@ -41,27 +41,36 @@ class Regression:
         self.__models = {"AdaBoostRegressor": ABoostRegressor(),
                          "ARDRegression": ARDRegression(),
                          "BaggingRegressor": BagRegressor(),
+
                          "BayesRidgeRegressor": BayesRidgeRegressor(),
                          "DecisionTreeRegressor": DTRegressor(),
                          "ElasticNetCVRegressor": ENetCVRegressor(),
+
                          "ElasticNetRegressor": ENetRegressor(),
                          "ExtraTreesRegressor": ETRegressor(),
                          "GaussianProcessRegressor": GaussPRegressor(),
+
                          "GradientBoostingRegressor": GBRegressor(),
                          "HuberRegressor": HuberRRegressor(),
                          "IsoRegression": IsoRegression(),
+
                          "KNeighborsRegressor": KNRegressor(),
                          "LarsCVRegressor": LarsCVRegressor(),
                          "LarsRegressor": LarsRegressor(),
+
                          "LassoCVRegressor": LassoCVRegressor(),
                          "LassoRegressor": LassoRegressor(),
                          "LinearRegression": LinRegressor(),
+
                          "LinSVRegressor": LinSVRegressor(),
                          "MultiLayerPerceptronRegressor": MLPRegressor(),
                          "PassiveAggressiveRegressor": PasAggrRegressor(),
+
                          "RadiusNeighborsRegressor": RadNeigRegressor(),
+                         "RANSACRegressor": RANSACRegressor(),
                          "RandomForestRegressor": RFRegressor(),
                          "RidgeCVRegressor": RidgeCVRegressor(),
+
                          "RidgeRegressor": RidgeRegressor(),
                          "StochasticGradientDescentRegressor": SGDRegressor(),
                          "SVRegressor": SVRegressor(),
