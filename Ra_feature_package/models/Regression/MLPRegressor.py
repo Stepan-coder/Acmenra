@@ -46,12 +46,12 @@ class MLPRegressor:
         self.__x_test = None
         self.__Y_train = None
         self.__y_test = None
-
+        self.set_params(count=25)
         if task is not None and target is not None and train_split is not None:
-            self.set_params(task=task,
-                            target=target,
-                            train_split=train_split,
-                            show=show)
+            self.set_data(task=task,
+                          target=target,
+                          train_split=train_split,
+                          show=show)
 
     def __str__(self):
         table = PrettyTable()
@@ -79,12 +79,7 @@ class MLPRegressor:
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
-    def set_params(self,
-                   task: pd.DataFrame or list,
-                   target: pd.DataFrame or list,
-                   train_split: int,
-                   show: bool = False):
-        count = len(task.keys()) + 1
+    def set_params(self, count: int):
         self.__default = {'hidden_layer_sizes': Param(ptype=[tuple],
                                                       def_val=(100,),
                                                       def_vals=[(100,)]),
@@ -161,6 +156,12 @@ class MLPRegressor:
                                                                 max_val=count * 1000,
                                                                 count=count,
                                                                 ltype=int))}
+
+    def set_data(self,
+                 task: pd.DataFrame or list,
+                 target: pd.DataFrame or list,
+                 train_split: int,
+                 show: bool = False):
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())

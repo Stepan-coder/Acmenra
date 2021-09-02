@@ -46,12 +46,12 @@ class KNRegressor:
         self.__x_test = None
         self.__Y_train = None
         self.__y_test = None
-
+        self.set_params(count=25)
         if task is not None and target is not None and train_split is not None:
-            self.set_params(task=task,
-                            target=target,
-                            train_split=train_split,
-                            show=show)
+            self.set_data(task=task,
+                          target=target,
+                          train_split=train_split,
+                          show=show)
 
     def __str__(self):
         table = PrettyTable()
@@ -79,12 +79,7 @@ class KNRegressor:
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
-    def set_params(self,
-                   task: pd.DataFrame or list,
-                   target: pd.DataFrame or list,
-                   train_split: int,
-                   show: bool = False):
-        count = len(task.keys()) + 1
+    def set_params(self, count: int):
         self.__default = {'n_neighbors': Param(ptype=[int],
                                                def_val=5,
                                                def_vals=conf_params(min_val=1,
@@ -118,6 +113,12 @@ class KNRegressor:
                           'metric_params': Param(ptype=[dict, type(None)],
                                                  def_val=None,
                                                  def_vals=[None])}
+
+    def set_data(self,
+                 task: pd.DataFrame or list,
+                 target: pd.DataFrame or list,
+                 train_split: int,
+                 show: bool = False):
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
