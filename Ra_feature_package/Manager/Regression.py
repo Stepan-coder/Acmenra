@@ -67,7 +67,7 @@ class Regression:
                          "PassiveAggressiveRegressor": PasAggrRegressor(),
 
                          "RadiusNeighborsRegressor": RadNeigRegressor(),
-                         "RANSACRegressor": RANSACRegressor(),
+                         # "RANSACRegressor": RANSACRegressor(),
                          "RandomForestRegressor": RFRegressor(),
                          "RidgeCVRegressor": RidgeCVRegressor(),
 

@@ -28,6 +28,7 @@ task.delete_column(column='SalePrice')
 target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
 
+# нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
 manager = Manager()
 regs = manager.blitz_test_regressions(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=True, n_jobs=-1, show=True)
