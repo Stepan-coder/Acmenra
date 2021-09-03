@@ -8,7 +8,7 @@ class DataSetColumn:
     def __init__(self,
                  column_name: str,
                  values: list = None,
-                 categorical: int = 25,
+                 categorical_procent: float = 0.15,
                  extended: bool = False,
                  rounding_factor: int = 2):
         self.__column_name = column_name
@@ -24,7 +24,7 @@ class DataSetColumn:
         self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
         if values is not None:
             self.fill_dataset_column(values=values,
-                                     categorical=categorical,
+                                     categorical_procent=categorical_procent,
                                      extended=extended,
                                      rounding_factor=rounding_factor)
 
@@ -58,11 +58,13 @@ class DataSetColumn:
 
     def fill_dataset_column(self,
                             values: list or pd.DataFrame,
-                            categorical: int = 25,
+                            categorical_procent: float = 0.15,
                             extended: bool = False,
                             rounding_factor: int = 2):
         """
         This method fill this class when we use values
+        :param rounding_factor:
+        :param categorical_procent:
         :param values: list of column values
         :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
@@ -70,7 +72,10 @@ class DataSetColumn:
         self.__count = len(self.__values)
         self.__count_unique = len(list(set(self.__values)))
         self.__field_type = self.get_column_type()
-        self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
+        if self.__count_unique >= categorical_procent * self.__count_unique:
+            self.__field_dtype = "variable"
+        else:
+            self.__field_dtype = "categorical"
         self.__nan_count = self.__get_nan_count()
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
             self.__num_stat = NumericalIndicators()
