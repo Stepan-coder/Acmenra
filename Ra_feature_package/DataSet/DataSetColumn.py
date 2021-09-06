@@ -35,7 +35,7 @@ class DataSetColumn:
         table.field_names = ["Indicator", "Value"]
         table.add_row(["Сolumn name", self.get_column_name()])
         table.add_row(["Type", self.get_type()])
-        table.add_row(["DType", self.get_dtype()])
+        table.add_row(["DType", self.get_dtype(threshold=0.15)])
         table.add_row(["Count", self.get_count()])
         table.add_row(["Count unique", self.get_count_unique()])
         table.add_row(["NaN count", self.get_nan_count()])
@@ -111,10 +111,10 @@ class DataSetColumn:
             raise Exception("The values were not loaded!")
         return self.__field_type
 
-    def get_dtype(self, categorical: int = 25):
+    def get_dtype(self, threshold: float):
         if self.__field_dtype is None:
             raise Exception("The values were not loaded!")
-        self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
+        self.__field_dtype = "variable" if self.__count_unique >= len(self.__values) * threshold else "categorical"
         return self.__field_dtype
 
     def get_min(self) -> int or float or bool:

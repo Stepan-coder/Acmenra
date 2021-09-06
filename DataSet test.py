@@ -17,3 +17,9 @@ this_dataset.export(dataset_name="test",
                     dataset_folder="test",
                     delimeter=";")
 print(this_dataset)
+
+exel_dataset = DataSet(dataset_project_name="excel")
+exel_dataset.load_xlsx_dataset(xlsx_file="DataSet_EKB_200000.xlsx",
+                               sheet_name="200000ste")
+exel_dataset.fillna()
+print(exel_dataset)

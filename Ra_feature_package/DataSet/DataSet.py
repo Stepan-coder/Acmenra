@@ -42,10 +42,10 @@ class DataSet:
             for key in self.__dataset_keys:
                 column = self.get_column_info(column_name=key, extended=False)
 
-                if column.get_dtype() == 'variable':
-                    dtype = "\033[32m {}\033[0m".format(column.get_dtype())
+                if column.get_dtype(threshold=0.15) == 'variable':
+                    dtype = "\033[32m {}\033[0m".format(column.get_dtype(threshold=0.15))
                 else:
-                    dtype = "\033[31m {}\033[0m".format(column.get_dtype())
+                    dtype = "\033[31m {}\033[0m".format(column.get_dtype(threshold=0.15))
                 table.add_row([column.get_column_name(),
                                column.get_type(),
                                dtype,
@@ -447,6 +447,25 @@ class DataSet:
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
+    def load_xlsx_dataset(self,
+                         xlsx_file: str,
+                         sheet_name: str):
+        """
+        This method loads the dataset into the DataSet class
+        :param xlsx_file: The name of the .csv file
+        :return:
+        """
+        if self.__is_dataset_loaded:
+            raise Exception("The dataset is already loaded!")
+        if xlsx_file is not None:  # Checking that the uploaded file has the .csv format
+            if not xlsx_file.endswith(".xlsx"):
+                raise Exception("The dataset format should be '.xlsx'!")
+        self.__dataset_file = xlsx_file
+        self.__dataset = self.__read_from_xlsx(filename=str(xlsx_file),
+                                               sheet_name=sheet_name)
+        self.__update_dataset_base_info()
+        self.__is_dataset_loaded = True
+
     def load_dataset_project(self,
                              dataset_project_folder: str,
                              json_config_filename: str):
@@ -651,6 +670,19 @@ class DataSet:
         return pd.read_csv(filename,
                            encoding=encoding,
                            delimiter=delimiter)
+
+    @staticmethod
+    def __read_from_xlsx(filename: str,
+                         sheet_name: str) -> pd.DataFrame:
+        """
+        This method reads the dataset from a .csv file
+        :param filename: The name of the .csv file
+        :param delimiter: Symbol-split in a .csv file
+        :param encoding: Explicit indication of the .csv file encoding
+        :return: The dataframe read from the file
+        """
+        return pd.read_excel(filename,
+                             sheet_name=sheet_name)
 
 
 def merge_two_dicts(dict1: dict, dict2: dict) -> dict:

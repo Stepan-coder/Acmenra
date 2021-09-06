@@ -23,7 +23,7 @@ for key in original_dataset.get_keys():
 original_dataset.update_dataset_info()
 
 task = DataSet(dataset_project_name='task')
-task.load_DataFrame(dataframe=original_dataset.get_DataFrame())
+task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='SalePrice')
 target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
@@ -31,17 +31,17 @@ target_analitic = original_dataset.get_column_info(column_name='SalePrice', exte
 # нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
 manager = Manager()
 some_model = manager.get_model(model_name="MultiLayerPerceptronRegressor")
-some_model.set_data(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200, show=True)
+some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
 some_model.fit_grid(count=0, grid_n_jobs=1)
 some_model.fit(grid_params=True, n_jobs=1)
 print(some_model)
 quit()
-regs = manager.blitz_test_regressions(task=task.get_DataFrame(), target=pd.DataFrame(target), train_split=1200,
+regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=False, n_jobs=-1, show=True)
 model = manager.get_model(model_name=regs[0].model_name)
 quit()
 converter = None
-converted_task = task.get_DataFrame()
+converted_task = task.get_dataframe()
 if regs[0].converter_name == "StandardScaler":
     converter = StandardScaler()
 elif regs[0].converter_name == "MinMaxScaler":
