@@ -1,5 +1,4 @@
 from Ra_feature_package.Manager.Regression import *
-from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
 
 
 class Manager:
@@ -12,6 +11,9 @@ class Manager:
     def get_model(self, model_name: str):
         if model_name in self.regression.get_models_names():
             return self.regression.get_model(model_name=model_name)
+
+    def get_prefit_model_locked_params(self, model):
+        pass
 
     def blitz_test_regressions(self,
                                task: pd.DataFrame,

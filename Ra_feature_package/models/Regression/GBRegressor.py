@@ -2,7 +2,7 @@ import os
 import math
 import time
 import copy
-import warnings
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -24,7 +24,7 @@ class GBRegressor:
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the GradientBoostingRegressor class
+        This method is the initiator of the GBRegressor class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
@@ -46,12 +46,12 @@ class GBRegressor:
         self.__x_test = None
         self.__Y_train = None
         self.__y_test = None
-        self.set_params(count=25)
+
         if task is not None and target is not None and train_split is not None:
-            self.set_data(task=task,
-                          target=target,
-                          train_split=train_split,
-                          show=show)
+            self.set_params(task=task,
+                            target=target,
+                            train_split=train_split,
+                            show=show)
 
     def __str__(self):
         table = PrettyTable()
@@ -79,7 +79,12 @@ class GBRegressor:
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
-    def set_params(self, count: int):
+    def set_params(self,
+                   task: pd.DataFrame or list,
+                   target: pd.DataFrame or list,
+                   train_split: int,
+                   show: bool = False):
+        count = len(task.keys()) + 1
         self.__default = {"loss": Param(ptype=[str],
                                         def_val='ls',
                                         def_vals=['ls', 'lad', 'huber', 'quantile'],
@@ -165,12 +170,6 @@ class GBRegressor:
                           'ccp_alpha': Param(ptype=[float],
                                              def_val=0.0,
                                              def_vals=[0.0])}
-
-    def set_data(self,
-                 task: pd.DataFrame or list,
-                 target: pd.DataFrame or list,
-                 train_split: int,
-                 show: bool = False):
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
@@ -277,17 +276,10 @@ class GBRegressor:
                         model_params[param] = [self.__default[param].def_val]
                     else:
                         model_params[param] = model_params[param]
-        for param in model_params:
-            model_params[param] = list(set(model_params[param]))
-            has_none = None in model_params[param]
-            model_params[param] = [p for p in model_params[param] if p is not None]
-            model_params[param].sort()
-            if has_none:
-                model_params[param].append(None)
         if self.__show:
             print(f"Learning GridSearch {self.__text_name}...")
             show_grid_params(params=model_params,
-                             locked_params=self.get_locked_params_names(),
+                             locked_params=self.get_locked_params(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
         model = GradientBoostingRegressor(verbose=0,
@@ -301,25 +293,13 @@ class GBRegressor:
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
-    def get_grid_locked_params(self) -> dict:
-        """
-        :return: This method returns a dictionary of "locked" parameters
-        """
-        if not self.__is_grid_fit:
-            raise Exception('At first you need to learn grid')
-        locked = {}
-        for param in self.__grid_best_params:
-            if param in self.get_locked_params_names():
-                locked[param] = self.__grid_best_params[param]
-        return locked
-
-    def get_locked_params_names(self) -> List[str]:
+    def get_locked_params(self) -> List[str]:
         """
         :return: This method return the list of locked params
         """
         return [p for p in self.__default if self.__default[p].is_locked]
 
-    def get_non_locked_params_names(self) -> List[str]:
+    def get_non_locked_params(self) -> List[str]:
         """
         :return: This method return the list of non locked params
         """
@@ -406,7 +386,7 @@ class GBRegressor:
         try:
             error = Errors.get_roc_auc_score(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"ROC AUC score\" error!")
+            print("An error occurred when calculating the \"ROC AUC score\" error")
         return error
 
     def get_r_squared_error(self) -> float:
@@ -420,7 +400,7 @@ class GBRegressor:
         try:
             error = Errors.get_r_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"R-Squared_error\" error!")
+            print("An error occurred when calculating the \"R-Squared_error\" error")
         return error
 
     def get_mean_absolute_error(self) -> float:
@@ -434,7 +414,7 @@ class GBRegressor:
         try:
             error = Errors.get_mean_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"Mean Absolute Error\" error!")
+            print("An error occurred when calculating the \"Mean Absolute Error\" error")
         return error
 
     def get_mean_squared_error(self) -> float:
@@ -448,7 +428,7 @@ class GBRegressor:
         try:
             error = Errors.get_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"Mean Squared Error\" error!")
+            print("An error occurred when calculating the \"Mean Squared Error\" error")
         return error
 
     def get_root_mean_squared_error(self) -> float:
@@ -462,7 +442,7 @@ class GBRegressor:
         try:
             error = Errors.get_root_mean_squared_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"Root Mean Squared Error\" error!")
+            print("An error occurred when calculating the \"Root Mean Squared Error\" error")
         return error
 
     def get_median_absolute_error(self) -> float:
@@ -476,7 +456,7 @@ class GBRegressor:
         try:
             error = Errors.get_median_absolute_error(self.__y_test, self.model.predict(self.__x_test))
         except:
-            warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
+            print("An error occurred when calculating the \"Median Absolute Error\" error")
         return error
 
     def get_predict_text_plt(self,
