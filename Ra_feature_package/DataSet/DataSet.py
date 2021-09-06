@@ -254,13 +254,13 @@ class DataSet:
     def add_column(self, column: str, values: list, dif_len: bool = False):
         if column in self.__dataset_keys:
             raise Exception(f"The '{column}' column already exists in the presented dataset!")
-        if len(self.__dataset) != len(values):
+        if len(self.__dataset) != len(values) and len(self.__dataset) != 0:
             if not dif_len:
                 raise Exception("The column and dataset must have the same size!")
         self.__dataset[column] = values
         self.__update_dataset_base_info()
 
-    def get_column(self, column: str) -> pd.DataFrame:
+    def get_column(self, column: str) -> list:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column: List of column names
@@ -478,12 +478,16 @@ class DataSet:
                dataset_name: str = None,
                dataset_folder: str = None,
                including_json: bool = False,
-               including_plots: bool = False):
+               including_plots: bool = False,
+               delimeter: str = None,
+               encoding: str = None):
         """
         This method exports the dataset as DataSet Project
+        :param encoding:
         :param dataset_name: New dataset name (if the user wants to specify another one)
         :param dataset_folder: The folder to place the dataset files in
-        :param including_json: Responsible for the export .the json config file together with the dataset
+        :param including_json: Responsible for the export the .json config file together with the dataset
+        :param including_plots: Responsible for the export the plots config file together with the dataset
         :return:
         """
         if self.__show:
@@ -495,10 +499,12 @@ class DataSet:
             dataset_filename = self.__dataset_project_name
         else:
             dataset_filename = os.path.basename(self.__dataset_file).replace(".csv", "")
-
         if not os.path.exists(os.path.join(dataset_folder, dataset_filename)):
             os.makedirs(os.path.join(dataset_folder, dataset_filename))
-
+        if encoding is not None and isinstance(encoding, str):
+            self.set_encoding(encoding=encoding)
+        if delimeter is not None and isinstance(delimeter, str):
+            self.set_delimiter(delimiter=delimeter)
         folder = ""
         if dataset_folder is not None:
             if os.path.exists(dataset_folder):
