@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 from typing import Dict, List
 from prettytable import PrettyTable
 from sklearn.linear_model import PassiveAggressiveRegressor
-from RA.Errors import Errors
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
-from RA.models.static_methods import *
+from RA.Errors import Errors
 from RA.models.Param import *
+from RA.models.static_methods import *
 
 
 class PasAggrRegressor:
