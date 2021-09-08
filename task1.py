@@ -1,9 +1,9 @@
 import warnings
 import pandas as pd
-from Ra_feature_package.Manager.Manager import *
-from Ra_feature_package.Manager.Regression import *
-from Ra_feature_package.DataSet.DataSet import *
-from Ra_feature_package.Preprocessing.Preprocessing import *
+from RA.Manager.Manager import *
+from RA.Manager.Regression import *
+from RA.DataSet.DataSet import *
+from RA.Preprocessing.Preprocessing import *
 
 
 warnings.filterwarnings("ignore")
