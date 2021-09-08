@@ -4,6 +4,7 @@ import pandas as pd
 from scipy import stats
 from typing import Dict, List
 
+
 class NormalDistribution:
     def __init__(self, values: List[int or float] = None):
         self.__math_mode = None

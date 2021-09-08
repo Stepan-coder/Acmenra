@@ -2,6 +2,7 @@ import math
 import pandas as pd
 from prettytable import PrettyTable
 from Ra_feature_package.DataSet.DataSetColumnNumStat import *
+from Ra_feature_package.DataSet.DataSetColumnStrStat import *
 
 
 class DataSetColumn:
@@ -19,14 +20,15 @@ class DataSetColumn:
         self.__field_type = None
         self.__field_dtype = None
         self.__num_stat = None
+        self.__str_stat = None
         self.__use_extended = extended
         self.__rounding_factor = rounding_factor
         self.__is_num_stat = False  # Отвечает за наличие числовых расчётов
+        self.__is_str_stat = False
         if values is not None:
             self.fill_dataset_column(values=values,
                                      categorical=categorical,
-                                     extended=extended,
-                                     rounding_factor=rounding_factor)
+                                     extended=extended)
 
     def __str__(self):
         table = PrettyTable()
@@ -59,10 +61,10 @@ class DataSetColumn:
     def fill_dataset_column(self,
                             values: list or pd.DataFrame,
                             categorical: int = 25,
-                            extended: bool = False,
-                            rounding_factor: int = 2):
+                            extended: bool = False):
         """
         This method fill this class when we use values
+        :param categorical:
         :param values: list of column values
         :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
@@ -77,12 +79,20 @@ class DataSetColumn:
             self.__num_stat.set_values(values=self.__values,
                                        extended=extended)
             self.__is_num_stat = True
+        elif self.__field_type.startswith("str"):
+            self.__str_stat = StringIndicators()
+            self.__str_stat.set_values(values=self.__values,
+                                       extended=extended)
+            self.__is_str_stat = True
 
     def get_values(self):
         return self.__values
 
     def get_num_stat(self) -> NumericalIndicators:
         return self.__num_stat
+
+    def get_str_stat(self) -> StringIndicators:
+        return self.__str_stat
 
     def get_column_name(self) -> str:
         """
