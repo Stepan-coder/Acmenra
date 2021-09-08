@@ -10,7 +10,7 @@ class DataSetColumn:
                  column_name: str,
                  values: list = None,
                  categorical: int = 25,
-                 extended: bool = False,
+                 extended: bool = None,
                  rounding_factor: int = 2):
         self.__column_name = column_name
         self.__values = None
@@ -61,7 +61,7 @@ class DataSetColumn:
     def fill_dataset_column(self,
                             values: list or pd.DataFrame,
                             categorical: int = 25,
-                            extended: bool = False):
+                            extended: bool = None):
         """
         This method fill this class when we use values
         :param categorical:
@@ -74,13 +74,14 @@ class DataSetColumn:
         self.__field_type = self.get_column_type()
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
         self.__nan_count = self.__get_nan_count()
+        extended = extended if extended is not None else False
         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
-            self.__num_stat = NumericalIndicators()
+            self.__num_stat = NumericalIndicators(extended=extended)
             self.__num_stat.set_values(values=self.__values,
                                        extended=extended)
             self.__is_num_stat = True
         elif self.__field_type.startswith("str"):
-            self.__str_stat = StringIndicators()
+            self.__str_stat = StringIndicators(extended=extended)
             self.__str_stat.set_values(values=self.__values,
                                        extended=extended)
             self.__is_str_stat = True
@@ -134,6 +135,8 @@ class DataSetColumn:
         """
         if self.__is_num_stat:
             return self.__num_stat.get_min()
+        elif self.__is_str_stat:
+            return self.__str_stat.get_min()
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
@@ -144,6 +147,8 @@ class DataSetColumn:
         """
         if self.__is_num_stat:
             return self.__num_stat.get_max()
+        elif self.__is_str_stat:
+            return self.__str_stat.get_max()
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
@@ -153,6 +158,8 @@ class DataSetColumn:
         """
         if self.__is_num_stat:
             return self.__num_stat.get_mean()
+        elif self.__is_str_stat:
+            return self.__str_stat.get_mean()
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
@@ -165,12 +172,14 @@ class DataSetColumn:
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 
-    def get_math_distribution(self):
+    def get_distribution(self):
         """
         This method return mathematical distribution dict
         """
         if self.__is_num_stat and self.get_num_stat().get_is_normal_distribution():
             return self.__num_stat.get_normal_distribution().get_math_distribution()
+        if self.__is_str_stat and self.get_str_stat().get_is_letter_counter():
+            return self.__str_stat.get_letter_counter().get_letter_distribution()
         else:
             raise Exception(f"The values in the column '{self.__column_name}' are not numbers!")
 

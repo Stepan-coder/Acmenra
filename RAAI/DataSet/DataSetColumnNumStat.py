@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from typing import Dict, List
+from prettytable import PrettyTable
 
 
 class NormalDistribution:
@@ -17,6 +18,23 @@ class NormalDistribution:
         self.__is_normal_distribution = False
         if values is not None:
             self.__fill_normal_distribution(values=values)
+
+    def __str__(self):
+        table = PrettyTable()
+        table.title = f"\"NormalDistribution\""
+        table.field_names = ["Indicator", "Value"]
+        if self.__is_normal_distribution:
+            table.add_row(["Math mode", self.get_math_mode()])
+            table.add_row(["Math expectation", self.get_math_expectation()])
+            table.add_row(["Math dispersion", self.get_math_distribution()])
+            table.add_row(["Math sigma", self.get_math_sigma()])
+            table.add_row(["Moda - 3 * sigma", self.get_math_expectation() - 3 * self.get_math_sigma()])
+            table.add_row(["Moda - 2 * sigma", self.get_math_expectation() - 2 * self.get_math_sigma()])
+            table.add_row(["Moda - 1 * sigma", self.get_math_expectation() - 1 * self.get_math_sigma()])
+            table.add_row(["Moda + 1 * sigma", self.get_math_expectation() + 1 * self.get_math_sigma()])
+            table.add_row(["Moda + 2 * sigma", self.get_math_expectation() + 2 * self.get_math_sigma()])
+            table.add_row(["Moda + 3 * sigma", self.get_math_expectation() + 3 * self.get_math_sigma()])
+        return str(table)
 
     def get_math_distribution(self) -> Dict[int or float, float]:
         """
@@ -208,7 +226,7 @@ class NormalDistribution:
 
 
 class NumericalIndicators:
-    def __init__(self, values: List[int or float] = None, extended: bool = False):
+    def __init__(self, extended: bool, values: List[int or float] = None):
         self.__min = None
         self.__mean = None
         self.__median = None
@@ -220,6 +238,17 @@ class NumericalIndicators:
         if values is not None:
             self.__fill_numerical_indicators(values=values,
                                              extended=extended)
+
+    def __str__(self):
+        table = PrettyTable()
+        table.title = f"\"NumericalIndicators\""
+        table.field_names = ["Indicator", "Value"]
+        if self.__is_numerical_indicators:
+            table.add_row(["Min val", self.get_min()])
+            table.add_row(["Mean val", self.get_mean()])
+            table.add_row(["Median val", self.get_median()])
+            table.add_row(["Max val", self.get_max()])
+        return str(table)
 
     def get_min(self):
         """
@@ -308,7 +337,7 @@ class NumericalIndicators:
             data['Normal distribution'] = self.normal_distribution.to_json()
         return data
 
-    def __fill_numerical_indicators(self, values: List[int or float] or pd.DataFrame, extended: bool = False):
+    def __fill_numerical_indicators(self, values: List[int or float] or pd.DataFrame, extended: bool):
         """
         This method fill this class when we use values
         :param values: list of column values
