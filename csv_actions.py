@@ -1,6 +1,7 @@
 import pandas as pd
 import openpyxl
 
+
 # .csv
 def read_from_csv(file_folder, filename, delimiter):
     return pd.read_csv(file_folder + "\\" + filename, encoding='utf-8', delimiter=delimiter)
