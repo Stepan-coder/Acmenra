@@ -165,7 +165,7 @@ class ARDRegression:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = ARDRegression(**self.__grid_best_params)
+            self.model = ARDRRegression(**self.__grid_best_params)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -175,9 +175,9 @@ class ARDRegression:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = ARDRegression(**model_params)
+            self.model = ARDRRegression(**model_params)
         elif not grid_params and param_dict is None:
-            self.model = ARDRegression()
+            self.model = ARDRRegression()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -245,7 +245,7 @@ class ARDRegression:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = ARDRegression()
+        model = ARDRRegression()
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -254,6 +254,12 @@ class ARDRegression:
         grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
+
+    def get_text_name(self) -> str:
+        """
+        :return: This method returns the text-name of current model
+        """
+        return self.__text_name
 
     def get_grid_locked_params(self) -> dict:
         """
@@ -307,18 +313,25 @@ class ARDRegression:
         return default_param_values
 
     def get_is_model_fit(self) -> bool:
-        f"""
+        """
         This method return flag is_model_fit
         :return: is_model_fit
         """
         return self.__is_model_fit
 
     def get_is_grid_fit(self) -> bool:
-        f"""
+        """
         This method return flag get_is_grid_fit
         :return: get_is_grid_fit
         """
         return self.__is_grid_fit
+
+    def get_is_dataset_set(self) -> bool:
+        """
+        This method return flag is_dataset_set
+        :return: is_dataset_set
+        """
+        return self.__is_dataset_set
 
     def get_grid_best_params(self) -> dict:
         """
@@ -466,7 +479,7 @@ class ARDRegression:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = ARDRegression()
+        model = ARDRRegression()
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start

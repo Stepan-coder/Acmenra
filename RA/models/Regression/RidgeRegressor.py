@@ -238,6 +238,12 @@ class RidgeRegressor:
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
+    def get_text_name(self) -> str:
+        """
+        :return: This method returns the text-name of current model
+        """
+        return self.__text_name
+
     def get_grid_locked_params(self) -> dict:
         """
         :return: This method returns a dictionary of "locked" parameters
@@ -290,18 +296,25 @@ class RidgeRegressor:
         return default_param_values
 
     def get_is_model_fit(self) -> bool:
-        f"""
+        """
         This method return flag is_model_fit
         :return: is_model_fit
         """
         return self.__is_model_fit
 
     def get_is_grid_fit(self) -> bool:
-        f"""
+        """
         This method return flag get_is_grid_fit
         :return: get_is_grid_fit
         """
         return self.__is_grid_fit
+
+    def get_is_dataset_set(self) -> bool:
+        """
+        This method return flag is_dataset_set
+        :return: is_dataset_set
+        """
+        return self.__is_dataset_set
 
     def get_grid_best_params(self) -> dict:
         """
