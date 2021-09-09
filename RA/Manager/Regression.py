@@ -174,7 +174,6 @@ class Regression:
         for model in self.__models:
             try:
                 this_model = self.__models[model].copy()
-                # this_model.set_params(task=task, target=target, train_split=int(len(task) * 0.5))
                 this_model.set_train_test(X_train=X_train, x_test=x_test,
                                           Y_train=Y_train, y_test=y_test)
                 if prefit:
