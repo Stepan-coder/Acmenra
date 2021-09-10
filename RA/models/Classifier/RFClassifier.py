@@ -24,7 +24,7 @@ class RFClassifier:
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the RandomForestClassifier class
+        This method is the initiator of the LogRegression class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
@@ -80,9 +80,75 @@ class RFClassifier:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {
-
-        }
+        self.__default = {'n_estimators': Param(ptype=[int],
+                                                def_val=100,
+                                                def_vals=conf_params(min_val=2,
+                                                                     max_val=count * 100,
+                                                                     count=count,
+                                                                     ltype=int)),
+                          'criterion': Param(ptype=[str],
+                                             def_val="gini",
+                                             def_vals=["gini", "entropy"],
+                                             is_locked=True),
+                          'max_depth': Param(ptype=[int, type(None)],
+                                             def_val=None,
+                                             def_vals=conf_params(min_val=1,
+                                                                  max_val=count * 2,
+                                                                  count=count,
+                                                                  ltype=int)),
+                          'min_samples_split': Param(ptype=[int],
+                                                     def_val=2,
+                                                     def_vals=conf_params(min_val=2,
+                                                                          max_val=count,
+                                                                          count=count,
+                                                                          ltype=int)),
+                          'min_samples_leaf': Param(ptype=[int],
+                                                    def_val=1,
+                                                    def_vals=conf_params(min_val=2,
+                                                                         max_val=count,
+                                                                         count=count,
+                                                                         ltype=int)),
+                          'min_weight_fraction_leaf': Param(ptype=[float],
+                                                            def_val=0.0,
+                                                            def_vals=[0.0]),
+                          'max_features': Param(ptype=[str, type(None)],
+                                                def_val="auto",
+                                                def_vals=['sqrt', 'auto', 'log2', None],
+                                                is_locked=True),
+                          'max_leaf_nodes': Param(ptype=[int, type(None)],
+                                                  def_val=None,
+                                                  def_vals=conf_params(min_val=2,
+                                                                       max_val=count * 2,
+                                                                       count=count,
+                                                                       ltype=int)),
+                          'min_impurity_decrease': Param(ptype=[float, type(None)],
+                                                         def_val=0.0,
+                                                         def_vals=[0.]),
+                          'bootstrap': Param(ptype=[bool],
+                                             def_val=True,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'oob_score': Param(ptype=[bool],
+                                             def_val=False,
+                                             def_vals=[False],
+                                             is_locked=True),
+                          'warm_start': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'class_weight': Param(ptype=[str, type(None)],
+                                                def_val=None,
+                                                def_vals=['balanced', 'balanced_subsample', None],
+                                                is_locked=True),
+                          'ccp_alpha': Param(ptype=[float, type(None)],
+                                             def_val=0.0,
+                                             def_vals=[0.0]),
+                          'max_samples': Param(ptype=[int, type(None)],
+                                               def_val=None,
+                                               def_vals=conf_params(min_val=1,
+                                                                    max_val=count * 2,
+                                                                    count=count,
+                                                                    ltype=int))}
 
     def set_data(self,
                  task: pd.DataFrame or list,
@@ -103,7 +169,7 @@ class RFClassifier:
         This method predicting values on data
         :param data:
         """
-        if not self.__is_grid_fit:
+        if not self.__is_model_fit:
             raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
@@ -301,18 +367,27 @@ class RFClassifier:
         """
         return self.__is_dataset_set
 
-    def get_best_params(self):
-        if self.is_grif_fit:
-            return self.grid_best_params
+    def get_grid_best_params(self) -> dict:
+        """
+        This method return the dict of best params for this model
+        :return: dict of best params for this model
+        """
+        if self.__is_grid_fit:
+            return self.__grid_best_params
         else:
             raise Exception('At first you need to learn grid')
 
-    def get_feature_importances(self):
-        if not self.is_model_fit:
-            raise Exception('You haven"t trained the RandomForestClassifier yet')
-        for index in range(len(self.rf.feature_importances_)):
-            self.importance[self.keys[index]] = self.rf.feature_importances_[index]
-        return {k: v for k, v in sorted(self.importance.items(), key=lambda item: item[1], reverse=True)}
+    def get_feature_importance(self) -> dict:
+        """
+        This method return dict of feature importance where key is the column of input dataset, and value is importance
+        of this column
+        :return: dict of column importance
+        """
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        for index in range(len(self.model.feature_importances_)):
+            self.__importance[self.__keys[index]] = self.model.feature_importances_[index]
+        return {k: v for k, v in sorted(self.__importance.items(), key=lambda item: item[1], reverse=True)}
 
     def copy(self):
         """
@@ -405,34 +480,43 @@ class RFClassifier:
             warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
         return error
 
-    def show_grid_params(self, params):
-        print("Learning GridSearch RandomForestClassifier...")
-        count_elements = []
-        multiply = 1
-        for param in params:
-            print("Param({0}[{2}]): {1}".format(param, params[param], len(params[param])))
-            count_elements.append(len(params[param]))
-        for ce in count_elements:
-            multiply *= ce
-        print("Total({1}): {0}".format(" X ".join([str(e) for e in count_elements]), multiply))
-
-    def get_choosed_params(self, params, step):
-        first_param = params[0]
-        last_param = params[-1]
-        remains_params = params[1:-1]
-        choosed_params = remains_params[1::step]
-        choosed_params = [first_param] + choosed_params + [last_param]
-        return list(set(choosed_params))
-
-    def check_param(self, param, value, types):
-        if isinstance(value, list) and len(value):
-            for p in value:
-                if not isinstance(p, types[param]) and p is not None:
-                    raise Exception('The value of the "{0}" parameter must be a "{1}", byt was "{2}"'.
-                                    format(param, types[param], type(p)))
-        else:
-            raise Exception('The value of the "{0}" parameter must be a non-empty list'.format(param))
+    def get_predict_test_plt(self,
+                             save_path: str = None,
+                             show: bool = False):
+        """
+        This method automates the display/saving of a graph of prediction results with a real graph
+        :param save_path: The path to save the graph on
+        :param show: The parameter responsible for displaying the plot of prediction
+        """
+        if not self.__is_model_fit:
+            raise Exception(f"You haven't trained the {self.__text_name} yet!")
+        values = [i for i in range(len(self.__x_test))]
+        plt.title(f'Predict {self.__text_name} at test data')
+        plt.plot(values, self.__y_test, 'g-', label='test')
+        plt.plot(values, self.model.predict(self.__x_test), 'r-', label='predict')
+        plt.legend(loc='best')
+        if save_path is not None:
+            if not os.path.exists(save_path):  # Надо что то с путём что то адекватное придумать
+                raise Exception("The specified path was not found!")
+            plt.savefig(os.path.join(save_path, f"Test predict {self.__text_name}.png"))
+        if show:
+            plt.show()
+        plt.close()
 
     def set_train_test(self, X_train, x_test, Y_train, y_test):
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
         self.__is_dataset_set = True
+
+    def __get_default_model_fit_time(self) -> float:
+        """
+        This method return time of fit model with defualt params
+        :return: time of fit model with defualt params
+        """
+        time_start = time.time()
+        model = RandomForestClassifier(n_jobs=1,
+                                       verbose=0,
+                                       random_state=13)
+        model.fit(self.__X_train, self.__Y_train.values.ravel())
+        time_end = time.time()
+        return time_end - time_start
+

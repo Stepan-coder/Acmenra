@@ -17,14 +17,14 @@ from RA.models.Param import *
 from RA.models.static_methods import *
 
 
-class LogRegressor:
+class LogRegression:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the LogisticRegression class
+        This method is the initiator of the LogRegression class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
@@ -80,9 +80,51 @@ class LogRegressor:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {
-
-        }
+        self.__default = {'penalty': Param(ptype=[str],
+                                           def_val="l2",
+                                           def_vals=["l1", "l2", "elasticnet", "none"],
+                                           is_locked=True),
+                          'dual': Param(ptype=[bool],
+                                        def_val=False,
+                                        def_vals=[True, False],
+                                        is_locked=True),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-4,
+                                       def_vals=[1e-4]),
+                          'C': Param(ptype=[float],
+                                     def_val=1.0,
+                                     def_vals=[1.0]),
+                          'fit_intercept': Param(ptype=[bool],
+                                                 def_val=True,
+                                                 def_vals=[True, False],
+                                                 is_locked=True),
+                          'intercept_scaling': Param(ptype=[float],
+                                                     def_val=1.0,
+                                                     def_vals=[1.0]),
+                          'class_weight': Param(ptype=[str, type(None)],
+                                                def_val=None,
+                                                def_vals=[None, "balanced"]),
+                          'solver': Param(ptype=[str],
+                                          def_val="lbfgs",
+                                          def_vals=["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+                                          is_locked=True),
+                          'max_iter': Param(ptype=[int, type(None)],
+                                            def_val=100,
+                                            def_vals=conf_params(min_val=1,
+                                                                 max_val=count * 100,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'multi_class': Param(ptype=[str],
+                                               def_val="auto",
+                                               def_vals=["auto", "ovr", "multinomial"],
+                                               is_locked=True),
+                          'warm_start': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True),
+                          'l1_ratio': Param(ptype=[float, type(None)],
+                                            def_val=None,
+                                            def_vals=[None])}
 
     def set_data(self,
                  task: pd.DataFrame or list,
@@ -103,7 +145,7 @@ class LogRegressor:
         This method predicting values on data
         :param data:
         """
-        if not self.__is_grid_fit:
+        if not self.__is_model_fit:
             raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
@@ -146,14 +188,15 @@ class LogRegressor:
                                             random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
-        print(f"Learning {self.__text_name}...")
-        self.model.fit(self.__X_train, self.__Y_train.values.astype(float))
+        if self.__show:
+            print(f"Learning {self.__text_name}...")
+        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
                  params_dict: Dict[str, list] = None,
-                 count: int = 1,
-                 cross_validation: int = 3,
+                 count: int = 0,  # Это имеется в виду из пользовательской сетки
+                 cross_validation: int = 2,
                  grid_n_jobs: int = 1):
         """
         This method uses iteration to find the best hyperparameters for the model and trains the model using them
@@ -413,7 +456,7 @@ class LogRegressor:
             warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
         return error
 
-    def get_predict_text_plt(self,
+    def get_predict_test_plt(self,
                              save_path: str = None,
                              show: bool = False):
         """
@@ -446,7 +489,10 @@ class LogRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = LogisticRegression(random_state=13)
-        model.fit(self.__X_train, self.__Y_train)
+        model = LogisticRegression(n_jobs=1,
+                                   verbose=0,
+                                   random_state=13)
+        model.fit(self.__X_train, self.__Y_train.values.ravel())
         time_end = time.time()
         return time_end - time_start
+
