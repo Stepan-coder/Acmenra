@@ -17,7 +17,7 @@ from RA.models.Param import *
 from RA.models.static_methods import *
 
 
-class GaussPRegressor:
+class GaussPClassifier:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,

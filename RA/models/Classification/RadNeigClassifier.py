@@ -9,28 +9,28 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import RadiusNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from RA.Errors import Errors
 from RA.models.Param import *
 from RA.models.static_methods import *
 
 
-class KNRegressor:
+class RadNeigClassifier:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the KNeighborsClassifier class
+        This method is the initiator of the RadiusNeighborsClassifier class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "KNeighborsClassifier"
+        self.__text_name = "RadiusNeighborsClassifier"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -80,36 +80,35 @@ class KNRegressor:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {'n_neighbors': Param(ptype=[int],
-                                               def_val=5,
-                                               def_vals=conf_params(min_val=1,
-                                                                    max_val=count * 15,
-                                                                    count=count,
-                                                                    ltype=int)),
+        self.__default = {'radius': Param(ptype=[float],
+                                          def_val=1.0,
+                                          def_vals=[1.0]),
                           'weights': Param(ptype=[str],
-                                           def_val='uniform',
+                                           def_val="uniform",
                                            def_vals=['uniform', 'distance'],
                                            is_locked=True),
                           'algorithm': Param(ptype=[str],
-                                             def_val='auto',
+                                             def_val="auto",
                                              def_vals=['auto', 'ball_tree', 'kd_tree', 'brute'],
                                              is_locked=True),
                           'leaf_size': Param(ptype=[int],
                                              def_val=30,
                                              def_vals=conf_params(min_val=5,
-                                                                  max_val=count * 15,
+                                                                  max_val=count * 5,
                                                                   count=count,
                                                                   ltype=int)),
                           'p': Param(ptype=[int],
                                      def_val=2,
-                                     def_vals=conf_params(min_val=2,
-                                                          max_val=count * 2,
-                                                          count=count,
-                                                          ltype=int)),
-                          'metric': Param(ptype=[str],
-                                          def_val='minkowski',
-                                          def_vals=['minkowski'],
+                                     def_vals=[1, 2],
+                                     is_locked=True),
+                          'metric': Param(ptype=[bool],
+                                          def_val="minkowski",
+                                          def_vals=["minkowski"],
                                           is_locked=True),
+                          'outlier_label': Param(ptype=[bool, type(None)],
+                                                 def_val=None,
+                                                 def_vals=[None, "most_frequent"],
+                                                 is_locked=True),
                           'metric_params': Param(ptype=[dict, type(None)],
                                                  def_val=None,
                                                  def_vals=[None])}
@@ -153,8 +152,8 @@ class KNRegressor:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = KNeighborsClassifier(**self.__grid_best_params,
-                                              n_jobs=n_jobs)
+            self.model = RadiusNeighborsClassifier(**self.__grid_best_params,
+                                                   n_jobs=n_jobs)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -164,10 +163,10 @@ class KNRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = KNeighborsClassifier(**model_params,
-                                              n_jobs=n_jobs)
+            self.model = RadiusNeighborsClassifier(**model_params,
+                                                   n_jobs=n_jobs)
         elif not grid_params and param_dict is None:
-            self.model = KNeighborsClassifier(n_jobs=n_jobs)
+            self.model = RadiusNeighborsClassifier(n_jobs=n_jobs)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -238,7 +237,7 @@ class KNRegressor:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = KNeighborsClassifier(n_jobs=1)
+        model = RadiusNeighborsClassifier(n_jobs=1)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -472,7 +471,8 @@ class KNRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = KNeighborsClassifier(n_jobs=1)
-        model.fit(self.__X_train, self.__Y_train)
+        model = RadiusNeighborsClassifier()
+        model.fit(self.__X_train, self.__Y_train.values.ravel())
         time_end = time.time()
         return time_end - time_start
+
