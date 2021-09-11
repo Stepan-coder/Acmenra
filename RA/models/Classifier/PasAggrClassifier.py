@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from RA.Errors import Errors
@@ -17,20 +17,20 @@ from RA.models.Param import *
 from RA.models.static_methods import *
 
 
-class ENetRegressor:
+class PasAggrClassifier:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the ElasticNetRegressor class
+        This method is the initiator of the PassiveAggressiveClassifier class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "ElasticNetRegressor"
+        self.__text_name = "PassiveAggressiveClassifier"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -80,50 +80,55 @@ class ENetRegressor:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {'alpha': Param(ptype=[float],
-                                         def_val=1.0,
-                                         def_vals=[1.0]),
-                          'l1_ratio': Param(ptype=[float],
-                                            def_val=0.5,
-                                            def_vals=[0.5]),
+        self.__default = {'C': Param(ptype=[float],
+                                     def_val=1.0,
+                                     def_vals=[1.0]),
                           'fit_intercept': Param(ptype=[bool],
                                                  def_val=True,
                                                  def_vals=[True, False],
                                                  is_locked=True),
-                          'normalize': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'precompute': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
-                                              is_locked=True),
                           'max_iter': Param(ptype=[int],
                                             def_val=1000,
                                             def_vals=conf_params(min_val=250,
                                                                  max_val=count,
                                                                  count=count,
                                                                  ltype=int)),
-                          'copy_X': Param(ptype=[bool],
-                                          def_val=True,
-                                          def_vals=[True, False],
-                                          is_locked=True),
                           'tol': Param(ptype=[float],
-                                       def_val=1e-4,
+                                       def_val=1e-3,
                                        def_vals=[1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10],
                                        is_locked=True),
+                          'early_stopping': Param(ptype=[bool],
+                                                  def_val=False,
+                                                  def_vals=[True, False],
+                                                  is_locked=True),
+                          'validation_fraction': Param(ptype=[float],
+                                                       def_val=0.1,
+                                                       def_vals=[0.1]),
+                          'n_iter_no_change': Param(ptype=[int],
+                                                    def_val=5,
+                                                    def_vals=conf_params(min_val=2,
+                                                                         max_val=count,
+                                                                         count=count,
+                                                                         ltype=int)),
+                          'shuffle': Param(ptype=[bool],
+                                           def_val=True,
+                                           def_vals=[True, False],
+                                           is_locked=True),
+                          'loss': Param(ptype=[str],
+                                        def_val='hinge',
+                                        def_vals=['hinge'],
+                                        is_locked=True),
                           'warm_start': Param(ptype=[bool],
                                               def_val=False,
                                               def_vals=[True, False],
                                               is_locked=True),
-                          'positive': Param(ptype=[bool],
-                                            def_val=False,
-                                            def_vals=[True, False],
-                                            is_locked=True),
-                          'selection': Param(ptype=[str],
-                                             def_val='cyclic',
-                                             def_vals=['cyclic', 'random'],
-                                             is_locked=True)}
+                          'class_weight': Param(ptype=[str, type(None)],
+                                                def_val=None,
+                                                def_vals=["balanced", None]),
+                          'average': Param(ptype=[bool],
+                                           def_val=False,
+                                           def_vals=[True, False],
+                                           is_locked=True)}
 
     def set_data(self,
                  task: pd.DataFrame or list,
@@ -164,7 +169,10 @@ class ENetRegressor:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = ElasticNet(**self.__grid_best_params)
+            self.model = PassiveAggressiveClassifier(**self.__grid_best_params,
+                                                     n_jobs=n_jobs,
+                                                     verbose=verbose,
+                                                     random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -174,9 +182,14 @@ class ENetRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = ElasticNet(**model_params)
+            self.model = PassiveAggressiveClassifier(**model_params,
+                                                     n_jobs=n_jobs,
+                                                     verbose=verbose,
+                                                     random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = ElasticNet()
+            self.model = PassiveAggressiveClassifier(n_jobs=n_jobs,
+                                                     verbose=verbose,
+                                                     random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -244,7 +257,8 @@ class ENetRegressor:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = ElasticNet()
+        model = PassiveAggressiveClassifier(n_jobs=grid_n_jobs,
+                                            random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -478,7 +492,9 @@ class ENetRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = ElasticNet()
+        model = PassiveAggressiveClassifier(n_jobs=1,
+                                            verbose=0,
+                                            random_state=13)
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start

@@ -101,8 +101,9 @@ class HuberRRegressor:
                                                  def_vals=[True, False],
                                                  is_locked=True),
                           'tol': Param(ptype=[float],
-                                       def_val=1e-05,
-                                       def_vals=[1e-05])}
+                                       def_val=1e-5,
+                                       def_vals=[1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10],
+                                       is_locked=True)}
 
     def set_data(self,
                  task: pd.DataFrame or list,

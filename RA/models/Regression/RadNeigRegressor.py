@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from typing import Dict, List
 from prettytable import PrettyTable
 from sklearn.model_selection import GridSearchCV
-from sklearn.neighbors import RadiusNeighborsRegressor
+from sklearn.neighbors import RadiusNeighborsRegressor, RadiusNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from RA.Errors import Errors
 from RA.models.Param import *

@@ -37,7 +37,7 @@ manager = Manager()
 # print(some_model)
 # quit()
 regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
-                                      prefit=False, n_jobs=-1, show=True)
+                                      prefit=True, n_jobs=-1, show=True)
 model = manager.get_model(model_name=regs[0].model_name)
 quit()
 converter = None

@@ -9,28 +9,28 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.linear_model import ElasticNet
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier as MultiLayerPerceptronClassifier
 from RA.Errors import Errors
 from RA.models.Param import *
 from RA.models.static_methods import *
 
 
-class ENetRegressor:
+class MLPClassifier:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the ElasticNetRegressor class
+        This method is the initiator of the MultiLayerPerceptronClassifier class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "ElasticNetRegressor"
+        self.__text_name = "MultiLayerPerceptronClassifier"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -80,34 +80,43 @@ class ENetRegressor:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {'alpha': Param(ptype=[float],
-                                         def_val=1.0,
-                                         def_vals=[1.0]),
-                          'l1_ratio': Param(ptype=[float],
-                                            def_val=0.5,
-                                            def_vals=[0.5]),
-                          'fit_intercept': Param(ptype=[bool],
-                                                 def_val=True,
-                                                 def_vals=[True, False],
-                                                 is_locked=True),
-                          'normalize': Param(ptype=[bool],
-                                             def_val=False,
-                                             def_vals=[True, False],
-                                             is_locked=True),
-                          'precompute': Param(ptype=[bool],
-                                              def_val=False,
-                                              def_vals=[True, False],
+        self.__default = {'hidden_layer_sizes': Param(ptype=[tuple],
+                                                      def_val=(100,),
+                                                      def_vals=[(100,)]),
+                          'activation': Param(ptype=[str],
+                                              def_val="relu",
+                                              def_vals=["identity", "logistic", "tanh", "relu"],
                                               is_locked=True),
+                          'solver': Param(ptype=[str],
+                                          def_val="adam",
+                                          def_vals=["lbfgs", "sgd", "adam"],
+                                          is_locked=True),
+                          'alpha': Param(ptype=[float],
+                                         def_val=0.0001,
+                                         def_vals=[0.0001]),
+                          'batch_size': Param(ptype=[int],
+                                              def_val="auto",
+                                              def_vals=["auto"]),
+                          'learning_rate': Param(ptype=[str],
+                                                 def_val="constant",
+                                                 def_vals=["constant", "invscaling", "adaptive"],
+                                                 is_locked=True),
+                          'learning_rate_init': Param(ptype=[float],
+                                                      def_val=0.001,
+                                                      def_vals=[0.001]),
+                          'power_t': Param(ptype=[float],
+                                           def_val=0.5,
+                                           def_vals=[0.5]),
                           'max_iter': Param(ptype=[int],
-                                            def_val=1000,
-                                            def_vals=conf_params(min_val=250,
-                                                                 max_val=count,
+                                            def_val=200,
+                                            def_vals=conf_params(min_val=100,
+                                                                 max_val=count * 100,
                                                                  count=count,
                                                                  ltype=int)),
-                          'copy_X': Param(ptype=[bool],
-                                          def_val=True,
-                                          def_vals=[True, False],
-                                          is_locked=True),
+                          'shuffle': Param(ptype=[bool],
+                                           def_val=True,
+                                           def_vals=[True, False],
+                                           is_locked=True),
                           'tol': Param(ptype=[float],
                                        def_val=1e-4,
                                        def_vals=[1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10],
@@ -116,14 +125,41 @@ class ENetRegressor:
                                               def_val=False,
                                               def_vals=[True, False],
                                               is_locked=True),
-                          'positive': Param(ptype=[bool],
-                                            def_val=False,
-                                            def_vals=[True, False],
-                                            is_locked=True),
-                          'selection': Param(ptype=[str],
-                                             def_val='cyclic',
-                                             def_vals=['cyclic', 'random'],
-                                             is_locked=True)}
+                          'momentum': Param(ptype=[float],
+                                            def_val=0.9,
+                                            def_vals=[0.9]),
+                          'nesterovs_momentum': Param(ptype=[bool],
+                                                      def_val=True,
+                                                      def_vals=[True, False],
+                                                      is_locked=True),
+                          'early_stopping': Param(ptype=[bool],
+                                                  def_val=False,
+                                                  def_vals=[True, False],
+                                                  is_locked=True),
+                          'validation_fraction': Param(ptype=[float],
+                                                       def_val=0.1,
+                                                       def_vals=[0.1]),
+                          'beta_1': Param(ptype=[float],
+                                          def_val=0.9,
+                                          def_vals=[0.9]),
+                          'beta_2': Param(ptype=[float],
+                                          def_val=0.999,
+                                          def_vals=[0.999]),
+                          'epsilon': Param(ptype=[float],
+                                           def_val=1e-8,
+                                           def_vals=[1e-8]),
+                          'n_iter_no_change': Param(ptype=[int],
+                                                    def_val=10,
+                                                    def_vals=conf_params(min_val=1,
+                                                                         max_val=count,
+                                                                         count=count,
+                                                                         ltype=int)),
+                          'max_fun': Param(ptype=[int],
+                                           def_val=15000,
+                                           def_vals=conf_params(min_val=1000,
+                                                                max_val=count * 1000,
+                                                                count=count,
+                                                                ltype=int))}
 
     def set_data(self,
                  task: pd.DataFrame or list,
@@ -164,7 +200,8 @@ class ENetRegressor:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = ElasticNet(**self.__grid_best_params)
+            self.model = MultiLayerPerceptronClassifier(**self.__grid_best_params,
+                                                        random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -174,9 +211,10 @@ class ENetRegressor:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = ElasticNet(**model_params)
+            self.model = MultiLayerPerceptronClassifier(**model_params,
+                                                        random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = ElasticNet()
+            self.model = MultiLayerPerceptronClassifier()
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -244,7 +282,7 @@ class ENetRegressor:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = ElasticNet()
+        model = MultiLayerPerceptronClassifier(random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -445,7 +483,7 @@ class ENetRegressor:
             warnings.warn("An error occurred when calculating the \"Median Absolute Error\" error!")
         return error
 
-    def get_predict_test_plt(self,
+    def get_predict_text_plt(self,
                              save_path: str = None,
                              show: bool = False):
         """
@@ -478,7 +516,9 @@ class ENetRegressor:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = ElasticNet()
+        model = MultiLayerPerceptronClassifier(random_state=13)
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start
+
+
