@@ -32,8 +32,8 @@ target_analitic = original_dataset.get_column_info(column_name='SalePrice', exte
 manager = Manager()
 some_model = manager.get_model(model_name="HistGradientBoostingRegressor")
 some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
-some_model.fit_grid(count=0, grid_n_jobs=1)
-some_model.fit(grid_params=True, n_jobs=1)
+some_model.fit_grid(count=0, grid_n_jobs=-1)
+some_model.fit(grid_params=True, n_jobs=-1)
 print(some_model)
 quit()
 regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
@@ -59,7 +59,6 @@ model.set_params(task=pd.DataFrame(converted_task), target=pd.DataFrame(target),
 # locked_params = model.get_grid_locked_params()
 model.fit(grid_params=False, n_jobs=1)
 print(model)
-# Кароче, регрессию он почти решает... Но надо много ещё чего сделать
 quit()
 answer_dataset = DataSet(dataset_project_name="Answer DataSet", show=True)
 answer_dataset.load_csv_dataset(csv_file="OriginalData/test.csv", delimiter=",")

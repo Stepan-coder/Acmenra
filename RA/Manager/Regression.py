@@ -44,37 +44,35 @@ class Regression:
         self.__models = {"AdaBoostRegressor": ABoostRegressor(),
                          "ARDRegression": ARDRegression(),
                          "BaggingRegressor": BagRegressor(),
-
                          "BayesRidgeRegressor": BayesRidgeRegressor(),
                          "DecisionTreeRegressor": DTRegressor(),
-                         "ElasticNetCVRegressor": ENetCVRegressor(),
 
+                         "ElasticNetCVRegressor": ENetCVRegressor(),
                          "ElasticNetRegressor": ENetRegressor(),
                          "ExtraTreesRegressor": ETRegressor(),
+                         "GammaRegressor": GammRegressor(),
                          "GaussianProcessRegressor": GaussPRegressor(),
 
                          "GradientBoostingRegressor": GBRegressor(),
                          "HistGradientBoostingRegressor": HGBRegressor(),
                          "HuberRegressor": HuberRRegressor(),
                          "IsoRegression": IsoRegression(),
-
                          "KNeighborsRegressor": KNRegressor(),
+
                          "LarsCVRegressor": LarsCVRegressor(),
                          "LarsRegressor": LarsRegressor(),
-
                          "LassoCVRegressor": LassoCVRegressor(),
                          "LassoRegressor": LassoRegressor(),
                          "LinearRegression": LinRegressor(),
-
                          "LinSVRegressor": LinSVRegressor(),
+
                          "MultiLayerPerceptronRegressor": MLPRegressor(),
                          "PassiveAggressiveRegressor": PasAggrRegressor(),
-
                          "RadiusNeighborsRegressor": RadNeigRegressor(),
                          "RANSACRegressor": RANSACRegressor(),
                          "RandomForestRegressor": RFRegressor(),
+                         
                          "RidgeCVRegressor": RidgeCVRegressor(),
-
                          "RidgeRegressor": RidgeRegressor(),
                          "StochasticGradientDescentRegressor": SGDRegressor(),
                          "SVRegressor": SVRegressor(),
