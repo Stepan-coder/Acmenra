@@ -42,32 +42,27 @@ class Regression:
                          "BaggingRegressor": BagRegressor(),
                          "BayesRidgeRegressor": BayesRidgeRegressor(),
                          "DecisionTreeRegressor": DTRegressor(),
-
                          "ElasticNetCVRegressor": ENetCVRegressor(),
                          "ElasticNetRegressor": ENetRegressor(),
                          "ExtraTreesRegressor": ETRegressor(),
                          "GammaRegressor": GammRegressor(),
                          "GaussianProcessRegressor": GaussPRegressor(),
-
                          "GradientBoostingRegressor": GBRegressor(),
                          "HistGradientBoostingRegressor": HGBRegressor(),
                          "HuberRegressor": HuberRRegressor(),
                          "IsoRegression": IsoRegression(),
                          "KNeighborsRegressor": KNRegressor(),
-
                          "LarsCVRegressor": LarsCVRegressor(),
                          "LarsRegressor": LarsRegressor(),
                          "LassoCVRegressor": LassoCVRegressor(),
                          "LassoRegressor": LassoRegressor(),
                          "LinearRegression": LinRegressor(),
                          "LinSVRegressor": LinSVRegressor(),
-
                          "MultiLayerPerceptronRegressor": MLPRegressor(),
                          "PassiveAggressiveRegressor": PasAggrRegressor(),
                          "RadiusNeighborsRegressor": RadNeigRegressor(),
                          "RANSACRegressor": RANSACRegressor(),
                          "RandomForestRegressor": RFRegressor(),
-
                          "RidgeCVRegressor": RidgeCVRegressor(),
                          "RidgeRegressor": RidgeRegressor(),
                          "StochasticGradientDescentRegressor": SGDRegressor(),
@@ -126,27 +121,21 @@ class Regression:
                                                                     train_size=train_split, random_state=13)
         simple_test = self.__blitz_test(X_train=X_train, x_test=x_test,
                                         Y_train=Y_train, y_test=y_test,
-                                        task=task, target=target,
                                         converter="Simple", prefit=prefit, n_jobs=n_jobs)
         SS_test = self.__blitz_test(X_train=SS_X_train, x_test=SS_x_test,
                                     Y_train=SS_Y_train, y_test=SS_y_test,
-                                    task=task, target=target,
                                     converter="StandardScaler", prefit=prefit, n_jobs=n_jobs)
         MMS_test = self.__blitz_test(X_train=MMS_X_train, x_test=MMS_x_test,
                                      Y_train=MMS_Y_train, y_test=MMS_y_test,
-                                     task=task, target=target,
                                      converter="MinMaxScaler", prefit=prefit, n_jobs=n_jobs)
         RS_test = self.__blitz_test(X_train=RS_X_train, x_test=RS_x_test,
                                     Y_train=RS_Y_train, y_test=RS_y_test,
-                                    task=task, target=target,
                                     converter="RobustScaler", prefit=prefit, n_jobs=n_jobs)
         MAS_test = self.__blitz_test(X_train=MAS_X_train, x_test=MAS_x_test,
                                      Y_train=MAS_Y_train, y_test=MAS_y_test,
-                                     task=task, target=target,
                                      converter="MaxAbsScaler", prefit=prefit, n_jobs=n_jobs)
         N_test = self.__blitz_test(X_train=N_X_train, x_test=N_x_test,
                                    Y_train=N_Y_train, y_test=N_y_test,
-                                   task=task, target=target,
                                    converter="Normalizer", prefit=prefit, n_jobs=n_jobs)
         results = simple_test + SS_test + MMS_test + RS_test + MAS_test + N_test
         results.sort(key=itemgetter(2, 3, 4, 5, 6, 7),
@@ -165,7 +154,7 @@ class Regression:
             blitz_results.append(ModelBlitzTestResult(result))
         return blitz_results
 
-    def __blitz_test(self, X_train, x_test, Y_train, y_test, task: pd.DataFrame, target: pd.DataFrame,
+    def __blitz_test(self, X_train, x_test, Y_train, y_test,
                      converter: str, prefit: bool = False, n_jobs: int = 1):
         results = []
         for model in self.__models:
