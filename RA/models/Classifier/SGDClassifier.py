@@ -188,9 +188,9 @@ class SGDClassifier:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor(**self.__grid_best_params,
-                                                            verbose=verbose,
-                                                            random_state=13)
+            self.model = StochasticGradientDescentClassifier(**self.__grid_best_params,
+                                                             verbose=verbose,
+                                                             random_state=13)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -200,12 +200,12 @@ class SGDClassifier:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = StochasticGradientDescentRegressor(**model_params,
-                                                            verbose=verbose,
-                                                            random_state=13)
+            self.model = StochasticGradientDescentClassifier(**model_params,
+                                                             verbose=verbose,
+                                                             random_state=13)
         elif not grid_params and param_dict is None:
-            self.model = StochasticGradientDescentRegressor(verbose=verbose,
-                                                            random_state=13)
+            self.model = StochasticGradientDescentClassifier(verbose=verbose,
+                                                             random_state=13)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
@@ -264,7 +264,10 @@ class SGDClassifier:
             model_params[param] = list(set(model_params[param]))
             has_none = None in model_params[param]
             model_params[param] = [p for p in model_params[param] if p is not None]
-            model_params[param].sort()
+            try:
+                model_params[param].sort()
+            except:
+                pass
             if has_none:
                 model_params[param].append(None)
         if self.__show:
@@ -273,8 +276,8 @@ class SGDClassifier:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = StochasticGradientDescentRegressor(verbose=0,
-                                                   random_state=13)
+        model = StochasticGradientDescentClassifier(verbose=0,
+                                                    random_state=13)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
@@ -508,7 +511,7 @@ class SGDClassifier:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = StochasticGradientDescentRegressor(random_state=13)
+        model = StochasticGradientDescentClassifier(random_state=13)
         model.fit(self.__X_train, self.__Y_train)
         time_end = time.time()
         return time_end - time_start

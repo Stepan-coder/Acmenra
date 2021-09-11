@@ -134,7 +134,6 @@ class MTENRegressor:
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
             self.model = MultiTaskElasticNet(**model_params)
-
         elif not grid_params and param_dict is None:
             self.model = MultiTaskElasticNet()
         else:
@@ -195,7 +194,10 @@ class MTENRegressor:
             model_params[param] = list(set(model_params[param]))
             has_none = None in model_params[param]
             model_params[param] = [p for p in model_params[param] if p is not None]
-            model_params[param].sort()
+            try:
+                model_params[param].sort()
+            except:
+                pass
             if has_none:
                 model_params[param].append(None)
         if self.__show:
