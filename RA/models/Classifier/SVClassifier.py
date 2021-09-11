@@ -9,28 +9,28 @@ import matplotlib.pyplot as plt
 
 from typing import Dict, List
 from prettytable import PrettyTable
-from sklearn.ensemble import AdaBoostClassifier, HistGradientBoostingRegressor
 from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
-from RA.Errors import Errors
 from RA.models.Param import *
+from RA.Errors import Errors
 from RA.models.static_methods import *
 
 
-class ABoostClassifier:
+class SVClassifier:
     def __init__(self,
                  task: pd.DataFrame or list = None,
                  target: pd.DataFrame or list = None,
                  train_split: int = None,
                  show: bool = False):
         """
-        This method is the initiator of the AdaBoostClassifier class
+        This method is the initiator of the SVClassifier class
         :param task: The training part of the dataset
         :param target: The target part of the dataset
         :param train_split: The coefficient of splitting into training and training samples
         :param show: The parameter responsible for displaying the progress of work
         """
-        self.__text_name = "AdaBoostClassifier"
+        self.__text_name = "SVClassifier"
         self.__importance = {}
         self.__is_dataset_set = False
         self.__is_model_fit = False
@@ -80,22 +80,58 @@ class ABoostClassifier:
         return str(table)
 
     def set_params(self, count: int):
-        self.__default = {'base_estimator': Param(ptype=[type(None)],
-                                                  def_val=None,
-                                                  def_vals=[None]),
-                          'n_estimators': Param(ptype=[int],
-                                                def_val=50,
-                                                def_vals=conf_params(min_val=1,
-                                                                     max_val=count * 50,
-                                                                     count=count,
-                                                                     ltype=int)),
-                          'learning_rate': Param(ptype=[float],
-                                                 def_val=1.0,
-                                                 def_vals=[1.0]),
-                          'algorithm': Param(ptype=[str],
-                                             def_val='SAMME.R',
-                                             def_vals=['SAMME', 'SAMME.R'],
-                                             is_locked=True)}
+        self.__default = {'C': Param(ptype=[float],
+                                     def_val=1.0,
+                                     def_vals=[1.0]),
+                          'kernel': Param(ptype=[str],
+                                          def_val="rbf",
+                                          def_vals=['linear', 'poly', 'rbf', 'sigmoid', 'precomputed'],
+                                          is_locked=True),
+                          'degree': Param(ptype=[int],
+                                          def_val=3,
+                                          def_vals=conf_params(min_val=1,
+                                                               max_val=count,
+                                                               count=count,
+                                                               ltype=int)),
+                          'gamma': Param(ptype=[str],
+                                         def_val="scale",
+                                         def_vals=['scale', 'auto'],
+                                         is_locked=True),
+                          'coef0': Param(ptype=[float],
+                                         def_val=0.0,
+                                         def_vals=[0.0]),
+                          'shrinking': Param(ptype=[bool],
+                                             def_val=True,
+                                             def_vals=[True, False],
+                                             is_locked=True),
+                          'probability': Param(ptype=[bool],
+                                               def_val=False,
+                                               def_vals=[True, False],
+                                               is_locked=True),
+                          'tol': Param(ptype=[float],
+                                       def_val=1e-3,
+                                       def_vals=[1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10],
+                                       is_locked=True),
+                          'cache_size': Param(ptype=[float],
+                                              def_val=200,
+                                              def_vals=[200]),
+                          'class_weight': Param(ptype=[str, type(None)],
+                                                def_val=None,
+                                                def_vals=["balanced", None]),
+                          'max_iter': Param(ptype=[int],
+                                            def_val=-1,
+                                            def_vals=conf_params(min_val=250,
+                                                                 max_val=count,
+                                                                 count=count,
+                                                                 ltype=int)),
+                          'decision_function_shape': Param(ptype=[str],
+                                                           def_val="ovr",
+                                                           def_vals=['ovr', 'ovo'],
+                                                           is_locked=True),
+                          'break_ties': Param(ptype=[bool],
+                                              def_val=False,
+                                              def_vals=[True, False],
+                                              is_locked=True)}
 
     def set_data(self,
                  task: pd.DataFrame or list,
@@ -116,7 +152,7 @@ class ABoostClassifier:
         This method predicting values on data
         :param data:
         """
-        if not self.__is_grid_fit:
+        if not self.__is_model_fit:
             raise Exception('At first you need to learn model!')
         return self.model.predict(data)
 
@@ -136,8 +172,8 @@ class ABoostClassifier:
         if not self.__is_dataset_set:
             raise Exception('At first you need set dataset!')
         if grid_params and param_dict is None:
-            self.model = AdaBoostClassifier(**self.__grid_best_params,
-                                            random_state=13)
+            self.model = SVC(**self.__grid_best_params,
+                             verbose=verbose)
         elif not grid_params and param_dict is not None:
             model_params = self.get_default_grid_param_values()
             for param in param_dict:
@@ -147,15 +183,15 @@ class ABoostClassifier:
                                   value=param_dict[param],
                                   param_type=self.__default[param].ptype)
                 model_params[param] = param_dict[param]
-            self.model = AdaBoostClassifier(**model_params,
-                                            random_state=13)
+            self.model = SVC(**model_params,
+                             verbose=verbose)
         elif not grid_params and param_dict is None:
-            self.model = AdaBoostClassifier(random_state=13)
+            self.model = SVC(verbose=verbose)
         else:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
             print(f"Learning {self.__text_name}...")
-        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
+        self.model.fit(self.__X_train, self.__Y_train)
         self.__is_model_fit = True
 
     def fit_grid(self,
@@ -218,13 +254,13 @@ class ABoostClassifier:
                              locked_params=self.get_locked_params_names(),
                              single_model_time=self.__get_default_model_fit_time(),
                              n_jobs=grid_n_jobs)
-        model = AdaBoostClassifier(random_state=13)
+        model = SVC(verbose=0)
         grid = GridSearchCV(estimator=model,
                             param_grid=model_params,
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
-        grid.fit(self.__X_train, self.__Y_train.values.ravel())
+        grid.fit(self.__X_train, self.__Y_train)
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
@@ -452,7 +488,8 @@ class ABoostClassifier:
         :return: time of fit model with defualt params
         """
         time_start = time.time()
-        model = AdaBoostClassifier(random_state=13)
-        model.fit(self.__X_train, self.__Y_train)
+        model = SVC()
+        model.fit(self.__X_train, self.__Y_train.values.ravel())
         time_end = time.time()
         return time_end - time_start
+

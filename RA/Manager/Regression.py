@@ -6,6 +6,7 @@ from RA.models.Regression.LinRegression import *
 from RA.models.Regression.DTRegressor import *
 from RA.models.Regression.RFRegressor import *
 from RA.models.Regression.ETRegressor import *
+from RA.models.Regression.GammRegressor import *
 from RA.models.Regression.PasAggrRegressor import *
 from RA.models.Regression.GBRegressor import *
 from RA.models.Regression.SGDRegressor import *
@@ -18,6 +19,7 @@ from RA.models.Regression.ElasticNetRegressor import *
 from RA.models.Regression.ElasticNetCVRegressor import *
 from RA.models.Regression.LarsRegressor import *
 from RA.models.Regression.LarsCVRegressor import *
+from RA.models.Regression.HGBRegressor import *
 from RA.models.Regression.HuberRegressor import *
 from RA.models.Regression.KNeigRegressor import *
 from RA.models.Regression.SVRegressor import *
@@ -52,6 +54,7 @@ class Regression:
                          "GaussianProcessRegressor": GaussPRegressor(),
 
                          "GradientBoostingRegressor": GBRegressor(),
+                         "HistGradientBoostingRegressor": HGBRegressor(),
                          "HuberRegressor": HuberRRegressor(),
                          "IsoRegression": IsoRegression(),
 
