@@ -71,7 +71,7 @@ class Regression:
                          "RadiusNeighborsRegressor": RadNeigRegressor(),
                          "RANSACRegressor": RANSACRegressor(),
                          "RandomForestRegressor": RFRegressor(),
-                         
+
                          "RidgeCVRegressor": RidgeCVRegressor(),
                          "RidgeRegressor": RidgeRegressor(),
                          "StochasticGradientDescentRegressor": SGDRegressor(),
