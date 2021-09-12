@@ -89,13 +89,13 @@ class Regression:
                    n_jobs: int = 1,
                    show: bool = False) -> list:
         """
-        :param task:
-        :param target:
-        :param train_split:
-        :param prefit:
+        :param task: The training part of the dataset
+        :param target: The target part of the dataset
+        :param train_split: The coefficient of splitting into training and training samples
+        :param prefit: Responsible for pre-training models based on blocked parameters
         :param n_jobs: The number of jobs to run in parallel.
         :param show: The parameter responsible for displaying the progress of work
-        :return: List of ModelBlitzTestResult classes
+        :return: list of models
         """
         standard_scaler = StandardScaler()
         min_max_scaler = MinMaxScaler()

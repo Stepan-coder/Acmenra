@@ -79,12 +79,12 @@ class RANSACRegressor:
             table.add_row(["Median Absolute Error", self.get_median_absolute_error()])
         return str(table)
 
-    def set_params(self,
-                   task: pd.DataFrame or list,
-                   target: pd.DataFrame or list,
-                   train_split: int,
-                   show: bool = False):
-        count = len(task.keys()) + 1
+    def set_params(self, count: int) -> None:
+        """
+        This method sets the parameters for the training grid
+        :param count: The number of elements in the grid
+        :return: None
+        """
         self.__default = {'base_estimator': Param(ptype=[object, type(None)],
                                                   def_val=None,
                                                   def_vals=[None]),
@@ -127,6 +127,19 @@ class RANSACRegressor:
                           'loss': Param(ptype=[str],
                                         def_val="absolute_loss",
                                         def_vals=["absolute_loss"])}
+
+    def set_data(self,
+                 task: pd.DataFrame or list,
+                 target: pd.DataFrame or list,
+                 train_split: int,
+                 show: bool = False) -> None:
+        """
+        This method passes data to the class
+        :param task: The training part of the dataset
+        :param target: The target part of the dataset
+        :param train_split: The coefficient of splitting into training and training samples
+        :param show: The parameter responsible for displaying the progress of work
+        """
         self.__show = show
         self.__keys = task.keys()
         self.__keys_len = len(task.keys())
@@ -470,7 +483,15 @@ class RANSACRegressor:
             plt.show()
         plt.close()
 
-    def set_train_test(self, X_train, x_test, Y_train, y_test):
+    def set_train_test(self, X_train, x_test, Y_train, y_test) -> None:
+        """
+        This method sets parameters for the training grid bypassing "set_params". Use it exclusively for the blitz test!
+        :param X_train: Training data sample
+        :param Y_train: Training value sample
+        :param x_test: Test data sample
+        :param y_test: Test value sample
+        :return: None
+        """
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
         self.__is_dataset_set = True
 

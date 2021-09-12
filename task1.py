@@ -30,11 +30,11 @@ target_analitic = original_dataset.get_column_info(column_name='SalePrice', exte
 
 # нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
 manager = Manager()
-# some_model = manager.get_model(model_name="HistGradientBoostingRegressor")
-# some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
-# some_model.fit_grid(count=0, grid_n_jobs=-1)
-# some_model.fit(grid_params=True, n_jobs=-1)
-# print(some_model)
+some_model = manager.get_model(model_name="RandomForestRegressor")
+some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
+some_model.fit_grid(count=0, grid_n_jobs=1)
+some_model.fit(grid_params=True, n_jobs=-1)
+print(some_model)
 # quit()
 regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=True, n_jobs=-1, show=True)
