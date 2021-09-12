@@ -159,15 +159,6 @@ class SVClassifier:
                                                                                         random_state=13)
         self.__is_dataset_set = True
 
-    def predict(self, data: pd.DataFrame):
-        """
-        This method predicting values on data
-        :param data:
-        """
-        if not self.__is_model_fit:
-            raise Exception('At first you need to learn model!')
-        return self.model.predict(data)
-
     def fit(self,
             param_dict: Dict[str, int or str] = None,
             grid_params: bool = False,
@@ -278,6 +269,15 @@ class SVClassifier:
         grid.fit(self.__X_train, self.__Y_train)
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
+
+    def predict(self, data: pd.DataFrame):
+        """
+        This method predicting values on data
+        :param data:
+        """
+        if not self.__is_model_fit:
+            raise Exception('At first you need to learn model!')
+        return self.model.predict(data)
 
     def get_text_name(self) -> str:
         """
