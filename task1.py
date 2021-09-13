@@ -1,7 +1,7 @@
 import warnings
 import pandas as pd
-from RA.Manager.Manager import *
-from RA.Manager.Regression import *
+from RA.ModelManager.ModelManager import *
+from RA.ModelManager.Regression import *
 from RA.DataSet.DataSet import *
 from RA.Preprocessing.Preprocessing import *
 
@@ -29,12 +29,12 @@ target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
 
 # нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
-manager = Manager()
-some_model = manager.get_model(model_name="RandomForestRegressor")
-some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
-some_model.fit_grid(count=0, grid_n_jobs=1)
-some_model.fit(grid_params=True, n_jobs=-1)
-print(some_model)
+manager = ModelManager()
+# some_model = manager.get_model(model_name="TSenRegressor")
+# some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
+# some_model.fit_grid(count=0, grid_n_jobs=-1)
+# some_model.fit(grid_params=True, n_jobs=-1)
+# print(some_model)
 # quit()
 regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=True, n_jobs=-1, show=True)

@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import math
 import numpy as np
@@ -57,35 +58,7 @@ class DataSet:
     def stat_info(self):
         pass  # Сдесь должно быть то же самое, что и просто в str у колонки, но для всех колонок и сведено в 1 таблицу
 
-    def head(self, n: int = 5):
-        """
-        This method ...
-        :param n: Count of lines
-        :return:
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet!")
-        if n <= 0:
-            raise Exception("Count of rows 'n' should be large, then 0!")
-        if n > len(self.__dataset):
-            raise Exception("Count of rows 'n' should be less, then length of dataset!")
-        return self.__dataset.iloc[:n]
-
-    def tail(self, n: int = 5):
-        """
-        This method ...
-        :param n: Count of lines
-        :return:
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet!")
-        if n <= 0:
-            raise Exception("Count of rows 'n' should be large, then 0!")
-        if n > len(self.__dataset):
-            raise Exception("Count of rows 'n' should be less, then length of dataset!")
-        return self.__dataset.iloc[-n:]
-
-    # set-get init params
+    # SET_GET INIT PARAMS
     def set_project_name(self, project_name: str) -> None:
         """
         This method sets the project_name of the DataSet
@@ -147,11 +120,10 @@ class DataSet:
         This method return column names of dataset pd.DataFrame
         :return: Column names of dataset pd.DataFrame
         """
-        if self.__dataset is not None:
-            self.__update_dataset_base_info()
-            return list(self.__dataset_keys)
-        else:
+        if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
+        self.__update_dataset_base_info()
+        return list(self.__dataset_keys)
 
     def set_keys_order(self, new_order_columns: List[str]) -> None:
         """
@@ -174,11 +146,10 @@ class DataSet:
         This method return count of column names of dataset pd.DataFrame
         :return: Count of column names of dataset pd.DataFrame
         """
-        if self.__dataset is not None:
-            self.__update_dataset_base_info()
-            return self.__dataset_keys_count
-        else:
+        if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet")
+        self.__update_dataset_base_info()
+        return self.__dataset_keys_count
 
     def set_to_field(self, column: str, index: int, value):
         """
@@ -280,6 +251,35 @@ class DataSet:
         if column in self.__dataset_analytics:
             self.__dataset_analytics.pop(column)
         self.__update_dataset_base_info()
+    # /SET_GET INIT PARAMS
+
+    def head(self, n: int = 5):
+        """
+        This method ...
+        :param n: Count of lines
+        :return:
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            raise Exception("Count of rows 'n' should be less, then length of dataset!")
+        return self.__dataset.iloc[:n]
+
+    def tail(self, n: int = 5):
+        """
+        This method ...
+        :param n: Count of lines
+        :return:
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            raise Exception("Count of rows 'n' should be less, then length of dataset!")
+        return self.__dataset.iloc[-n:]
 
     def dropna(self):
         self.__dataset = self.__dataset.dropna()
@@ -314,10 +314,9 @@ class DataSet:
         This method return dataset as pd.DataFrame
         :return: dataset as pd.DataFrame
         """
-        if self.__dataset is not None:
-            return self.__dataset
-        else:
+        if self.__dataset is None:
             raise Exception("The dataset has not been uploaded yet!")
+        return self.__dataset
 
     def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
         """
@@ -388,6 +387,7 @@ class DataSet:
                                                           values=self.__dataset[key],
                                                           extended=is_extended)
 
+    # CREATE-LOAD-EXPORT DATASET
     def create_empty_dataset(self,
                              columns_names: list = None,
                              delimiter: str = ",",
@@ -413,7 +413,7 @@ class DataSet:
     def load_DataFrame(self, dataframe: pd.DataFrame):
         """
         This method loads the dataset into the DataSet class
-        :param dataset: Explicitly specifying pd. DataFrame as a dataset
+        :param dataframe: Explicitly specifying pd. DataFrame as a dataset
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -448,10 +448,11 @@ class DataSet:
         self.__is_dataset_loaded = True
 
     def load_xlsx_dataset(self,
-                         xlsx_file: str,
-                         sheet_name: str):
+                          xlsx_file: str,
+                          sheet_name: str):
         """
         This method loads the dataset into the DataSet class
+        :param sheet_name:
         :param xlsx_file: The name of the .csv file
         :return:
         """
@@ -509,29 +510,36 @@ class DataSet:
         :param including_plots: Responsible for the export the plots config file together with the dataset
         :return:
         """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
         if self.__show:
-            # print(f"Saving DataSet \'{self.__dataset_project_name}\'...")
+            print(f"Saving DataSet \'{self.__dataset_project_name}\'...")
             pass
-        if dataset_name is not None:
+
+        if dataset_name is not None:  # Если явно указано имя выходного файла
             dataset_filename = dataset_name
-        elif self.__dataset_file is None:
+        elif self.__dataset_file is None:  # Иначе - берём имя датасета, указанное в классе
             dataset_filename = self.__dataset_project_name
-        else:
+        else:  # Иначе - берём имя из загруженного файла
             dataset_filename = os.path.basename(self.__dataset_file).replace(".csv", "")
-        if not os.path.exists(os.path.join(dataset_folder, dataset_filename)):
-            os.makedirs(os.path.join(dataset_folder, dataset_filename))
+
+        folder = ""
+        if dataset_folder is not None:  # Если явно указана папка, куда сохраняемся
+            if os.path.exists(dataset_folder):  # Если родительский путь верен
+                folder = os.path.join(dataset_folder, dataset_filename)  # Сдесь под "dataset_filename" понимается проектная папка
+                if not os.path.exists(folder):
+                    os.makedirs(folder)
+            else:
+                raise Exception("There is no such folder!")
+        else:
+            folder = os.path.join(os.path.dirname(sys.modules['__main__'].__file__), dataset_filename)
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+
         if encoding is not None and isinstance(encoding, str):
             self.set_encoding(encoding=encoding)
         if delimeter is not None and isinstance(delimeter, str):
             self.set_delimiter(delimiter=delimeter)
-        folder = ""
-        if dataset_folder is not None:
-            if os.path.exists(dataset_folder):
-                folder = os.path.join(dataset_folder, dataset_filename)
-            else:
-                raise Exception("Ошибка!")
-        else:
-            folder = dataset_filename
 
         if including_json and self.__dataset is not None:
             json_config = {"dataset_filename": f"{dataset_filename}.csv",
@@ -543,7 +551,8 @@ class DataSet:
                            "columns": {}}
             for key in self.__dataset_keys:
                 if key not in self.__dataset_analytics:
-                    self.__update_dataset_analytics()
+                    self.__dataset_analytics[key] = self.get_column_info(column_name=key,
+                                                                         extended=True)
                 json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                          self.__dataset_analytics[key].to_json())
             with open(os.path.join(folder, f"{dataset_filename}.json"), 'w') as json_file:
@@ -560,13 +569,49 @@ class DataSet:
                         pass
                     self.__save_plots(path=os.path.join(folder, "plots"),
                                       column=self.__dataset_analytics[key])
-
         pd.DataFrame(self.__dataset).to_csv(os.path.join(folder, f"{dataset_filename}.csv"),
                                             index=False,
                                             sep=self.__delimiter,
                                             encoding=self.__encoding)
 
-    def __save_plots(self, path: str,  column: DataSetColumn):
+    def to_csv(self,
+               path: str,
+               delimeter: str = None,
+               encoding: str = None):
+
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if not path.endswith(".csv"):
+            raise Exception("The dataset format should be '.csv'!")
+        if encoding is not None and isinstance(encoding, str):
+            self.set_encoding(encoding=encoding)
+        if delimeter is not None and isinstance(delimeter, str):
+            self.set_delimiter(delimiter=delimeter)
+        pd.DataFrame(self.__dataset).to_csv(path,
+                                            index=False,
+                                            sep=self.__delimiter,
+                                            encoding=self.__encoding)
+
+    def to_excel(self,
+                 path: str,
+                 sheet_name: str = None):
+
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if not path.endswith(".xlsx"):
+            raise Exception("The dataset format should be '.xlsx'!")
+        if sheet_name is not None:  # Если явно указано имя выходного файла
+            sheet_name = sheet_name
+        elif self.__dataset_file is None:  # Иначе - берём имя датасета, указанное в классе
+            sheet_name = self.__dataset_project_name
+        else:  # Иначе - берём имя из загруженного файла
+            sheet_name = os.path.basename(self.__dataset_file).replace(".csv", "").replace(".xlsx", "")
+        pd.DataFrame(self.__dataset).to_excel(path,
+                                              index=False,
+                                              sheet_name=sheet_name)
+    # CREATE-LOAD-EXPORT DATASET
+
+    def __save_plots(self, path: str, column: DataSetColumn):
         if column.get_is_num_stat():
             self.__save_min_average_max_plot(path=path,
                                              column=column)

@@ -1,8 +1,8 @@
-from RA.Manager.Regression import *
-from RA.Manager.Classification import *
+from RA.ModelManager.Regression import *
+from RA.ModelManager.Classification import *
 
 
-class Manager:
+class ModelManager:
     def __init__(self):
         self.regression = Regression()
         self.classification = Classification()

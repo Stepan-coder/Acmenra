@@ -46,12 +46,12 @@ class RANSACRegressor:
         self.__x_test = None
         self.__Y_train = None
         self.__y_test = None
-
+        self.set_params(count=25)
         if task is not None and target is not None and train_split is not None:
-            self.set_params(task=task,
-                            target=target,
-                            train_split=train_split,
-                            show=show)
+            self.set_data(task=task,
+                          target=target,
+                          train_split=train_split,
+                          show=show)
 
     def __str__(self):
         table = PrettyTable()

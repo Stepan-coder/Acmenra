@@ -1,73 +1,47 @@
 import copy
 from operator import itemgetter
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
-from RA.models.Regression.ABoostRegressor import *
-from RA.models.Regression.ARDRegression import *
-from RA.models.Regression.BagRegressor import *
-from RA.models.Regression.BayesRidgeRegressor import *
-from RA.models.Regression.DTRegressor import *
-from RA.models.Regression.ElasticNetCVRegressor import *
-from RA.models.Regression.ElasticNetRegressor import *
-from RA.models.Regression.ETRegressor import *
-from RA.models.Regression.GammRegressor import *
-from RA.models.Regression.GaussPRegressor import *
-from RA.models.Regression.GBRegressor import *
-from RA.models.Regression.HGBRegressor import *
-from RA.models.Regression.HuberRegressor import *
-from RA.models.Regression.IsoRegression import *
-from RA.models.Regression.KNRegressor import *
-from RA.models.Regression.LarsCVRegressor import *
-from RA.models.Regression.LarsRegressor import *
-from RA.models.Regression.LassoCVRegressor import *
-from RA.models.Regression.LassoRegressor import *
-from RA.models.Regression.LinRegression import *
-from RA.models.Regression.LinSVRegressor import *
-from RA.models.Regression.MLPRegressor import *
-from RA.models.Regression.PasAggrRegressor import *
-from RA.models.Regression.RadNeigRegressor import *
-from RA.models.Regression.RANSACRegressor import *
-from RA.models.Regression.RFRegressor import *
-from RA.models.Regression.RidgeCVRegressor import *
-from RA.models.Regression.RidgeRegressor import *
-from RA.models.Regression.SGDRegressor import *
-from RA.models.Regression.SVRegressor import *
-from RA.models.Regression.TSenRegressor import *
-from RA.Manager.ModelBlitzTestResult import *
+from RA.models.Classification.ABoostClassifier import *
+from RA.models.Classification.BagClassifier import *
+from RA.models.Classification.DTClassifier import *
+from RA.models.Classification.ETClassifier import *
+from RA.models.Classification.GaussPClassifier import *
+from RA.models.Classification.GBClassifier import *
+from RA.models.Classification.HGBClassifier import *
+from RA.models.Classification.KNClassifier import *
+from RA.models.Classification.LinSVClassifier import *
+from RA.models.Classification.LogRegression import *
+from RA.models.Classification.MLPClassifier import *
+from RA.models.Classification.PasAggrClassifier import *
+from RA.models.Classification.RadNeigClassifier import *
+from RA.models.Classification.RFClassifier import *
+from RA.models.Classification.RidgeClassifier import *
+from RA.models.Classification.RidgeCVClassifier import *
+from RA.models.Classification.SGDClassifier import *
+from RA.models.Classification.SVClassifier import *
+from RA.ModelManager.ModelBlitzTestResult import *
 
 
-class Regression:
+class Classification:
     def __init__(self):
-        self.__models = {"AdaBoostRegressor": ABoostRegressor(),
-                         "ARDRegression": ARDRegression(),
-                         "BaggingRegressor": BagRegressor(),
-                         "BayesRidgeRegressor": BayesRidgeRegressor(),
-                         "DecisionTreeRegressor": DTRegressor(),
-                         "ElasticNetCVRegressor": ENetCVRegressor(),
-                         "ElasticNetRegressor": ENetRegressor(),
-                         "ExtraTreesRegressor": ETRegressor(),
-                         "GammaRegressor": GammRegressor(),
-                         "GaussianProcessRegressor": GaussPRegressor(),
-                         "GradientBoostingRegressor": GBRegressor(),
-                         "HistGradientBoostingRegressor": HGBRegressor(),
-                         "HuberRegressor": HuberRRegressor(),
-                         "IsoRegression": IsoRegression(),
-                         "KNeighborsRegressor": KNRegressor(),
-                         "LarsCVRegressor": LarsCVRegressor(),
-                         "LarsRegressor": LarsRegressor(),
-                         "LassoCVRegressor": LassoCVRegressor(),
-                         "LassoRegressor": LassoRegressor(),
-                         "LinearRegression": LinRegressor(),
-                         "LinSVRegressor": LinSVRegressor(),
-                         "MultiLayerPerceptronRegressor": MLPRegressor(),
-                         "PassiveAggressiveRegressor": PasAggrRegressor(),
-                         "RadiusNeighborsRegressor": RadNeigRegressor(),
-                         "RANSACRegressor": RANSACRegressor(),
-                         "RandomForestRegressor": RFRegressor(),
-                         "RidgeCVRegressor": RidgeCVRegressor(),
-                         "RidgeRegressor": RidgeRegressor(),
-                         "StochasticGradientDescentRegressor": SGDRegressor(),
-                         "SVRegressor": SVRegressor(),
-                         "TSenRegressor": TSenRegressor()}
+        self.__models = {"AdaBoostClassifier": ABoostClassifier(),
+                         "BaggingClassifier": BagClassifier(),
+                         "DecisionTreeClassifier": DTClassifier(),
+                         "ExtraTreesClassifier": ETRegressor(),
+                         "GaussianProcessClassifier": GaussPClassifier(),
+                         "GradientBoostingClassifier": GBClassifier(),
+                         "HistGradientBoostingClassifier": HGBClassifier(),
+                         "KNeighborsClassifier": KNClassifier(),
+                         "LinSVClassifier": LinSVClassifier(),
+                         "LogisticRegression": LogRegression(),
+                         "MultiLayerPerceptronClassifier": MLPClassifier(),
+                         "PassiveAggressiveClassifier": PasAggrClassifier(),
+                         "RadiusNeighborsClassifier": RadNeigClassifier(),
+                         "RandomForestClassifier": RFClassifier(),
+                         "RidgeCVClassifier": RidgeCVClassifier(),
+                         "RidgeClassifier": RidgeClassifier(),
+                         "StochasticGradientDescentClassifier": SGDClassifier(),
+                         "SVClassifier": SVClassifier()}
 
     def get_model(self, model_name: str):
         if model_name not in self.__models:

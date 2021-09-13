@@ -182,7 +182,7 @@ class SVRegressor:
             raise Exception("You should only choose one way to select hyperparameters!")
         if self.__show:
             print(f"Learning {self.__text_name}...")
-        self.model.fit(self.__X_train, self.__Y_train)
+        self.model.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__is_model_fit = True
 
     def fit_grid(self,
@@ -254,7 +254,7 @@ class SVRegressor:
                             cv=cross_validation,
                             n_jobs=grid_n_jobs,
                             scoring='neg_mean_absolute_error')
-        grid.fit(self.__X_train, self.__Y_train)
+        grid.fit(self.__X_train, self.__Y_train.values.ravel())
         self.__grid_best_params = grid.best_params_
         self.__is_grid_fit = True
 
