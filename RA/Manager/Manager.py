@@ -1,11 +1,61 @@
-from RA.ModelManager.Regression import *
-from RA.ModelManager.Classification import *
+import os
+
+from RA.DataSet.DataSet import *
+from RA.Manager.Regression import *
+from RA.Manager.Classification import *
 
 
-class ModelManager:
-    def __init__(self):
+class Manager:
+    def __init__(self, path: str, project_name: str):
+        """
+
+        :param path:
+        :param project_name:
+        """
+        self.project_name = project_name
+        self.project_path = self.__create_project_folder(path=path)
+        self.datasets = {}
         self.regression = Regression()
         self.classification = Classification()
+
+    def __create_project_folder(self, path):
+        if not os.path.exists(path):
+            raise Exception("Wrong way!")
+        if not os.path.exists(os.path.join(path, self.project_name)):
+            os.makedirs(os.path.join(path, self.project_name))
+        return os.path.join(path, self.project_name)
+
+    def add_DataSet(self, dataset: DataSet) -> None:
+        """
+        This method adds a DataSet to the manager
+        :param dataset: The DataSet class that we want to add
+        :return: None
+        """
+        if str(dataset.get_name()) not in self.datasets:
+            self.datasets[dataset.get_name()] = dataset
+            self.datasets[dataset.get_name()].set_saving_path(path=self.project_path)
+        else:
+            raise Exception("A dataset with this name already exists!")
+
+    def DataSet(self, dataset_name: str) -> DataSet:
+        """
+        This method returns DataSet from manager
+        :param dataset_name: The DataSet class name
+        :return: DataSet
+        """
+        if dataset_name not in self.datasets:
+            raise Exception("There is no dataset with this name!")
+        return self.datasets[str(dataset_name)]
+
+    def delate_DataSet(self, dataset_name: str) -> None:
+        """
+        This method delete a DataSet from manager
+        :param dataset_name: The DataSet class that we want delete
+        :return: None
+        """
+        if dataset_name not in self.datasets:
+            raise Exception("There is no dataset with this name!")
+        del self.datasets[str(dataset_name)]
 
     def get_models_names(self) -> List[str]:
         """
@@ -14,7 +64,7 @@ class ModelManager:
         """
         return self.regression.get_models_names() + self.classification.get_models_names()
 
-    def get_model(self, model_name: str):
+    def Model(self, model_name: str):
         """
 
         :param model_name: Model Name
@@ -26,9 +76,6 @@ class ModelManager:
             return self.classification.get_model(model_name=model_name)
         else:
             raise Exception(f"The \'{abs}\' model does not exist!")
-
-    def get_prefit_model_locked_params(self, model):
-        pass
 
     def blitz_test_regressions(self,
                                task: pd.DataFrame,

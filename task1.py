@@ -1,35 +1,39 @@
+import os
 import warnings
 import pandas as pd
-from RA.ModelManager.ModelManager import *
-from RA.ModelManager.Regression import *
+from RA.Manager.Manager import *
+from RA.Manager.Regression import *
 from RA.DataSet.DataSet import *
-from RA.Preprocessing.Preprocessing import *
+from RA.Preprocessing.LabelEncoder import *
 
 
 warnings.filterwarnings("ignore")
 
-original_dataset = DataSet(dataset_project_name="Original DataSet", show=True)
-original_dataset.load_csv_dataset(csv_file="OriginalData/train.csv", delimiter=",")
-original_dataset.fillna()
-print(original_dataset)
+manager = Manager(path=os.getcwd(), project_name="test_project")
+manager.add_DataSet(dataset=DataSet(dataset_name="Original DataSet", show=True))
+manager.DataSet(dataset_name="Original DataSet").load_csv_dataset(csv_file="OriginalData/train.csv", delimiter=",")
+manager.DataSet(dataset_name="Original DataSet").fillna()
+manager.DataSet(dataset_name="Original DataSet").export(dataset_name="123")
+
+quit()
 encoders = {}
 for key in original_dataset.get_keys():
     key_column = original_dataset.get_column_info(column_name=key, extended=True)
     if key_column.get_dtype(50) == "categorical":
-        encoders[key] = Encoder()
+        encoders[key] = LabelEncoder()
         encoders[key].fit(key_column.get_values().tolist())
         original_dataset.delete_column(column=key)
         original_dataset.add_column(column=key, values=encoders[key].encode(key_column.get_values().tolist()))
 original_dataset.update_dataset_info()
 
-task = DataSet(dataset_project_name='task')
+task = DataSet(dataset_name='task')
 task.load_DataFrame(dataframe=original_dataset.get_dataframe())
 task.delete_column(column='SalePrice')
 target = original_dataset.get_column(column='SalePrice')
 target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
 
 # нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
-manager = ModelManager()
+manager = Manager()
 # some_model = manager.get_model(model_name="TSenRegressor")
 # some_model.set_data(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200, show=True)
 # some_model.fit_grid(count=0, grid_n_jobs=-1)

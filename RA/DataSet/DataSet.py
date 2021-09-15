@@ -13,13 +13,13 @@ from RA.DataSet.DataSetColumn import *
 
 
 class DataSet:
-    def __init__(self, dataset_project_name: str, show: bool = False):
+    def __init__(self, dataset_name: str, show: bool = False):
         """
         This is an init method
-        :param dataset_project_name: User nickname of dataset
+        :param dataset_name: User nickname of dataset
         :param show: Do I need to show what is happening
         """
-        self.__dataset_project_name = dataset_project_name
+        self.__dataset_name = dataset_name
         self.__show = show
         self.__delimiter = ","
         self.__encoding = 'utf-8'
@@ -29,6 +29,7 @@ class DataSet:
         self.__dataset_keys = None  # Column names in the dataset
         self.__dataset_keys_count = None  # Number of columns in the dataset
         self.__dataset_file = None
+        self.__dataset_save_path = None
         self.__dataset_analytics = {}
 
     def __len__(self):
@@ -37,7 +38,7 @@ class DataSet:
     def __str__(self):
         table = PrettyTable()
         is_dataset = True if self.__dataset is not None and self.__dataset_len > 0 else False
-        table.title = f"{'Empty ' if not is_dataset else ''}DataSet \"{self.__dataset_project_name}\""
+        table.title = f"{'Empty ' if not is_dataset else ''}DataSet \"{self.__dataset_name}\""
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:
@@ -59,19 +60,19 @@ class DataSet:
         pass  # Сдесь должно быть то же самое, что и просто в str у колонки, но для всех колонок и сведено в 1 таблицу
 
     # SET_GET INIT PARAMS
-    def set_project_name(self, project_name: str) -> None:
+    def set_name(self, project_name: str) -> None:
         """
         This method sets the project_name of the DataSet
         :param project_name: Name of this
         """
-        self.__dataset_project_name = project_name
+        self.__dataset_name = project_name
 
-    def get_project_name(self) -> str:
+    def get_name(self) -> str:
         """
-        This method returns the project_name of the current DataSet
+        This method returns the dataset name of the current DataSet
         :return:
         """
-        return self.__dataset_project_name
+        return self.__dataset_name
 
     def set_show(self, show: bool) -> None:
         """
@@ -245,12 +246,26 @@ class DataSet:
         return self.__dataset[column].tolist()
 
     def delete_column(self, column: str) -> None:
+        """
+        This method removes the column from the dataset
+        :param column: List of column names
+        :return: None
+        """
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         self.__dataset = self.__dataset.drop([column], axis=1)
         if column in self.__dataset_analytics:
             self.__dataset_analytics.pop(column)
         self.__update_dataset_base_info()
+
+    def set_saving_path(self, path: str) -> None:
+        """
+        This method removes the column from the dataset
+        :param path: The path to save the "DataSet" project
+        :return: None
+        """
+        self.__dataset_save_path = path
+
     # /SET_GET INIT PARAMS
 
     def head(self, n: int = 5):
@@ -500,7 +515,7 @@ class DataSet:
                including_json: bool = False,
                including_plots: bool = False,
                delimeter: str = None,
-               encoding: str = None):
+               encoding: str = None) -> None:
         """
         This method exports the dataset as DataSet Project
         :param encoding:
@@ -508,25 +523,30 @@ class DataSet:
         :param dataset_folder: The folder to place the dataset files in
         :param including_json: Responsible for the export the .json config file together with the dataset
         :param including_plots: Responsible for the export the plots config file together with the dataset
-        :return:
+        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if self.__show:
-            print(f"Saving DataSet \'{self.__dataset_project_name}\'...")
+            print(f"Saving DataSet \'{self.__dataset_name}\'...")
             pass
 
         if dataset_name is not None:  # Если явно указано имя выходного файла
             dataset_filename = dataset_name
-        elif self.__dataset_file is None:  # Иначе - берём имя датасета, указанное в классе
-            dataset_filename = self.__dataset_project_name
+        elif self.__dataset_name is not None:  # Иначе - берём имя датасета, указанное в классе
+            dataset_filename = self.__dataset_name
         else:  # Иначе - берём имя из загруженного файла
             dataset_filename = os.path.basename(self.__dataset_file).replace(".csv", "")
 
         folder = ""
-        if dataset_folder is not None:  # Если явно указана папка, куда сохраняемся
+        if self.__dataset_save_path is not None:
+            if os.path.exists(self.__dataset_save_path):  # Если родительский путь верен
+                folder = os.path.join(self.__dataset_save_path, dataset_filename)
+                if not os.path.exists(folder):
+                    os.makedirs(folder)
+        elif dataset_folder is not None:  # Если явно указана папка, куда сохраняемся
             if os.path.exists(dataset_folder):  # Если родительский путь верен
-                folder = os.path.join(dataset_folder, dataset_filename)  # Сдесь под "dataset_filename" понимается проектная папка
+                folder = os.path.join(dataset_folder, dataset_filename)
                 if not os.path.exists(folder):
                     os.makedirs(folder)
             else:
@@ -560,7 +580,7 @@ class DataSet:
 
         if including_plots and self.__dataset is not None:
             for key in tqdm(self.__dataset_keys,
-                            desc=str(f"Creating _{self.__dataset_project_name}_ columns plots"),
+                            desc=str(f"Creating _{self.__dataset_name}_ columns plots"),
                             colour="blue"):
                 if key in self.__dataset_analytics:
                     try:
@@ -603,7 +623,7 @@ class DataSet:
         if sheet_name is not None:  # Если явно указано имя выходного файла
             sheet_name = sheet_name
         elif self.__dataset_file is None:  # Иначе - берём имя датасета, указанное в классе
-            sheet_name = self.__dataset_project_name
+            sheet_name = self.__dataset_name
         else:  # Иначе - берём имя из загруженного файла
             sheet_name = os.path.basename(self.__dataset_file).replace(".csv", "").replace(".xlsx", "")
         pd.DataFrame(self.__dataset).to_excel(path,

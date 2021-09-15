@@ -3,18 +3,15 @@ import json
 import math
 from typing import List
 
-import numpy as np
-import pandas as pd
 
-
-class Encoder:
+class LabelEncoder:
     def __init__(self):
         self.__unique = None
         self.__labels_count = None
         self.__labels_dict = {}
         self.__labels_dict_r = {}
 
-    def fit(self, values: List[bool or int or float or str], ):
+    def fit(self, values: List[bool or int or float or str]):
         if len(values) <= 0:
             raise Exception("The length of the training sample must be greater than 0!")
         for i in range(len(values)):
@@ -29,10 +26,7 @@ class Encoder:
         if isinstance(val, list):
             if len(val) <= 0:
                 raise Exception("The length of the training sample must be greater than 0!")
-            values = []
-            for v in val:
-                values.append(self.__labels_dict[v])
-            return values
+            return [self.__labels_dict[v] for v in val]
         else:
             return self.__labels_dict[val]
 
@@ -40,10 +34,7 @@ class Encoder:
         if isinstance(val, list):
             if len(val) <= 0:
                 raise Exception("The length of the training sample must be greater than 0!")
-            values = []
-            for v in val:
-                values.append(self.__labels_dict_r[v])
-            return values
+            return [self.__labels_dict_r[v] for v in val]
         else:
             return self.__labels_dict_r[val]
 
