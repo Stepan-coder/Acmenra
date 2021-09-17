@@ -15,7 +15,6 @@ manager.DataSet(dataset_name="Original DataSet").load_csv_dataset(csv_file="Orig
 manager.DataSet(dataset_name="Original DataSet").fillna()
 manager.DataSet(dataset_name="Original DataSet").export(dataset_name="123")
 
-quit()
 encoders = {}
 for key in original_dataset.get_keys():
     key_column = original_dataset.get_column_info(column_name=key, extended=True)
@@ -27,10 +26,11 @@ for key in original_dataset.get_keys():
 original_dataset.update_dataset_info()
 
 task = DataSet(dataset_name='task')
-task.load_DataFrame(dataframe=original_dataset.get_dataframe())
+task.load_DataFrame(dataframe=manager.DataSet(dataset_name="Original DataSet").get_dataframe())
 task.delete_column(column='SalePrice')
-target = original_dataset.get_column(column='SalePrice')
-target_analitic = original_dataset.get_column_info(column_name='SalePrice', extended=True)
+target = manager.DataSet(dataset_name="Original DataSet").get_column(column='SalePrice')
+target_analitic = manager.DataSet(dataset_name="Original DataSet").get_column_info(column_name='SalePrice',
+                                                                                   extended=True)
 
 # нужно сделать так, чтобы можно было получать хотя бы названия залоченных параметров без указания датасета
 manager = Manager()
@@ -42,7 +42,7 @@ manager = Manager()
 # quit()
 regs = manager.blitz_test_regressions(task=task.get_dataframe(), target=pd.DataFrame(target), train_split=1200,
                                       prefit=True, n_jobs=-1, show=True)
-model = manager.get_model(model_name=regs[0].model_name)
+model = manager.Model(model_name=regs[0].m odel_name)
 quit()
 converter = None
 converted_task = task.get_dataframe()
