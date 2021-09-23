@@ -56,9 +56,6 @@ class DataSet:
                                column.get_nan_count()])
         return str(table)
 
-    def stat_info(self):
-        pass  # Сдесь должно быть то же самое, что и просто в str у колонки, но для всех колонок и сведено в 1 таблицу
-
     # SET_GET INIT PARAMS
     def set_name(self, project_name: str) -> None:
         """
@@ -165,6 +162,8 @@ class DataSet:
             raise Exception("The row value must be less than the number of rows in the dataset!")
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        if column in self.__dataset_analytics:
+            self.__dataset_analytics.pop(column)
         self.__dataset.loc[index, column] = value
 
     def get_from_field(self, column: str, index: int):
@@ -192,6 +191,9 @@ class DataSet:
             if column not in new_row.keys():
                 raise Exception(f"The \"{column}\" column is missing!")
         self.__dataset.loc[len(self.__dataset)] = [new_row[d] for d in self.__dataset_keys]
+        for key in self.__dataset_keys:
+            if key in self.__dataset_analytics:
+                self.__dataset_analytics.pop(key)
         self.__update_dataset_base_info()
 
     def get_row(self, index: int) -> dict:
@@ -224,6 +226,9 @@ class DataSet:
             raise Exception("The row value must be less than the number of rows in the dataset!")
         self.__dataset = self.__dataset.drop(index=index)
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
+        for key in self.__dataset_keys:
+            if key in self.__dataset_analytics:
+                self.__dataset_analytics.pop(key)
         self.__update_dataset_base_info()
 
     def add_column(self, column: str, values: list, dif_len: bool = False):
@@ -244,6 +249,25 @@ class DataSet:
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return self.__dataset[column].tolist()
+
+    def rename_column(self, column: str, new_column_name: str) -> None:
+        """
+        This method renames the column in the dataset
+        :param column: The name of the column that we are renaming
+        :param new_column_name: New name for the "column" column
+        :return: None
+        """
+        if column not in self.__dataset_keys:
+            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        if new_column_name in self.__dataset_keys:
+            raise Exception(f"The \"{new_column_name}\" column does already exist in this dataset!")
+        self.__dataset = self.__dataset.rename(columns={column: new_column_name})
+        if column in self.__dataset_analytics:
+            column_analytic = self.__dataset_analytics[column]
+            self.__dataset_analytics.pop(column)
+            self.__dataset_analytics[new_column_name] = column_analytic
+            self.__dataset_analytics[new_column_name].set_column_name(new_column_name=new_column_name)
+        self.__update_dataset_base_info()
 
     def delete_column(self, column: str) -> None:
         """
@@ -268,33 +292,33 @@ class DataSet:
 
     # /SET_GET INIT PARAMS
 
-    def head(self, n: int = 5):
+    def head(self, n: int = 5) -> None:
         """
-        This method ...
+        This method prints the first n rows
         :param n: Count of lines
-        :return:
+        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if n <= 0:
             raise Exception("Count of rows 'n' should be large, then 0!")
         if n > len(self.__dataset):
-            raise Exception("Count of rows 'n' should be less, then length of dataset!")
-        return self.__dataset.iloc[:n]
+            n = len(self.__dataset)
+        print(self.__dataset.iloc[:n])
 
-    def tail(self, n: int = 5):
+    def tail(self, n: int = 5) -> None:
         """
-        This method ...
+        This method prints the last n rows
         :param n: Count of lines
-        :return:
+        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if n <= 0:
             raise Exception("Count of rows 'n' should be large, then 0!")
         if n > len(self.__dataset):
-            raise Exception("Count of rows 'n' should be less, then length of dataset!")
-        return self.__dataset.iloc[-n:]
+            n = len(self.__dataset)
+        print(self.__dataset.iloc[-n:])
 
     def dropna(self):
         self.__dataset = self.__dataset.dropna()
@@ -324,7 +348,14 @@ class DataSet:
                                                                   extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_dataframe(self) -> pd.DataFrame:
+    def get_columns_stat_info(self) -> Dict[str, DataSetColumn]:
+        """
+        This method returns DataSet columns stat info
+        :return: Dict["column_name", <DataSetColumn> class]
+        """
+        return self.__dataset_analytics
+
+    def get_DataFrame(self) -> pd.DataFrame:
         """
         This method return dataset as pd.DataFrame
         :return: dataset as pd.DataFrame
@@ -333,10 +364,27 @@ class DataSet:
             raise Exception("The dataset has not been uploaded yet!")
         return self.__dataset
 
-    def join_dataset(self, dataset: pd.DataFrame, dif_len: bool = False):
+    def join_DataFrame(self, dataframe: pd.DataFrame, dif_len: bool = False):
         """
         This method attaches a new dataset to the current one
-        :param dataset: The dataset to be attached to the current one
+        :param dataframe: The pd.DataFrame to be attached to the current one
+        :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
+        """
+        if len(dataframe) == 0:
+            raise Exception("You are trying to add an empty dataset")
+        if len(self.__dataset) != len(dataframe):
+            if not dif_len:
+                raise Exception("The pd.DataFrames must have the same size!")
+        columns_names = list(self.__dataset.keys()) + list(dataframe.keys())
+        if len(set(columns_names)) != len(columns_names):
+            raise Exception("The current dataset and the new dataset have the same column names!")
+        self.__dataset = self.__dataset.join(dataframe)
+        self.__update_dataset_base_info()
+
+    def join_DataSet(self, dataset, dif_len: bool = False):
+        """
+        This method attaches a new dataset to the current one
+        :param dataframe: The pd.DataFrame to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         """
         if len(dataset) == 0:
@@ -344,10 +392,11 @@ class DataSet:
         if len(self.__dataset) != len(dataset):
             if not dif_len:
                 raise Exception("The pd.DataFrames must have the same size!")
-        columns_names = list(self.__dataset.keys()) + list(dataset.keys())
+        columns_names = list(self.__dataset.keys()) + list(dataset.get_keys())
         if len(set(columns_names)) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the same column names!")
-        self.__dataset = self.__dataset.join(dataset)
+        self.__dataset = self.__dataset.join(dataset.get_DataFrame())
+        self.__dataset_analytics = merge_two_dicts(self.__dataset_analytics, dataset.get_columns_stat_info())
         self.__update_dataset_base_info()
 
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):

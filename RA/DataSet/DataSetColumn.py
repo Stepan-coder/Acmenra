@@ -95,10 +95,18 @@ class DataSetColumn:
     def get_str_stat(self) -> StringIndicators:
         return self.__str_stat
 
+    def set_column_name(self, new_column_name: str) -> None:
+        """
+        This method sets the new name for current column
+        :param new_column_name: The new name of this column
+        :return: None
+        """
+        self.__column_name = new_column_name
+
     def get_column_name(self) -> str:
         """
         This method return the name of current column
-        :return:
+        :return: Name of column
         """
         return self.__column_name
 
