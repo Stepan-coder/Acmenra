@@ -111,21 +111,37 @@ class DataSetColumn:
         return self.__column_name
 
     def get_count(self) -> int:
+        """
+        This method returns count of values in this column
+        :return: Count of values
+        """
         if self.__count is None:
             raise Exception("The values were not loaded!")
         return self.__count
 
     def get_count_unique(self) -> int:
+        """
+        This method returns count of unique values in this column
+        :return: Count of unique values
+        """
         if self.__count_unique is None:
             raise Exception("The values were not loaded!")
         return self.__count_unique
 
     def get_nan_count(self) -> int:
+        """
+        This method returns count of NaN values in this column
+        :return: Count of NaN values
+        """
         if self.__nan_count is None:
             raise Exception("The values were not loaded!")
         return self.__nan_count
 
     def get_type(self) -> str:
+        """
+        This method returns type of column
+        :return: Type of column
+        """
         if self.__field_type is None:
             raise Exception("The values were not loaded!")
         return self.__field_type
@@ -163,6 +179,7 @@ class DataSetColumn:
     def get_mean(self) -> int or float or bool:
         """
         This method return maximal value of column
+        :return Mean value of column
         """
         if self.__is_num_stat:
             return self.__num_stat.get_mean()
@@ -174,6 +191,7 @@ class DataSetColumn:
     def get_median(self) -> int or float or bool:
         """
         This method return maximal value of column
+        :return Median value of column
         """
         if self.__is_num_stat:
             return self.__num_stat.get_median()
@@ -282,9 +300,13 @@ class DataSetColumn:
         self.__field_type = data["type"]
         self.__field_dtype = data["dtype"]
         if "Numerical indicators" in data:
-            self.__num_stat: NumericalIndicators = NumericalIndicators()
+            self.__num_stat: NumericalIndicators = NumericalIndicators(extended=False)
             self.__num_stat.get_from_json(data=data["Numerical indicators"])
             self.__is_num_stat = True
+        if "String Indicators" in data:
+            self.__str_stat: StringIndicators = StringIndicators(extended=False)
+            self.__str_stat.get_from_json(data=data["String Indicators"])
+            self.__is_str_stat = True
 
     def to_json(self) -> dict:
         """
@@ -300,11 +322,18 @@ class DataSetColumn:
                     "dtype": self.__field_dtype}
             if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
                 if not self.__num_stat.get_is_numerical_indicators():
-                    self.__num_stat = NumericalIndicators()
+                    self.__num_stat = NumericalIndicators(extended=self.__use_extended)
                     self.__num_stat.set_values(values=self.__values,
                                                extended=self.__use_extended)
                     self.__is_num_stat = True
                 data["Numerical indicators"] = self.__num_stat.to_json()
+            elif self.__field_type.startswith("str"):
+                if not self.__str_stat.get_is_string_indicators():
+                    self.__str_stat = StringIndicators(extended=self.__use_extended)
+                    self.__str_stat.set_values(values=self.__values,
+                                               extended=self.__use_extended)
+                    self.__is_str_stat = True
+                data["String Indicators"] = self.__str_stat.to_json()
             return {self.__column_name: data}
         else:
             raise Exception("The values were not loaded!")

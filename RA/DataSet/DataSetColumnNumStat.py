@@ -128,16 +128,16 @@ class NormalDistribution:
         """
         if not self.__is_normal_distribution:
             raise Exception("The values were not loaded!")
-        return {"Math mode": self.__math_mode,
-                "Math expectation": self.__math_expectation,
-                "Math dispersion": self.__math_dispersion,
-                "Math sigma": self.__math_sigma,
-                "Moda - 3 * sigma": self.__math_expectation - 3 * self.__math_sigma,
-                "Moda - 2 * sigma": self.__math_expectation - 2 * self.__math_sigma,
-                "Moda - 1 * sigma": self.__math_expectation - 1 * self.__math_sigma,
-                "Moda + 1 * sigma": self.__math_expectation + 1 * self.__math_sigma,
-                "Moda + 2 * sigma": self.__math_expectation + 2 * self.__math_sigma,
-                "Moda + 3 * sigma": self.__math_expectation + 3 * self.__math_sigma}
+        return {"Math mode": float(self.__math_mode),
+                "Math expectation": float(self.__math_expectation),
+                "Math dispersion": float(self.__math_dispersion),
+                "Math sigma": float(self.__math_sigma),
+                "Moda - 3 * sigma": float(self.__math_expectation - 3 * self.__math_sigma),
+                "Moda - 2 * sigma": float(self.__math_expectation - 2 * self.__math_sigma),
+                "Moda - 1 * sigma": float(self.__math_expectation - 1 * self.__math_sigma),
+                "Moda + 1 * sigma": float(self.__math_expectation + 1 * self.__math_sigma),
+                "Moda + 2 * sigma": float(self.__math_expectation + 2 * self.__math_sigma),
+                "Moda + 3 * sigma": float(self.__math_expectation + 3 * self.__math_sigma)}
 
     def set_values(self, values: List[int or float]):
         if not self.__is_normal_distribution:
@@ -309,7 +309,7 @@ class NumericalIndicators:
         :param data: Incoming data in json format
         :return: None
         """
-        required_fields = ["Minimal value", "Maximal value", "Average value"]
+        required_fields = ["Minimal value", "Maximal value", "Mean value", "Median value"]
         for rf in required_fields:
             if rf not in data:
                 raise Exception("The resulting json file does not contain required arguments! Try another file.")
@@ -320,7 +320,9 @@ class NumericalIndicators:
         self.__is_numerical_indicators = True
         if "Normal distribution" in data:
             self.normal_distribution = NormalDistribution()
+            self.normal_distribution.from_json(data["Normal distribution"])
             self.__is_normal_distribution = True
+            self.__use_normal_distribution = True
 
     def to_json(self):
         """
@@ -354,5 +356,6 @@ class NumericalIndicators:
         if extended and not self.__is_normal_distribution:
             self.normal_distribution = NormalDistribution()
             self.normal_distribution.set_values(values=values)
+            self.__use_extended = True
             self.__is_normal_distribution = True
 

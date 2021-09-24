@@ -342,7 +342,8 @@ class DataSet:
         """
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        if column_name not in self.__dataset_analytics:
+        if column_name not in self.__dataset_analytics or \
+                (not self.__dataset_analytics[column_name].get_is_extended() == extended and extended == True):
             self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
                                                                   values=self.__dataset[column_name],
                                                                   extended=extended)
@@ -516,15 +517,15 @@ class DataSet:
                           sheet_name: str):
         """
         This method loads the dataset into the DataSet class
-        :param sheet_name:
+        :param sheet_name: Name of sheet in .xlsx file
         :param xlsx_file: The name of the .csv file
         :return:
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if xlsx_file is not None:  # Checking that the uploaded file has the .csv format
-            if not xlsx_file.endswith(".xlsx"):
-                raise Exception("The dataset format should be '.xlsx'!")
+            if not xlsx_file.endswith((".xlsx", ".xls")):
+                raise Exception("The dataset format should be '.xls', '.xlsx'!")
         self.__dataset_file = xlsx_file
         self.__dataset = self.__read_from_xlsx(filename=str(xlsx_file),
                                                sheet_name=sheet_name)
@@ -567,6 +568,7 @@ class DataSet:
                encoding: str = None) -> None:
         """
         This method exports the dataset as DataSet Project
+        :param delimeter:
         :param encoding:
         :param dataset_name: New dataset name (if the user wants to specify another one)
         :param dataset_folder: The folder to place the dataset files in
@@ -678,6 +680,7 @@ class DataSet:
         pd.DataFrame(self.__dataset).to_excel(path,
                                               index=False,
                                               sheet_name=sheet_name)
+
     # CREATE-LOAD-EXPORT DATASET
 
     def __save_plots(self, path: str, column: DataSetColumn):

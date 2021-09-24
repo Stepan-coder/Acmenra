@@ -39,10 +39,7 @@ class LetterDistribution:
         :param data: Input json object
         :return: None
         """
-        required_fields = ["Math mode", "Math mode", "Math dispersion", "Math sigma"]
-        for rf in required_fields:
-            if rf not in data:
-                raise Exception("The resulting json file does not contain required arguments! Try another file.")
+        self.__letter_distribution = data
         self.__is_letter_distribution = True
 
     def to_json(self):
@@ -104,6 +101,18 @@ class StringIndicators:
             table.add_row(["Maximal string length", self.get_max()])
         return str(table)
 
+    def set_values(self, values: List[int or float], extended: bool) -> None:
+        """
+        This method init the filling params of this class
+        :param values: Values from DataSetColumn - values of column from the dataset
+        :param extended: The switch responsible for calculating the indicators of the normal distribution
+        :return: None
+        """
+        if not self.__is_string_indicators:
+            if values is not None:
+                self.__fill_string_indicators(values=values,
+                                              extended=extended)
+
     def get_min(self):
         """
         This method return minimal value of column
@@ -130,7 +139,7 @@ class StringIndicators:
 
     def get_letter_counter(self) -> LetterDistribution:
         if self.__is_letter_counter:
-            return self.letter_counter
+            return self.__letter_counter
 
     def get_is_string_indicators(self) -> bool:
         """
@@ -138,25 +147,13 @@ class StringIndicators:
         """
         return self.__is_string_indicators
 
-    def set_values(self, values: List[int or float], extended: bool) -> None:
-        """
-        This method init the filling params of this class
-        :param values: Values from DataSetColumn - values of column from the dataset
-        :param extended: The switch responsible for calculating the indicators of the normal distribution
-        :return: None
-        """
-        if not self.__is_string_indicators:
-            if values is not None:
-                self.__fill_string_indicators(values=values,
-                                              extended=extended)
-
     def get_from_json(self, data: dict) -> None:
         """
         This method load NumericalIndicators indicators from json
         :param data: Incoming data in json format
         :return: None
         """
-        required_fields = ["Minimal value", "Maximal value", "Average value"]
+        required_fields = ["Minimal string length", "Maximal string length", "Mean string length"]
         for rf in required_fields:
             if rf not in data:
                 raise Exception("The resulting json file does not contain required arguments! Try another file.")
@@ -165,8 +162,10 @@ class StringIndicators:
         self.__mean_len = data["Mean string length"]
         self.__is_string_indicators = True
         if "Letter counter" in data:
-            self.letter_counter = LetterDistribution()
-            self.__is_string_indicators = True
+            self.__letter_counter = LetterDistribution()
+            self.__letter_counter.from_json(data["Letter counter"])
+            self.__use_letter_counter = True
+            self.__is_letter_counter = True
 
     def to_json(self) -> dict:
         """
@@ -175,11 +174,11 @@ class StringIndicators:
         """
         if not self.__is_string_indicators:
             raise Exception("The values were not loaded!")
-        data = {"Minimal value": self.__min_len,
-                "Maximal value": self.__max_len,
-                "Mean value": self.__mean_len}
+        data = {"Minimal string length": self.__min_len,
+                "Maximal string length": self.__max_len,
+                "Mean string length": self.__mean_len}
         if self.__use_letter_counter and self.__is_letter_counter:
-            data['Letter counter'] = self.letter_counter.to_json()
+            data['Letter counter'] = self.__letter_counter.to_json()
         return data
 
     def __fill_string_indicators(self, values: List[int or float] or pd.DataFrame, extended: bool) -> None:
