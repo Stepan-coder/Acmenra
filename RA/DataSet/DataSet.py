@@ -400,6 +400,17 @@ class DataSet:
         self.__dataset_analytics = merge_two_dicts(self.__dataset_analytics, dataset.get_columns_stat_info())
         self.__update_dataset_base_info()
 
+    def concat_DataSet(self, dataset, dif_col=False):
+        if len(dataset) == 0:
+            raise Exception("You are trying to add an empty dataset")
+        columns_names = set(list(self.__dataset.keys()) + list(dataset.get_keys()))
+        if len(self.__dataset.keys()) != len(columns_names):
+            raise Exception("The current dataset and the new dataset have the different column names!")
+        self.__dataset = pd.concat([self.__dataset, dataset.get_DataFrame()])
+        self.__dataset_analytics = []
+        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
+        self.__update_dataset_base_info()
+
     def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
         """
         This method converts column types
