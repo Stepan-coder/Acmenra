@@ -345,7 +345,7 @@ class NumericalIndicators:
         :param values: list of column values
         :param extended: The switch responsible for calculating the indicators of the normal distribution
         """
-        values = values.tolist()
+        values = values
         values = [val for val in values if not math.isnan(val)]
         self.__min = min(values)
         self.__max = max(values)

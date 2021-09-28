@@ -326,7 +326,8 @@ class DataSet:
 
     def fillna(self):
         for key in self.__dataset_keys:
-            column_type = self.get_column_info(column_name=key, extended=False).get_type()
+            column_type = self.get_column_info(column_name=key,
+                                               extended=False).get_type()
             if column_type.startswith('str'):
                 self.__dataset[key] = self.__dataset[key].fillna(value="-")
             elif column_type.startswith('int') or column_type.startswith('float'):
@@ -344,9 +345,10 @@ class DataSet:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics or \
                 (not self.__dataset_analytics[column_name].get_is_extended() == extended and extended == True):
+            print(list(self.__dataset[column_name]))
             self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
-                                                                  values=self.__dataset[column_name],
-                                                                  extended=extended)
+                                                                  values=list(self.__dataset[column_name]),
+                                                                  extended=None)
         return self.__dataset_analytics[column_name]
 
     def get_columns_stat_info(self) -> Dict[str, DataSetColumn]:
@@ -385,7 +387,7 @@ class DataSet:
     def join_DataSet(self, dataset, dif_len: bool = False):
         """
         This method attaches a new dataset to the current one
-        :param dataframe: The pd.DataFrame to be attached to the current one
+        :param dataset: The DataSet object to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         """
         if len(dataset) == 0:
@@ -400,18 +402,29 @@ class DataSet:
         self.__dataset_analytics = merge_two_dicts(self.__dataset_analytics, dataset.get_columns_stat_info())
         self.__update_dataset_base_info()
 
-    def concat_DataSet(self, dataset, dif_col=False):
+    def concat_DataSet(self, dataframe: pd.DataFrame, dif_col=False) -> None:
+        if len(dataframe) == 0:
+            raise Exception("You are trying to add an empty dataset")
+        columns_names = set(list(self.__dataset.keys()) + list(dataframe.keys()))
+        if len(self.__dataset.keys()) != len(columns_names):
+            raise Exception("The current dataset and the new dataset have the different column names!")
+        self.__dataset = pd.concat([self.__dataset, dataframe])
+        self.__dataset_analytics = {}
+        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
+        self.__update_dataset_base_info()
+
+    def concat_DataSet(self, dataset, dif_col=False) -> None:
         if len(dataset) == 0:
             raise Exception("You are trying to add an empty dataset")
         columns_names = set(list(self.__dataset.keys()) + list(dataset.get_keys()))
         if len(self.__dataset.keys()) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the different column names!")
         self.__dataset = pd.concat([self.__dataset, dataset.get_DataFrame()])
-        self.__dataset_analytics = []
+        self.__dataset_analytics = {}
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
 
-    def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None):
+    def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None) -> None:
         """
         This method converts column types
         :param new_fields_type: New type of dataset columns (excluding exceptions)
