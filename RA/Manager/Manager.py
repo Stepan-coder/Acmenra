@@ -25,6 +25,9 @@ class Manager:
             os.makedirs(os.path.join(path, self.project_name))
         return os.path.join(path, self.project_name)
 
+    # def cmd(self, cmd: str):  # Метод для доступа к функционалу из строки с командой
+    #     if cmd.startswith("LOAD DATASET"):
+
     def add_DataSet(self, dataset: DataSet) -> None:
         """
         This method adds a DataSet to the manager

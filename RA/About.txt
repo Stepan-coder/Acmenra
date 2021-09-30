@@ -1,12 +1,8 @@
-Это текстовое описание модуля
-Работает:
--DataSet (Требуются правки в объединении датасетов [слева, справа, сверху, снизу] и доработки по очистке данных, нормальная статистика, расчёт квентилей)
--DataSetColumn
--Errors
--DTRegressor
--ETRegressor
--LinRegression
-Ко всем моделям надо исправить отображение параметров сетки, а так же сделать обучение в % вместо шага
-НЕ Работает:
--LogRegression (Просто не работает)
--DTClassifier (Нужно правильные параметры заполнить)
+# Комманды для датасета
+LOAD DATASET "dataset name" FROM "C:\.....\some.csv"
+LOAD DATASET "dataset name" FROM "C:\.....\some.xlsx"
+IN DATASET "dataset name" DELETE ROW 1
+
+
+# Комманды для моделей
+LOAD MODEL "RandomForestRegressor" FROM "C:\.....\some.model"
