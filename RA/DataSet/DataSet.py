@@ -320,10 +320,6 @@ class DataSet:
             n = len(self.__dataset)
         print(self.__dataset.iloc[-n:])
 
-    def dropna(self):
-        self.__dataset = self.__dataset.dropna()
-        self.__update_dataset_base_info()
-
     def fillna(self):
         for key in self.__dataset_keys:
             column_type = self.get_column_info(column_name=key,
@@ -333,6 +329,22 @@ class DataSet:
             elif column_type.startswith('int') or column_type.startswith('float'):
                 self.__dataset[key] = self.__dataset[key].fillna(value=0)
         self.update_dataset_info()
+
+    def split(self, count: int) -> List:
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if count <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        counter = 0
+        result = []
+        while counter * count < len(self.__dataset):
+            this_dataset = DataSet(dataset_name=f"splited_{self.__dataset_name}_{counter}")
+            this_dataset.load_DataFrame(dataframe=self.__dataset[counter * count: (counter + 1) * count])
+            this_dataset.set_delimiter(delimiter=self.get_delimiter())
+            this_dataset.set_encoding(encoding=self.get_encoding())
+            result.append(this_dataset)
+            counter += 1
+        return result
 
     def get_column_info(self, column_name: str, extended: bool) -> DataSetColumn:
         """
@@ -402,7 +414,7 @@ class DataSet:
         self.__dataset_analytics = merge_two_dicts(self.__dataset_analytics, dataset.get_columns_stat_info())
         self.__update_dataset_base_info()
 
-    def concat_DataSet(self, dataframe: pd.DataFrame, dif_col=False) -> None:
+    def concat_DataFrame(self, dataframe: pd.DataFrame, dif_col=False) -> None:
         if len(dataframe) == 0:
             raise Exception("You are trying to add an empty dataset")
         columns_names = set(list(self.__dataset.keys()) + list(dataframe.keys()))
@@ -507,6 +519,7 @@ class DataSet:
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         self.__dataset = dataframe
+        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
