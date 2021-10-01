@@ -1,13 +1,16 @@
 import os
 import sys
+import odf
 import json
 import math
+import xlrd
+import openpyxl
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-from typing import Dict
+from typing import Dict, List, Any, Union
 from prettytable import PrettyTable
 from RA.DataSet.DataSetColumn import *
 
@@ -511,10 +514,28 @@ class DataSet:
         self.__is_dataset_loaded = True
         self.__update_dataset_base_info()
 
-    def load_DataFrame(self, dataframe: pd.DataFrame):
+    def create_dataset_from_list(self,
+                                 data: List[List[Any]],
+                                 columns: List[str],
+                                 delimiter: str = ",",
+                                 encoding: str = 'utf-8') -> None:
+        if self.__is_dataset_loaded:
+            raise Exception("The dataset is already loaded!")
+        if len(data) == 0:
+            raise Exception('The number of elements in "data" must be greater than 0!')
+        if len(columns) == 0 or len(columns) != len(data[0]):
+            raise Exception('There should be as many column names as there are columns in "data"!')
+        self.__dataset = pd.DataFrame(data, columns=columns)
+        self.set_delimiter(delimiter=delimiter)
+        self.set_encoding(encoding=encoding)
+        self.__update_dataset_base_info()
+        self.__is_dataset_loaded =True
+
+    def load_DataFrame(self, dataframe: pd.DataFrame) -> None:
         """
         This method loads the dataset into the DataSet class
         :param dataframe: Explicitly specifying pd. DataFrame as a dataset
+        :return None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -549,22 +570,22 @@ class DataSet:
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
-    def load_xlsx_dataset(self,
-                          xlsx_file: str,
-                          sheet_name: str):
+    def load_excel_dataset(self,
+                           excel_file: str,
+                           sheet_name: str) -> None:
         """
         This method loads the dataset into the DataSet class
-        :param sheet_name: Name of sheet in .xlsx file
-        :param xlsx_file: The name of the .csv file
-        :return:
+        :param sheet_name: Name of sheet in excel file
+        :param excel_file: The name of the excel file
+        :return: None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
-        if xlsx_file is not None:  # Checking that the uploaded file has the .csv format
-            if not xlsx_file.endswith((".xlsx", ".xls")):
-                raise Exception("The dataset format should be '.xls', '.xlsx'!")
-        self.__dataset_file = xlsx_file
-        self.__dataset = self.__read_from_xlsx(filename=str(xlsx_file),
+        if excel_file is not None:  # Checking that the uploaded file has the .csv format
+            if not excel_file.endswith((".xlsx", ".xls", ".xlsb", '.ods')):
+                raise Exception("The dataset format should be '.xls', '.xlsx', '.xlsb', '.ods'!")
+        self.__dataset_file = excel_file
+        self.__dataset = self.__read_from_xlsx(filename=str(excel_file),
                                                sheet_name=sheet_name)
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
@@ -605,8 +626,8 @@ class DataSet:
                encoding: str = None) -> None:
         """
         This method exports the dataset as DataSet Project
-        :param delimeter:
-        :param encoding:
+        :param delimeter: Symbol-split in a .csv file
+        :param encoding: Explicit indication of the .csv file encoding
         :param dataset_name: New dataset name (if the user wants to specify another one)
         :param dataset_folder: The folder to place the dataset files in
         :param including_json: Responsible for the export the .json config file together with the dataset
@@ -685,8 +706,14 @@ class DataSet:
     def to_csv(self,
                path: str,
                delimeter: str = None,
-               encoding: str = None):
-
+               encoding: str = None) -> None:
+        """
+        This method saves pd.DataFrame to .csv file
+        :param path: Path to .csv file
+        :param delimeter: Symbol-split in a .csv file
+        :param encoding: Explicit indication of the .csv file encoding
+        :return: None
+        """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if not path.endswith(".csv"):
@@ -703,7 +730,12 @@ class DataSet:
     def to_excel(self,
                  path: str,
                  sheet_name: str = None):
-
+        """
+        This method saves pd.DataFrame to excel file
+        :param path: The path to save the excel file
+        :param sheet_name: Name of sheet in excel file
+        :return: None
+        """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if not path.endswith(".xlsx"):
@@ -831,12 +863,25 @@ class DataSet:
         """
         This method reads the dataset from a .csv file
         :param filename: The name of the .csv file
-        :param delimiter: Symbol-split in a .csv file
-        :param encoding: Explicit indication of the .csv file encoding
         :return: The dataframe read from the file
         """
-        return pd.read_excel(filename,
-                             sheet_name=sheet_name)
+        try:
+            return pd.read_excel(filename, sheet_name=sheet_name, engine="xlrd")
+        except:
+            pass
+        try:
+            return pd.read_excel(filename, sheet_name=sheet_name, engine="openpyxl")
+        except:
+            pass
+        try:
+            return pd.read_excel(filename, sheet_name=sheet_name, engine="odf")
+        except:
+            pass
+        try:
+            return pd.read_excel(filename, sheet_name=sheet_name, engine="pyxlsb")
+        except:
+            pass
+
 
 
 def merge_two_dicts(dict1: dict, dict2: dict) -> dict:
