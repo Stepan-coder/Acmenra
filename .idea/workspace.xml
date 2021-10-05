@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="" />
+    <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/task1.py" beforeDir="false" afterPath="$PROJECT_DIR$/task1.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -15,9 +18,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
   <component name="RunManager" selected="Python.task1">
-    <configuration name="task1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ML_feachers" />
+    <configuration name="task1" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true" nameIsGenerated="true">
+      <module name="RocketAI" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -65,6 +74,7 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -77,44 +87,6 @@
       <updated>1632533276653</updated>
     </task>
     <servers />
-  </component>
-  <component name="WindowStateProjectService">
-    <state width="2539" height="2" key="GridCell.Tab.0.bottom" timestamp="1633125812257">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="2" key="GridCell.Tab.0.bottom/0.0.2560.1080@0.0.2560.1080" timestamp="1633125812257" />
-    <state width="2539" height="2" key="GridCell.Tab.0.center" timestamp="1633125812257">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="2" key="GridCell.Tab.0.center/0.0.2560.1080@0.0.2560.1080" timestamp="1633125812257" />
-    <state width="2539" height="2" key="GridCell.Tab.0.left" timestamp="1633125812257">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="2" key="GridCell.Tab.0.left/0.0.2560.1080@0.0.2560.1080" timestamp="1633125812257" />
-    <state width="2539" height="2" key="GridCell.Tab.0.right" timestamp="1633125812257">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="2" key="GridCell.Tab.0.right/0.0.2560.1080@0.0.2560.1080" timestamp="1633125812257" />
-    <state width="2539" height="363" key="GridCell.Tab.1.bottom" timestamp="1632767118380">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="363" key="GridCell.Tab.1.bottom/0.0.2560.1080@0.0.2560.1080" timestamp="1632767118380" />
-    <state width="2539" height="363" key="GridCell.Tab.1.center" timestamp="1632767118379">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="363" key="GridCell.Tab.1.center/0.0.2560.1080@0.0.2560.1080" timestamp="1632767118379" />
-    <state width="2539" height="363" key="GridCell.Tab.1.left" timestamp="1632767118379">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="363" key="GridCell.Tab.1.left/0.0.2560.1080@0.0.2560.1080" timestamp="1632767118379" />
-    <state width="2539" height="363" key="GridCell.Tab.1.right" timestamp="1632767118379">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="363" key="GridCell.Tab.1.right/0.0.2560.1080@0.0.2560.1080" timestamp="1632767118379" />
-    <state x="844" y="269" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1632767085642">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state x="844" y="269" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.2560.1080@0.0.2560.1080" timestamp="1632767085642" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

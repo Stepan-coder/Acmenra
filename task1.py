@@ -1,6 +1,5 @@
 from RA.Manager.Manager import *
 from RA.DataSet.DataSet import *
-from RA.Preprocessing.LabelEncoder import *
 
 
 warnings.filterwarnings("ignore")
@@ -20,13 +19,6 @@ manager.DataSet("Original DataSet").add_row(new_row={"A": 9, "B": 3})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 10, "B": 3})
 # manager.DataSet("Original DataSet").head()
 splitted_DatatSet = manager.DataSet("Original DataSet").split(count=3)
-splitted_DatatSet[0].head()
-print()
-splitted_DatatSet[1].head()
-print()
-splitted_DatatSet[2].head()
-print()
-splitted_DatatSet[3].head()
 for sp in splitted_DatatSet:
     print(len(sp))
 # manager.add_DataSet(dataset=DataSet(dataset_name="Original DataSet1", show=True))
