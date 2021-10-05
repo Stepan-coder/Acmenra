@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import Any
-from RocketAI.RA.DataSet.DataSetColumn import *
+from RA.DataSet.DataSetColumn import *
 
 
 class DataSet:

@@ -1,5 +1,5 @@
-from RocketAI.RA.DataSet.DataSetColumnNumStat import *
-from RocketAI.RA.DataSet.DataSetColumnStrStat import *
+from RA.DataSet.DataSetColumnNumStat import *
+from RA.DataSet.DataSetColumnStrStat import *
 
 
 class DataSetColumn:

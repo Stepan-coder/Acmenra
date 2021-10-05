@@ -1,24 +1,24 @@
 from operator import itemgetter
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, MaxAbsScaler, Normalizer
-from RocketAI.RA.models.Classification.ABoostClassifier import *
-from RocketAI.RA.models.Classification.BagClassifier import *
-from RocketAI.RA.models.Classification.DTClassifier import *
-from RocketAI.RA.models.Classification.ETClassifier import *
-from RocketAI.RA.models.Classification.GaussPClassifier import *
-from RocketAI.RA.models.Classification.GBClassifier import *
-from RocketAI.RA.models.Classification.HGBClassifier import *
-from RocketAI.RA.models.Classification.KNClassifier import *
-from RocketAI.RA.models.Classification.LinSVClassifier import *
-from RocketAI.RA.models.Classification.LogRegression import *
-from RocketAI.RA.models.Classification.MLPClassifier import *
-from RocketAI.RA.models.Classification.PasAggrClassifier import *
-from RocketAI.RA.models.Classification.RadNeigClassifier import *
-from RocketAI.RA.models.Classification.RFClassifier import *
-from RocketAI.RA.models.Classification.RidgeClassifier import *
-from RocketAI.RA.models.Classification.RidgeCVClassifier import *
-from RocketAI.RA.models.Classification.SGDClassifier import *
-from RocketAI.RA.models.Classification.SVClassifier import *
-from RocketAI.RA.Manager.ModelBlitzTestResult import *
+from RA.models.Classification.ABoostClassifier import *
+from RA.models.Classification.BagClassifier import *
+from RA.models.Classification.DTClassifier import *
+from RA.models.Classification.ETClassifier import *
+from RA.models.Classification.GaussPClassifier import *
+from RA.models.Classification.GBClassifier import *
+from RA.models.Classification.HGBClassifier import *
+from RA.models.Classification.KNClassifier import *
+from RA.models.Classification.LinSVClassifier import *
+from RA.models.Classification.LogRegression import *
+from RA.models.Classification.MLPClassifier import *
+from RA.models.Classification.PasAggrClassifier import *
+from RA.models.Classification.RadNeigClassifier import *
+from RA.models.Classification.RFClassifier import *
+from RA.models.Classification.RidgeClassifier import *
+from RA.models.Classification.RidgeCVClassifier import *
+from RA.models.Classification.SGDClassifier import *
+from RA.models.Classification.SVClassifier import *
+from RA.Manager.ModelBlitzTestResult import *
 
 
 class Classification:

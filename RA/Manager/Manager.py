@@ -1,6 +1,6 @@
-from RocketAI.RA.DataSet.DataSet import *
-from RocketAI.RA.Manager.Regression import *
-from RocketAI.RA.Manager.Classification import *
+from RA.DataSet.DataSet import *
+from RA.Manager.Regression import *
+from RA.Manager.Classification import *
 
 
 class Manager:
