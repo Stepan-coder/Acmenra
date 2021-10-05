@@ -9,10 +9,11 @@ from typing import Dict
 from prettytable import PrettyTable
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
+from sklearn.experimental import enable_hist_gradient_boosting
 from sklearn.ensemble import HistGradientBoostingRegressor
-from RocketAI.RA.Errors import Errors
-from RocketAI.RA.models.Param import *
-from RocketAI.RA.models.static_methods import *
+from RA.Errors import Errors
+from RA.models.Param import *
+from RA.models.static_methods import *
 
 
 class HGBRegressor:
