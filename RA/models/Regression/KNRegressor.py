@@ -1,20 +1,18 @@
 import os
-import math
 import time
 import copy
 import warnings
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from typing import Dict, List
+from typing import Dict
 from prettytable import PrettyTable
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
-from RA.Errors import Errors
-from RA.models.Param import *
-from RA.models.static_methods import *
+from RocketAI.RA.Errors import Errors
+from RocketAI.RA.models.Param import *
+from RocketAI.RA.models.static_methods import *
 
 
 class KNRegressor:

@@ -1,18 +1,12 @@
 import os
 import sys
-import odf
 import json
-import math
-import xlrd
-import openpyxl
-import numpy as np
-import pandas as pd
+import warnings
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-from typing import Dict, List, Any, Union
-from prettytable import PrettyTable
-from RA.DataSet.DataSetColumn import *
+from typing import Any
+from RocketAI.RA.DataSet.DataSetColumn import *
 
 
 class DataSet:
@@ -184,7 +178,17 @@ class DataSet:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return self.__dataset.at[index, column]
 
-    def add_row(self, new_row: dict):
+    def add_row(self, new_row: Dict[str, Any]) -> None:
+        """
+        This method adds a new row to the dataset
+        :param new_row: The string to be added to the dataset. In dictionary format,
+        where the key is the column name and the value is a list of values
+        :return: None
+        """
+        if not self.__is_dataset_loaded:
+            warnings.warn(f'The dataset was not loaded. '
+                          f'An empty dataset was created with the columns {list(new_row.keys())}!', UserWarning)
+            self.create_empty_dataset(columns_names=list(new_row.keys()))
         if len(set(new_row.keys())) != len(new_row.keys()):
             raise Exception(f"Column names should not be repeated!")
         for column in new_row:
@@ -199,17 +203,19 @@ class DataSet:
                 self.__dataset_analytics.pop(key)
         self.__update_dataset_base_info()
 
-    def get_row(self, index: int) -> dict:
+    def get_row(self, index: int) -> Dict[str, Any]:
         """
         This method returns a row of the dataset in dictionary format, where the keys are the column names and the
         values are the values in the columns
         :param index: Index of the dataset string
-        :return:
+        :return: Dict[str, Any]
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if index < 0:
-            raise Exception("The string value must be greater than 0!")
+            raise Exception("The row index must be greater than 0!")
         if index > self.__dataset_len:
-            raise Exception("The row value must be less than the number of rows in the dataset!")
+            raise Exception("The row index must be less than the number of rows in the dataset!")
         self.__update_dataset_base_info()
         result = {}
         for column in self.__dataset_keys:
@@ -218,13 +224,16 @@ class DataSet:
                                                      index=index)
         return result
 
-    def delete_row(self, index) -> None:
+    def delete_row(self, index: int) -> None:
         """
         This method delete row from dataset
         :param index: Index of the dataset string
+        :return None
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if index < 0:
-            raise Exception("The string value must be greater than 0!")
+            raise Exception("The row index must be greater than 0!")
         if index > self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
         self.__dataset = self.__dataset.drop(index=index)
@@ -234,7 +243,17 @@ class DataSet:
                 self.__dataset_analytics.pop(key)
         self.__update_dataset_base_info()
 
-    def add_column(self, column: str, values: list, dif_len: bool = False):
+    def add_column(self, column: str, values: list, dif_len: bool = False) -> None:
+        """
+        This method adds the column to the dataset on the right
+        :param column: String name of the column to be added
+        :param values: List of column values
+        :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
+        :return: None
+        """
+        if not self.__is_dataset_loaded:
+            warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
+            self.create_empty_dataset()
         if column in self.__dataset_keys:
             raise Exception(f"The '{column}' column already exists in the presented dataset!")
         if len(self.__dataset) != len(values) and len(self.__dataset) != 0:
@@ -247,8 +266,10 @@ class DataSet:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column: List of column names
-        :return: Return the selected column
+        :return: List
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return self.__dataset[column].tolist()
@@ -260,6 +281,8 @@ class DataSet:
         :param new_column_name: New name for the "column" column
         :return: None
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         if new_column_name in self.__dataset_keys:
@@ -278,6 +301,8 @@ class DataSet:
         :param column: List of column names
         :return: None
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if column not in self.__dataset_keys:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         self.__dataset = self.__dataset.drop([column], axis=1)
@@ -323,7 +348,14 @@ class DataSet:
             n = len(self.__dataset)
         print(self.__dataset.iloc[-n:])
 
-    def fillna(self):
+    def fillna(self) -> None:
+        """
+        This method automatically fills in "null" values:
+         For "int" -> 0.
+         For "float" -> 0.0.
+         For "str" -> "-".
+        :return: None
+        """
         for key in self.__dataset_keys:
             column_type = self.get_column_info(column_name=key,
                                                extended=False).get_type()
@@ -334,10 +366,15 @@ class DataSet:
         self.update_dataset_info()
 
     def split(self, count: int) -> List:
+        """
+        This method automatically divides the DataSet into a list of DataSets with a maximum of "count" rows in each
+        :param count: Maximal count of rows in new DataSets
+        :return: List[DataSet]
+        """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
         if count <= 0:
-            raise Exception("Count of rows 'n' should be large, then 0!")
+            raise Exception("Count of rows 'count' should be large, then 0!")
         counter = 0
         result = []
         while counter * count < len(self.__dataset):
@@ -354,8 +391,10 @@ class DataSet:
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
         :param extended: Responsible for calculating additional parameters
-        :return:
+        :return: DataSetColumn
         """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics or \
@@ -382,12 +421,16 @@ class DataSet:
             raise Exception("The dataset has not been uploaded yet!")
         return self.__dataset
 
-    def join_DataFrame(self, dataframe: pd.DataFrame, dif_len: bool = False):
+    def join_DataFrame(self, dataframe: pd.DataFrame, dif_len: bool = False) -> None:
         """
         This method attaches a new dataset to the current one
         :param dataframe: The pd.DataFrame to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
+        :return None
         """
+        if self.__dataset is None:
+            warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
+            self.create_empty_dataset()
         if len(dataframe) == 0:
             raise Exception("You are trying to add an empty dataset")
         if len(self.__dataset) != len(dataframe):
@@ -396,39 +439,51 @@ class DataSet:
         columns_names = list(self.__dataset.keys()) + list(dataframe.keys())
         if len(set(columns_names)) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the same column names!")
-        self.__dataset = self.__dataset.join(dataframe)
+        self.__dataset = self.__dataset.join(dataframe,
+                                             how='outer')
         self.__update_dataset_base_info()
 
-    def join_DataSet(self, dataset, dif_len: bool = False):
+    def join_DataSet(self, dataset, dif_len: bool = False) -> None:
         """
         This method attaches a new dataset to the current one
         :param dataset: The DataSet object to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
+        :return None
         """
+        if self.__dataset is None:
+            warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
+            self.create_empty_dataset()
         if len(dataset) == 0:
             raise Exception("You are trying to add an empty dataset")
-        if len(self.__dataset) != len(dataset):
+        if len(self.__dataset) != len(dataset) and len(self.__dataset) > 0:
             if not dif_len:
                 raise Exception("The pd.DataFrames must have the same size!")
         columns_names = list(self.__dataset.keys()) + list(dataset.get_keys())
         if len(set(columns_names)) != len(columns_names):
             raise Exception("The current dataset and the new dataset have the same column names!")
-        self.__dataset = self.__dataset.join(dataset.get_DataFrame())
+        self.__dataset = self.__dataset.join(dataset.get_DataFrame(),
+                                             how='outer')
         self.__dataset_analytics = merge_two_dicts(self.__dataset_analytics, dataset.get_columns_stat_info())
         self.__update_dataset_base_info()
 
-    def concat_DataFrame(self, dataframe: pd.DataFrame, dif_col=False) -> None:
+    def concat_DataFrame(self, dataframe: pd.DataFrame) -> None:
+        if self.__dataset is None:
+            warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
+            self.create_empty_dataset()
         if len(dataframe) == 0:
             raise Exception("You are trying to add an empty dataset")
         columns_names = set(list(self.__dataset.keys()) + list(dataframe.keys()))
-        if len(self.__dataset.keys()) != len(columns_names):
+        if len(self.__dataset.keys()) != len(columns_names) and len(self.__dataset) > 0:
             raise Exception("The current dataset and the new dataset have the different column names!")
         self.__dataset = pd.concat([self.__dataset, dataframe])
         self.__dataset_analytics = {}
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
 
-    def concat_DataSet(self, dataset, dif_col=False) -> None:
+    def concat_DataSet(self, dataset) -> None:
+        if self.__dataset is None:
+            warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
+            self.create_empty_dataset()
         if len(dataset) == 0:
             raise Exception("You are trying to add an empty dataset")
         columns_names = set(list(self.__dataset.keys()) + list(dataset.get_keys()))
@@ -444,6 +499,7 @@ class DataSet:
         This method converts column types
         :param new_fields_type: New type of dataset columns (excluding exceptions)
         :param exception: Fields that have a different type from the main dataset type
+        :return None
         """
         if new_fields_type is None and exception is None:
             raise Exception("One of the parameters \'new_fields_type\' or \'exception\' must not be empty!")
@@ -456,11 +512,12 @@ class DataSet:
                                     new_field_type=exception[field])
         self.__update_dataset_base_info()
 
-    def set_field_type(self, field_name: str, new_field_type: type):
+    def set_field_type(self, field_name: str, new_field_type: type) -> None:
         """
         This method converts column type
         :param field_name: The name of the column in which we want to change the type
         :param new_field_type: Field type
+        :return None
         """
         if new_field_type != str and new_field_type != int and new_field_type != float:
             raise Exception(f"'{new_field_type}' is an invalid data type for conversion. Valid types: int, float, str")
@@ -481,7 +538,11 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def update_dataset_info(self):
+    def update_dataset_info(self) -> None:
+        """
+        This method updates, the analitic-statistics data about already precalculated columns
+        :return: None
+        """
         self.__update_dataset_base_info()
         for key in self.__dataset_keys:
             is_extended = False
@@ -503,6 +564,8 @@ class DataSet:
         :param encoding: Explicit indication of the .csv file encoding
         :return:
         """
+        if self.__is_dataset_loaded:
+            raise Exception("The dataset is already loaded!")
         if columns_names is not None:
             if len(set(columns_names)) != len(columns_names):
                 raise Exception(f"Column names should not be repeated!")
@@ -547,13 +610,13 @@ class DataSet:
     def load_csv_dataset(self,
                          csv_file: str,
                          delimiter: str,
-                         encoding: str = 'utf-8'):
+                         encoding: str = 'utf-8') -> None:
         """
         This method loads the dataset into the DataSet class
         :param csv_file: The name of the .csv file
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return:
+        :return: None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -592,11 +655,12 @@ class DataSet:
 
     def load_dataset_project(self,
                              dataset_project_folder: str,
-                             json_config_filename: str):
+                             json_config_filename: str) -> None:
         """
         This method loads the dataset into the DataSet class
         :param dataset_project_folder: The path to the .csv file
         :param json_config_filename:
+        :return None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -729,7 +793,7 @@ class DataSet:
 
     def to_excel(self,
                  path: str,
-                 sheet_name: str = None):
+                 sheet_name: str = None) -> None:
         """
         This method saves pd.DataFrame to excel file
         :param path: The path to save the excel file
@@ -749,14 +813,12 @@ class DataSet:
         pd.DataFrame(self.__dataset).to_excel(path,
                                               index=False,
                                               sheet_name=sheet_name)
-
     # CREATE-LOAD-EXPORT DATASET
 
     def __save_plots(self, path: str, column: DataSetColumn):
         if column.get_is_num_stat():
             self.__save_min_average_max_plot(path=path,
                                              column=column)
-
             if column.num_stat.get_is_normal_distribution():
                 self.__save_normal_distribution_plot(path=path,
                                                      column=column)
@@ -815,10 +877,11 @@ class DataSet:
             plt.savefig(os.path.join(path, plot_title + ".png"))
         plt.close()
 
-    def __read_dataset_info_from_json(self, data):
+    def __read_dataset_info_from_json(self, data) -> None:
         """
         This method reads config and statistics info from .json file
         :param data: json data
+        :return None
         """
         self.__dataset_file = data["dataset_filename"]
         self.__dataset_keys = data["columns_names"]
@@ -831,9 +894,10 @@ class DataSet:
             self.__dataset_analytics[dk].get_from_json(data=data["columns"][dk],
                                                        values=self.__dataset[dk].values)
 
-    def __update_dataset_base_info(self):
+    def __update_dataset_base_info(self) -> None:
         """
         This method updates the basic information about the dataset
+        :return None
         """
         if self.__dataset is None:
             print("dataset is None")
@@ -851,7 +915,7 @@ class DataSet:
         :param filename: The name of the .csv file
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return: The dataframe read from the file
+        :return: pd.DataFrame
         """
         return pd.read_csv(filename,
                            encoding=encoding,
@@ -863,7 +927,7 @@ class DataSet:
         """
         This method reads the dataset from a .csv file
         :param filename: The name of the .csv file
-        :return: The dataframe read from the file
+        :return: pd.DataFrame
         """
         try:
             return pd.read_excel(filename, sheet_name=sheet_name, engine="xlrd")
@@ -883,12 +947,11 @@ class DataSet:
             pass
 
 
-
 def merge_two_dicts(dict1: dict, dict2: dict) -> dict:
     """
     This method merge two dicts
     :param dict1: First dict to merge
     :param dict2: Second dict to merge
-    :return: result merged dict
+    :return: dict
     """
     return {**dict1, **dict2}

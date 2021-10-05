@@ -1,8 +1,6 @@
-import os
-
-from RA.DataSet.DataSet import *
-from RA.Manager.Regression import *
-from RA.Manager.Classification import *
+from RocketAI.RA.DataSet.DataSet import *
+from RocketAI.RA.Manager.Regression import *
+from RocketAI.RA.Manager.Classification import *
 
 
 class Manager:
@@ -127,3 +125,7 @@ class Manager:
                                               prefit=prefit,
                                               n_jobs=n_jobs,
                                               show=show)
+
+
+if __name__ == '__main__':
+    pass

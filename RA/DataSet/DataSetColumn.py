@@ -1,8 +1,5 @@
-import math
-import pandas as pd
-from prettytable import PrettyTable
-from RA.DataSet.DataSetColumnNumStat import *
-from RA.DataSet.DataSetColumnStrStat import *
+from RocketAI.RA.DataSet.DataSetColumnNumStat import *
+from RocketAI.RA.DataSet.DataSetColumnStrStat import *
 
 
 class DataSetColumn:
