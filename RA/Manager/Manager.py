@@ -100,8 +100,6 @@ class Manager:
         :return: str
         """
         return self.__project_path
-    # def cmd(self, cmd: str):  # Метод для доступа к функционалу из строки с командой
-    #     if cmd.startswith("LOAD DATASET"):
 
     def DataSet(self, dataset_name: str) -> DataSet:
         """
@@ -113,17 +111,27 @@ class Manager:
             raise Exception("There is no DataSet with this name!")
         return self.__datasets[str(dataset_name)]
 
+    def create_DataSet(self, dataset_name: str) -> None:
+        """
+        This method creates a new DataSet in manager
+        :param dataset_name: The name of new DataSet
+        :return: None
+        """
+        if dataset_name not in self.__datasets:
+            raise Exception("There is no DataSet with this name!")
+        self.__datasets[dataset_name] = DataSet(dataset_name=dataset_name)
+        self.__datasets[dataset_name].set_saving_path(path=self.__project_path)
+
     def add_DataSet(self, dataset: DataSet) -> None:
         """
         This method adds a DataSet to the manager
         :param dataset: The DataSet class that we want to add
         :return: None
         """
-        if str(dataset.get_name()) not in self.__datasets:
-            self.__datasets[dataset.get_name()] = dataset
-            self.__datasets[dataset.get_name()].set_saving_path(path=self.__project_path)
-        else:
+        if str(dataset.get_name()) in self.__datasets:
             raise Exception("A dataset with this name already exists!")
+        self.__datasets[dataset.get_name()] = dataset
+        self.__datasets[dataset.get_name()].set_saving_path(path=self.__project_path)
 
     def delate_DataSet(self, dataset_name: str) -> None:
         """
