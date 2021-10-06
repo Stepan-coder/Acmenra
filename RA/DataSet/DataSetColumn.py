@@ -1,3 +1,4 @@
+from prettytable import PrettyTable
 from RA.DataSet.DataSetColumnNumStat import *
 from RA.DataSet.DataSetColumnStrStat import *
 
@@ -305,10 +306,10 @@ class DataSetColumn:
             self.__str_stat.get_from_json(data=data["String Indicators"])
             self.__is_str_stat = True
 
-    def to_json(self) -> dict:
+    def to_json(self) -> Dict[str, dict]:
         """
         This method export DataSet statistics as json
-        :return: dict[column name, json statistic]
+        :return: Dict[str, json]
         """
         if self.__values is not None:
             data = {"column_name": self.__column_name,

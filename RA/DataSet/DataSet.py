@@ -6,15 +6,17 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import Any
+from prettytable import PrettyTable
 from RA.DataSet.DataSetColumn import *
 
 
 class DataSet:
-    def __init__(self, dataset_name: str, show: bool = False):
+    def __init__(self, dataset_name: str, show: bool = False) -> None:
         """
         This is an init method
         :param dataset_name: User nickname of dataset
         :param show: Do I need to show what is happening
+        :return None
         """
         self.__dataset_name = dataset_name
         self.__show = show
@@ -29,8 +31,11 @@ class DataSet:
         self.__dataset_save_path = None
         self.__dataset_analytics = {}
 
-    def __len__(self):
-        return len(self.__dataset)
+    def __len__(self) -> int:
+        if self.__dataset is not None:
+            return len(self.__dataset)
+        else:
+            return 0
 
     def __str__(self):
         table = PrettyTable()
@@ -54,17 +59,22 @@ class DataSet:
         return str(table)
 
     # SET_GET INIT PARAMS
-    def set_name(self, project_name: str) -> None:
+    def set_name(self, dataset_name: str) -> None:
         """
         This method sets the project_name of the DataSet
-        :param project_name: Name of this
+        :param dataset_name: Name of this
+        :return None
         """
-        self.__dataset_name = project_name
+        if not isinstance(dataset_name, str):
+            raise Exception("The name must be a string!")
+        if not len(dataset_name) > 0:
+            raise Exception("The name must be longer than 0 characters!")
+        self.__dataset_name = dataset_name
 
     def get_name(self) -> str:
         """
         This method returns the dataset name of the current DataSet
-        :return:
+        :return: str
         """
         return self.__dataset_name
 
@@ -72,13 +82,16 @@ class DataSet:
         """
         This method sets the show switcher
         :param show: Name of this
+        :return None
         """
+        if not isinstance(show, bool):
+            raise Exception('The "show" parameter must be boolean!')
         self.__show = show
 
     def get_show(self) -> bool:
         """
         This method returns the show switcher
-        :return:
+        :return: bool
         """
         return self.__show
 
@@ -86,7 +99,12 @@ class DataSet:
         """
         This method sets the delimiter character
         :param delimiter: Symbol-split in a .csv file
+        :return None
         """
+        if not isinstance(delimiter, str):
+            raise Exception("The delimiter must be a one-symbol string!")
+        if len(delimiter) > 1 or len(delimiter) == 0:
+            raise Exception("A separator with a length of 1 character is allowed!")
         self.__delimiter = delimiter
 
     def get_delimiter(self) -> str:
@@ -100,7 +118,12 @@ class DataSet:
         """
         This method sets the encoding for the future export of the dataset
         :param encoding: Encoding for the dataset. Example: 'utf-8', 'windows1232'
+        :return None
         """
+        if not isinstance(encoding, str):
+            raise Exception("The encoding must be a string!")
+        if len(encoding) == 0:
+            raise Exception("The name must be longer than 0 characters!")
         self.__encoding = encoding
 
     def get_encoding(self) -> str:
@@ -110,10 +133,10 @@ class DataSet:
         """
         return self.__encoding
 
-    def get_keys(self) -> list:
+    def get_keys(self) -> List[str]:
         """
         This method return column names of dataset pd.DataFrame
-        :return: Column names of dataset pd.DataFrame
+        :return: List[str]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -124,6 +147,7 @@ class DataSet:
         """
         This method set columns order
         :param new_order_columns: List of new order of columns
+        :return None
         """
         if len(set(new_order_columns)) != len(new_order_columns):
             raise Exception(f"Column names should not be repeated!")
@@ -139,19 +163,20 @@ class DataSet:
     def get_keys_count(self) -> int:
         """
         This method return count of column names of dataset pd.DataFrame
-        :return: Count of column names of dataset pd.DataFrame
+        :return: int
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet")
         self.__update_dataset_base_info()
         return self.__dataset_keys_count
 
-    def set_to_field(self, column: str, index: int, value):
+    def set_to_field(self, column: str, index: int, value: Any) -> None:
         """
         This method gets the value from the dataset cell
         :param column: The name of the dataset column
         :param index: Index of the dataset string
         :param value: The value that we want to write
+        :return None
         """
         if index < 0:
             raise Exception("The string value must be greater than 0!")
@@ -163,12 +188,12 @@ class DataSet:
             self.__dataset_analytics.pop(column)
         self.__dataset.loc[index, column] = value
 
-    def get_from_field(self, column: str, index: int):
+    def get_from_field(self, column: str, index: int) -> Any:
         """
         This method gets the value from the dataset cell
         :param column: The name of the dataset column
         :param index: Index of the dataset string
-        :return: value
+        :return: Any
         """
         if index < 0:
             raise Exception("The string value must be greater than 0!")
@@ -320,6 +345,13 @@ class DataSet:
 
     # /SET_GET INIT PARAMS
 
+    def get_is_loaded(self) -> bool:
+        """
+        This method returns the state of this DataSet
+        :return: bool
+        """
+        return self.__is_dataset_loaded
+
     def head(self, n: int = 5) -> None:
         """
         This method prints the first n rows
@@ -399,7 +431,6 @@ class DataSet:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics or \
                 (not self.__dataset_analytics[column_name].get_is_extended() == extended and extended == True):
-            print(list(self.__dataset[column_name]))
             self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
                                                                   values=list(self.__dataset[column_name]),
                                                                   extended=None)
@@ -415,7 +446,7 @@ class DataSet:
     def get_DataFrame(self) -> pd.DataFrame:
         """
         This method return dataset as pd.DataFrame
-        :return: dataset as pd.DataFrame
+        :return: pd.DataFrame
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been uploaded yet!")
@@ -423,7 +454,7 @@ class DataSet:
 
     def join_DataFrame(self, dataframe: pd.DataFrame, dif_len: bool = False) -> None:
         """
-        This method attaches a new dataset to the current one
+        This method attaches a new dataset to the current one (at right)
         :param dataframe: The pd.DataFrame to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         :return None
@@ -445,7 +476,7 @@ class DataSet:
 
     def join_DataSet(self, dataset, dif_len: bool = False) -> None:
         """
-        This method attaches a new dataset to the current one
+        This method attaches a new dataset to the current one(at right)
         :param dataset: The DataSet object to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         :return None
@@ -467,6 +498,11 @@ class DataSet:
         self.__update_dataset_base_info()
 
     def concat_DataFrame(self, dataframe: pd.DataFrame) -> None:
+        """
+        This method attaches a new dataset to the current one (at bottom)
+        :param dataframe: The pd.DataFrame to be attached to the current one
+        :return None
+        """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
             self.create_empty_dataset()
@@ -481,6 +517,11 @@ class DataSet:
         self.__update_dataset_base_info()
 
     def concat_DataSet(self, dataset) -> None:
+        """
+        This method attaches a new dataset to the current one (at bottom)
+        :param dataset: The DataSet object to be attached to the current one
+        :return None
+        """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
             self.create_empty_dataset()
@@ -582,6 +623,14 @@ class DataSet:
                                  columns: List[str],
                                  delimiter: str = ",",
                                  encoding: str = 'utf-8') -> None:
+        """
+        This method creates a dataset from list
+        :param data: List[List[Any] - lines of dataset]
+        :param columns: List of column names
+        :param delimiter: Symbol-split in a .csv file
+        :param encoding: Explicit indication of the .csv file encoding
+        :return: None
+        """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if len(data) == 0:
@@ -592,7 +641,7 @@ class DataSet:
         self.set_delimiter(delimiter=delimiter)
         self.set_encoding(encoding=encoding)
         self.__update_dataset_base_info()
-        self.__is_dataset_loaded =True
+        self.__is_dataset_loaded = True
 
     def load_DataFrame(self, dataframe: pd.DataFrame) -> None:
         """
@@ -813,6 +862,7 @@ class DataSet:
         pd.DataFrame(self.__dataset).to_excel(path,
                                               index=False,
                                               sheet_name=sheet_name)
+
     # CREATE-LOAD-EXPORT DATASET
 
     def __save_plots(self, path: str, column: DataSetColumn):

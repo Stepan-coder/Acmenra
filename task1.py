@@ -17,8 +17,19 @@ manager.DataSet("Original DataSet").add_row(new_row={"A": 7, "B": 1})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 8, "B": 2})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 9, "B": 3})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 10, "B": 3})
+
+manager.add_DataSet(dataset=DataSet("Test just created"))
+manager.add_DataSet(dataset=DataSet("Test Empty"))
+manager.DataSet("Test Empty").create_empty_dataset()
+manager.split_DataSet(dataset_name="Original DataSet",
+                      count=3,
+                      delete_original_DataSet=True)
+
+print(manager)
+
+quit()
 # manager.DataSet("Original DataSet").head()
-splitted_DatatSet = manager.DataSet("Original DataSet").split(count=3)
+splitted_DatatSet = manager.DataSet(" DataSet").split(count=3)
 for sp in splitted_DatatSet:
     print(len(sp))
 # manager.add_DataSet(dataset=DataSet(dataset_name="Original DataSet1", show=True))

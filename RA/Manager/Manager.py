@@ -1,42 +1,107 @@
+from prettytable import PrettyTable
+
 from RA.DataSet.DataSet import *
 from RA.Manager.Regression import *
 from RA.Manager.Classification import *
 
 
 class Manager:
-    def __init__(self, path: str, project_name: str):
+    def __init__(self, path: str, project_name: str) -> None:
         """
-
-        :param path:
-        :param project_name:
+        This method initializes the manager's work
+        :param path: The path to the project folder
+        :param project_name: The name of this project
+        :return None
         """
-        self.project_name = project_name
-        self.project_path = self.__create_project_folder(path=path)
-        self.datasets = {}
-        self.regression = Regression()
-        self.classification = Classification()
+        self.set_project_name(project_name)
+        self.__path = path
+        self.__project_path = self.__create_project_folder(path=path)
+        self.__datasets = {}
+        self.__models = {}
+        self.__regression = Regression()
+        self.__classification = Classification()
 
-    def __create_project_folder(self, path):
+    def __str__(self):
+        table = PrettyTable()
+        is_dataset = True if len(self.__datasets) + len(self.__models) > 0 else False
+        table.title = f"{'Empty ' if not is_dataset else ''}Manager \"{self.__project_name}\""
+        table.field_names = ["Name", "Type", "Status"]
+        for dataset in self.__datasets:
+            status = "Ups.."
+            if not self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) == 0:
+                status = self.__set_str_cmd_clr("Just created", 'RED')
+            elif self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) == 0:
+                status = self.__set_str_cmd_clr("Empty", 'YELLOW')
+            elif self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) > 0:
+                status = self.__set_str_cmd_clr("Enable", 'GREEN')
+
+            table.add_row([dataset, "<DataSet>", status])
+        return str(table)
+
+    def __len__(self) -> int:
+        return len(self.__datasets) + len(self.__models)
+
+    def __set_str_cmd_clr(self, text: str, color: str) -> str:
+        clr_text = ""
+        if color == 'RED':
+            clr_text = "\033[31m {}\033[0m".format(text)
+        elif color == 'GREEN':
+            clr_text = "\033[32m {}\033[0m".format(text)
+        elif color == 'YELLOW':
+            clr_text = "\033[33m {}\033[0m".format(text)
+        return clr_text
+
+    def __create_project_folder(self, path: str) -> str:
+        """
+        Creates a folder where all project files will be "stacked"
+        :param path: The path to the project folder
+        :return: str
+        """
+        if not isinstance(path, str):
+            raise Exception("The path must be a string!")
+        if len(path) == 0:
+            raise Exception("The 'path' must be longer than 0 characters!")
         if not os.path.exists(path):
             raise Exception("Wrong way!")
-        if not os.path.exists(os.path.join(path, self.project_name)):
-            os.makedirs(os.path.join(path, self.project_name))
-        return os.path.join(path, self.project_name)
+        if not os.path.exists(os.path.join(path, self.__project_name)):
+            os.makedirs(os.path.join(path, self.__project_name))
+        return os.path.join(path, self.__project_name)
 
-    # def cmd(self, cmd: str):  # Метод для доступа к функционалу из строки с командой
-    #     if cmd.startswith("LOAD DATASET"):
-
-    def add_DataSet(self, dataset: DataSet) -> None:
+    def set_project_name(self, new_project_name: str) -> None:
         """
-        This method adds a DataSet to the manager
-        :param dataset: The DataSet class that we want to add
+        This method sets the new name of this project
+        :param new_project_name: The new name of this project
         :return: None
         """
-        if str(dataset.get_name()) not in self.datasets:
-            self.datasets[dataset.get_name()] = dataset
-            self.datasets[dataset.get_name()].set_saving_path(path=self.project_path)
-        else:
-            raise Exception("A dataset with this name already exists!")
+        if not isinstance(new_project_name, str):
+            raise Exception("The new_project_name must be a string!")
+        if len(new_project_name) == 0:
+            raise Exception("The 'new_project_name' must be longer than 0 characters!")
+        self.__project_name = new_project_name
+
+    def get_project_name(self) -> str:
+        """
+        This method return the name of this project
+        :return: str
+        """
+        return self.__project_name
+
+    def set_path(self, new_path: str) -> None:
+        """
+        This method sets a new path of this project
+        :param new_path: new path of project
+        :return: None
+        """
+        self.__project_path = self.__create_project_folder(path=new_path)
+
+    def get_path(self) -> str:
+        """
+        This method returns the project path
+        :return: str
+        """
+        return self.__project_path
+    # def cmd(self, cmd: str):  # Метод для доступа к функционалу из строки с командой
+    #     if cmd.startswith("LOAD DATASET"):
 
     def DataSet(self, dataset_name: str) -> DataSet:
         """
@@ -44,9 +109,21 @@ class Manager:
         :param dataset_name: The DataSet class name
         :return: DataSet
         """
-        if dataset_name not in self.datasets:
-            raise Exception("There is no dataset with this name!")
-        return self.datasets[str(dataset_name)]
+        if dataset_name not in self.__datasets:
+            raise Exception("There is no DataSet with this name!")
+        return self.__datasets[str(dataset_name)]
+
+    def add_DataSet(self, dataset: DataSet) -> None:
+        """
+        This method adds a DataSet to the manager
+        :param dataset: The DataSet class that we want to add
+        :return: None
+        """
+        if str(dataset.get_name()) not in self.__datasets:
+            self.__datasets[dataset.get_name()] = dataset
+            self.__datasets[dataset.get_name()].set_saving_path(path=self.__project_path)
+        else:
+            raise Exception("A dataset with this name already exists!")
 
     def delate_DataSet(self, dataset_name: str) -> None:
         """
@@ -54,16 +131,44 @@ class Manager:
         :param dataset_name: The DataSet class that we want delete
         :return: None
         """
-        if dataset_name not in self.datasets:
+        if dataset_name not in self.__datasets:
             raise Exception("There is no dataset with this name!")
-        del self.datasets[str(dataset_name)]
+        del self.__datasets[str(dataset_name)]
+
+    def split_DataSet(self, dataset_name: str, count: int, delete_original_DataSet: bool = False) -> None:
+        """
+        This method splits the dataset into datasets of the specified length and adds them to the project
+        :param dataset_name: The DataSet class name
+        :param count: Maximal count of rows in new DataSets
+        :param delete_original_DataSet: This switch is responsible for auto-deleting the original dataset
+        after splitting it
+        :return: None
+        """
+        if dataset_name not in self.__datasets:
+            raise Exception("There is no DataSet with this name!")
+        splitted_datasets = self.__datasets[str(dataset_name)].split(count=count)
+        for i in range(len(splitted_datasets)):
+            if splitted_datasets[i].get_name() in self.__datasets:
+                raise Exception(f"As a result of splitting the dataset \'{dataset_name}\' into parts, "
+                                f"the name of the dataset {splitted_datasets[i].get_name()} coincided!")
+        for i in range(len(splitted_datasets)):
+            self.__datasets[splitted_datasets[i].get_name()] = splitted_datasets[i]
+        if delete_original_DataSet:
+            del self.__datasets[str(dataset_name)]
+
+    def get_DataSets(self) -> Dict[str, DataSet]:
+        """
+        This method returns all DataSets from manager
+        :return: Dict[str, DataSet]
+        """
+        return self.__datasets
 
     def get_models_names(self) -> List[str]:
         """
         This method returns the names of all models added to the RA system
         :return: Names of models
         """
-        return self.regression.get_models_names() + self.classification.get_models_names()
+        return self.__regression.get_models_names() + self.__classification.get_models_names()
 
     def Model(self, model_name: str):
         """
@@ -71,10 +176,10 @@ class Manager:
         :param model_name: Model Name
         :return: RA.Model
         """
-        if model_name in self.regression.get_models_names():
-            return self.regression.get_model(model_name=model_name)
-        elif model_name in self.classification.get_models_names():
-            return self.classification.get_model(model_name=model_name)
+        if model_name in self.__regression.get_models_names():
+            return self.__regression.get_model(model_name=model_name)
+        elif model_name in self.__classification.get_models_names():
+            return self.__classification.get_model(model_name=model_name)
         else:
             raise Exception(f"The \'{abs}\' model does not exist!")
 
@@ -95,12 +200,12 @@ class Manager:
         :param show: The parameter responsible for displaying the progress of work
         :return: list of models
         """
-        return self.regression.blitz_test(task=task,
-                                          target=target,
-                                          train_split=train_split,
-                                          prefit=prefit,
-                                          n_jobs=n_jobs,
-                                          show=show)
+        return self.__regression.blitz_test(task=task,
+                                            target=target,
+                                            train_split=train_split,
+                                            prefit=prefit,
+                                            n_jobs=n_jobs,
+                                            show=show)
 
     def blitz_test_classification(self,
                                   task: pd.DataFrame,
@@ -119,13 +224,9 @@ class Manager:
         :param show: The parameter responsible for displaying the progress of work
         :return: list of models
         """
-        return self.classification.blitz_test(task=task,
-                                              target=target,
-                                              train_split=train_split,
-                                              prefit=prefit,
-                                              n_jobs=n_jobs,
-                                              show=show)
-
-
-if __name__ == '__main__':
-    pass
+        return self.__classification.blitz_test(task=task,
+                                                target=target,
+                                                train_split=train_split,
+                                                prefit=prefit,
+                                                n_jobs=n_jobs,
+                                                show=show)
