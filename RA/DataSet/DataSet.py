@@ -528,7 +528,7 @@ class DataSet:
         if len(dataset) == 0:
             raise Exception("You are trying to add an empty dataset")
         columns_names = set(list(self.__dataset.keys()) + list(dataset.get_keys()))
-        if len(self.__dataset.keys()) != len(columns_names):
+        if len(self.__dataset.keys()) != len(columns_names) and len(self.__dataset) > 0:
             raise Exception("The current dataset and the new dataset have the different column names!")
         self.__dataset = pd.concat([self.__dataset, dataset.get_DataFrame()])
         self.__dataset_analytics = {}

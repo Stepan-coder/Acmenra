@@ -5,8 +5,8 @@ from RA.DataSet.DataSet import *
 warnings.filterwarnings("ignore")
 
 manager = Manager(path=os.getcwd(), project_name="test_project")
-manager.add_DataSet(dataset=DataSet(dataset_name="Original DataSet", show=True))
-manager.DataSet("Original DataSet").create_empty_dataset(columns_names=["A", "B"])
+manager.create_DataSet(dataset_name="Original DataSet")
+manager.create_DataSet(dataset_name="Original DataSet1")
 manager.DataSet("Original DataSet").add_row(new_row={"A": 1, "B": 1})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 2, "B": 2})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 3, "B": 3})
@@ -21,17 +21,20 @@ manager.DataSet("Original DataSet").add_row(new_row={"A": 10, "B": 3})
 manager.add_DataSet(dataset=DataSet("Test just created"))
 manager.add_DataSet(dataset=DataSet("Test Empty"))
 manager.DataSet("Test Empty").create_empty_dataset()
-manager.split_DataSet(dataset_name="Original DataSet",
-                      count=3,
-                      delete_original_DataSet=True)
 
 print(manager)
+splt = manager.split_DataSet(dataset_name="Original DataSet",
+                             count=3,
+                             delete_original_DataSet=True)
 
+print(manager)
+manager.concat_DataSets(new_dataset_name="Original DataSet",
+                        dataset_names=splt)
+print(manager)
 quit()
+
 # manager.DataSet("Original DataSet").head()
-splitted_DatatSet = manager.DataSet(" DataSet").split(count=3)
-for sp in splitted_DatatSet:
-    print(len(sp))
+
 # manager.add_DataSet(dataset=DataSet(dataset_name="Original DataSet1", show=True))
 # manager.DataSet("Original DataSet1").create_empty_dataset(columns_names=["A", "B"])
 # manager.DataSet("Original DataSet1").add_row(new_row={"A": 4, "B": 4})

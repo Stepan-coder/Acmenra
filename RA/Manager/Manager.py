@@ -117,8 +117,8 @@ class Manager:
         :param dataset_name: The name of new DataSet
         :return: None
         """
-        if dataset_name not in self.__datasets:
-            raise Exception("There is no DataSet with this name!")
+        if dataset_name in self.__datasets:
+            raise Exception("A dataset with this name already exists!")
         self.__datasets[dataset_name] = DataSet(dataset_name=dataset_name)
         self.__datasets[dataset_name].set_saving_path(path=self.__project_path)
 
@@ -143,14 +143,14 @@ class Manager:
             raise Exception("There is no dataset with this name!")
         del self.__datasets[str(dataset_name)]
 
-    def split_DataSet(self, dataset_name: str, count: int, delete_original_DataSet: bool = False) -> None:
+    def split_DataSet(self, dataset_name: str, count: int, delete_original_DataSet: bool = False) -> List[str]:
         """
         This method splits the dataset into datasets of the specified length and adds them to the project
         :param dataset_name: The DataSet class name
         :param count: Maximal count of rows in new DataSets
         :param delete_original_DataSet: This switch is responsible for auto-deleting the original dataset
         after splitting it
-        :return: None
+        :return: List[str]
         """
         if dataset_name not in self.__datasets:
             raise Exception("There is no DataSet with this name!")
@@ -159,10 +159,46 @@ class Manager:
             if splitted_datasets[i].get_name() in self.__datasets:
                 raise Exception(f"As a result of splitting the dataset \'{dataset_name}\' into parts, "
                                 f"the name of the dataset {splitted_datasets[i].get_name()} coincided!")
+        splitted_datasets_names = []
         for i in range(len(splitted_datasets)):
             self.__datasets[splitted_datasets[i].get_name()] = splitted_datasets[i]
+            splitted_datasets_names.append(splitted_datasets[i].get_name())
         if delete_original_DataSet:
             del self.__datasets[str(dataset_name)]
+        return splitted_datasets_names
+
+    def concat_DataSets(self,
+                        new_dataset_name: str,
+                        dataset_names: List[str]=None,
+                        only_new_dataset=True) -> None:
+        """
+        This method is the reverse of "split_DataSet".
+        It connects all the manager's DataSets sequentially, into a new, large DataSet
+        :param only_new_dataset:
+        :return: None
+        """
+        if len(self.__datasets) == 0:
+            raise Exception("No dataset has been added to the manager yet!")
+        if len(self.__datasets) == 1:
+            warnings.warn("The manager has only 1 available dataset!")
+            return None
+        if dataset_names is None:
+            datasets = list(self.__datasets.keys())
+        else:
+            datasets = dataset_names
+        ds_keys = []
+        for ds in datasets:
+            if ds not in self.__datasets:
+                raise Exception("There is no DataSet with this name!")
+            if set(self.DataSet(ds).get_keys()) in ds_keys or len(ds_keys) == 0:
+                ds_keys.append(set(self.DataSet(ds).get_keys()))
+            else:
+                raise Exception("The names of the columns in the datasets do not match!")
+        self.create_DataSet(dataset_name=new_dataset_name)
+        for ds in datasets:
+            self.DataSet(new_dataset_name).concat_DataSet(dataset=self.DataSet(dataset_name=ds))
+            if only_new_dataset:
+                self.delate_DataSet(dataset_name=ds)
 
     def get_DataSets(self) -> Dict[str, DataSet]:
         """
@@ -170,6 +206,13 @@ class Manager:
         :return: Dict[str, DataSet]
         """
         return self.__datasets
+
+    def get_datasets_names(self) -> List[str]:
+        """
+        This method returns the names of all models added to the RA system
+        :return: List[str]
+        """
+        return list(self.__datasets.keys())
 
     def get_models_names(self) -> List[str]:
         """
