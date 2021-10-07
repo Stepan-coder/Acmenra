@@ -188,7 +188,10 @@ class StringIndicators:
         :param extended: The switch responsible for calculating the indicators of the normal distribution
         :return None
         """
-        values = values.tolist()
+        try:
+            values = values.tolist()
+        except:
+            pass
         values = [val for val in values if isinstance(val, str)]
         self.__min_len = min([len(v) for v in values])
         self.__max_len = max([len(v) for v in values])

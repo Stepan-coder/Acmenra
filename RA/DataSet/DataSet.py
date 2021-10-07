@@ -320,6 +320,58 @@ class DataSet:
             self.__dataset_analytics[new_column_name].set_column_name(new_column_name=new_column_name)
         self.__update_dataset_base_info()
 
+    def set_column_types(self, new_column_types: type, exception: Dict[str, type] = None) -> None:
+        """
+        This method converts column types
+        :param new_column_types: New type of dataset columns (excluding exceptions)
+        :param exception: Fields that have a different type from the main dataset type
+        :return None
+        """
+        for field in self.__dataset:
+            if exception is None:
+                self.set_column_type(column_name=field, new_column_type=new_column_types)
+            else:
+                if field in exception:
+                    self.set_column_type(column_name=field, new_column_type=exception[field])
+                else:
+                    self.set_column_type(column_name=field, new_column_type=new_column_types)
+        self.__update_dataset_base_info()
+
+    def set_column_type(self, column_name: str, new_column_type: type) -> None:
+        """
+        This method converts column type
+        :param column_name: The name of the column in which we want to change the type
+        :param new_column_type: Field type
+        :return None
+        """
+        if new_column_type != str and new_column_type != int and new_column_type != float:
+            raise Exception(f"'{new_column_type}' is an invalid data type for conversion. Valid types: int, float, str")
+        if column_name in self.__dataset:
+            primary_type = str(self.__dataset[column_name].dtype)
+            if new_column_type == float or new_column_type == int:
+                self.__dataset[column_name] = self.__dataset[column_name].replace(",", ".", regex=True) \
+                    .replace(" ", "", regex=True) \
+                    .fillna(0)
+                try:
+                    self.__dataset[column_name] = self.__dataset[column_name].astype(float)
+                except Exception as e:
+                    raise Exception(str(e).capitalize())
+                if new_column_type == int:
+                    try:
+                        self.__dataset[column_name] = self.__dataset[column_name].astype(int)
+                    except Exception as e:
+                        raise Exception(str(e).capitalize())
+            else:
+                try:
+                    self.__dataset[column_name] = self.__dataset[column_name].astype(new_column_type)
+                except Exception as e:
+                    raise Exception(str(e).capitalize())
+            secondary_type = str(self.__dataset[column_name].dtype)
+            if self.__show:
+                print(f"Convert DataSet field \'{column_name}\': {primary_type} -> {secondary_type}")
+        else:
+            raise Exception("There is no such column in the presented dataset!")
+
     def delete_column(self, column: str) -> None:
         """
         This method removes the column from the dataset
@@ -534,50 +586,6 @@ class DataSet:
         self.__dataset_analytics = {}
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
         self.__update_dataset_base_info()
-
-    def set_field_types(self, new_fields_type: type = None, exception: Dict[str, type] = None) -> None:
-        """
-        This method converts column types
-        :param new_fields_type: New type of dataset columns (excluding exceptions)
-        :param exception: Fields that have a different type from the main dataset type
-        :return None
-        """
-        if new_fields_type is None and exception is None:
-            raise Exception("One of the parameters \'new_fields_type\' or \'exception\' must not be empty!")
-        for field in self.__dataset:
-            if field not in exception and new_fields_type is not None:
-                self.set_field_type(field_name=field,
-                                    new_field_type=new_fields_type)
-            elif field in exception:
-                self.set_field_type(field_name=field,
-                                    new_field_type=exception[field])
-        self.__update_dataset_base_info()
-
-    def set_field_type(self, field_name: str, new_field_type: type) -> None:
-        """
-        This method converts column type
-        :param field_name: The name of the column in which we want to change the type
-        :param new_field_type: Field type
-        :return None
-        """
-        if new_field_type != str and new_field_type != int and new_field_type != float:
-            raise Exception(f"'{new_field_type}' is an invalid data type for conversion. Valid types: int, float, str")
-        if field_name in self.__dataset:
-            primary_type = str(self.__dataset[field_name].dtype)
-            if new_field_type == float or new_field_type == int:
-                self.__dataset[field_name] = self.__dataset[field_name].replace(",", ".", regex=True) \
-                    .replace(" ", "", regex=True) \
-                    .fillna(0)
-                self.__dataset[field_name] = self.__dataset[field_name].astype(float)
-                if new_field_type == int:
-                    self.__dataset[field_name] = self.__dataset[field_name].astype(int)
-            else:
-                self.__dataset[field_name] = self.__dataset[field_name].astype(new_field_type)
-            secondary_type = str(self.__dataset[field_name].dtype)
-            if self.__show:
-                print(f"Convert DataSet field \'{field_name}\': {primary_type} -> {secondary_type}")
-        else:
-            raise Exception("There is no such column in the presented dataset!")
 
     def update_dataset_info(self) -> None:
         """

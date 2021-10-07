@@ -18,19 +18,12 @@ manager.DataSet("Original DataSet").add_row(new_row={"A": 8, "B": 2})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 9, "B": 3})
 manager.DataSet("Original DataSet").add_row(new_row={"A": 10, "B": 3})
 
-manager.add_DataSet(dataset=DataSet("Test just created"))
-manager.add_DataSet(dataset=DataSet("Test Empty"))
-manager.DataSet("Test Empty").create_empty_dataset()
+print(manager.DataSet("Original DataSet").get_row(index=5)["A"])
+manager.DataSet("Original DataSet").set_column_types(new_column_types=str)
 
-print(manager)
-splt = manager.split_DataSet(dataset_name="Original DataSet",
-                             count=3,
-                             delete_original_DataSet=True)
+print(type(manager.DataSet("Original DataSet").get_from_field("A", 3)))
+print(manager.DataSet("Original DataSet"))
 
-print(manager)
-manager.concat_DataSets(new_dataset_name="Original DataSet",
-                        dataset_names=splt)
-print(manager)
 quit()
 
 # manager.DataSet("Original DataSet").head()
