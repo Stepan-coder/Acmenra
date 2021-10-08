@@ -9,7 +9,7 @@ class DataSetColumn:
                  values: list = None,
                  categorical: int = 25,
                  extended: bool = None,
-                 rounding_factor: int = 2):
+                 rounding_factor: int = 2) -> None:
         self.__column_name = column_name
         self.__values = None
         self.__count = None
@@ -84,7 +84,11 @@ class DataSetColumn:
                                        extended=extended)
             self.__is_str_stat = True
 
-    def get_values(self):
+    def get_values(self) -> list:
+        """
+        This method returns list of values from column
+        :return: Liat[Any]
+        """
         return self.__values
 
     def get_num_stat(self) -> NumericalIndicators:
@@ -92,14 +96,6 @@ class DataSetColumn:
 
     def get_str_stat(self) -> StringIndicators:
         return self.__str_stat
-
-    def set_column_name(self, new_column_name: str) -> None:
-        """
-        This method sets the new name for current column
-        :param new_column_name: The new name of this column
-        :return: None
-        """
-        self.__column_name = new_column_name
 
     def get_column_name(self) -> str:
         """

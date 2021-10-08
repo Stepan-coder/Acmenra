@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
-from RA.DataSet.DataSetColumn import *
+
+from RA.DataSet.DataSetColumnNum import *
 
 
 class DataSet:
@@ -268,10 +269,10 @@ class DataSet:
                 self.__dataset_analytics.pop(key)
         self.__update_dataset_base_info()
 
-    def add_column(self, column: str, values: list, dif_len: bool = False) -> None:
+    def add_column(self, column_name: str, values: list, dif_len: bool = False) -> None:
         """
         This method adds the column to the dataset on the right
-        :param column: String name of the column to be added
+        :param column_name: String name of the column to be added
         :param values: List of column values
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
         :return: None
@@ -279,45 +280,60 @@ class DataSet:
         if not self.__is_dataset_loaded:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
             self.create_empty_dataset()
-        if column in self.__dataset_keys:
-            raise Exception(f"The '{column}' column already exists in the presented dataset!")
+        if column_name in self.__dataset_keys:
+            raise Exception(f"The '{column_name}' column already exists in the presented dataset!")
         if len(self.__dataset) != len(values) and len(self.__dataset) != 0:
             if not dif_len:
                 raise Exception("The column and dataset must have the same size!")
-        self.__dataset[column] = values
+        self.__dataset[column_name] = values
         self.__update_dataset_base_info()
 
-    def get_column(self, column: str) -> list:
+    def get_column_values(self, column_name: str) -> list:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
-        :param column: List of column names
+        :param column_name: List of column names
         :return: List
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column not in self.__dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        return self.__dataset[column].tolist()
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        return self.__dataset[column_name].tolist()
 
-    def rename_column(self, column: str, new_column_name: str) -> None:
+    def rename_column(self, column_name: str, new_column_name: str) -> None:
         """
         This method renames the column in the dataset
-        :param column: The name of the column that we are renaming
+        :param column_name: The name of the column that we are renaming
         :param new_column_name: New name for the "column" column
         :return: None
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column not in self.__dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if new_column_name in self.__dataset_keys:
             raise Exception(f"The \"{new_column_name}\" column does already exist in this dataset!")
-        self.__dataset = self.__dataset.rename(columns={column: new_column_name})
-        if column in self.__dataset_analytics:
-            column_analytic = self.__dataset_analytics[column]
-            self.__dataset_analytics.pop(column)
+        self.__dataset = self.__dataset.rename(columns={column_name: new_column_name})
+        if column_name in self.__dataset_analytics:
+            column_analytic = self.__dataset_analytics[column_name]
+            self.__dataset_analytics.pop(column_name)
             self.__dataset_analytics[new_column_name] = column_analytic
             self.__dataset_analytics[new_column_name].set_column_name(new_column_name=new_column_name)
+        self.__update_dataset_base_info()
+
+    def delete_column(self, column_name: str) -> None:
+        """
+        This method removes the column from the dataset
+        :param column_name: List of column names
+        :return: None
+        """
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        self.__dataset = self.__dataset.drop([column_name], axis=1)
+        if column_name in self.__dataset_analytics:
+            self.__dataset_analytics.pop(column_name)
         self.__update_dataset_base_info()
 
     def set_column_types(self, new_column_types: type, exception: Dict[str, type] = None) -> None:
@@ -344,8 +360,9 @@ class DataSet:
         :param new_column_type: Field type
         :return None
         """
-        if new_column_type != str and new_column_type != int and new_column_type != float:
-            raise Exception(f"'{new_column_type}' is an invalid data type for conversion. Valid types: int, float, str")
+        if new_column_type != str and new_column_type != int and new_column_type != float and new_column_type != bool:
+            raise Exception(f"'{new_column_type}' is an invalid data type for conversion. "
+                            f"Valid types: bool, int, float, str")
         if column_name in self.__dataset:
             primary_type = str(self.__dataset[column_name].dtype)
             if new_column_type == float or new_column_type == int:
@@ -372,20 +389,29 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def delete_column(self, column: str) -> None:
+    def get_column_statinfo(self, column_name: str) -> DataSetColumnNum:
         """
-        This method removes the column from the dataset
-        :param column: List of column names
-        :return: None
+        This method returns statistical analytics for a given column
+        :param column_name: The name of the dataset column for which we output statistics
+        :param extended: Responsible for calculating additional parameters
+        :return: DataSetColumn
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column not in self.__dataset_keys:
-            raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        self.__dataset = self.__dataset.drop([column], axis=1)
-        if column in self.__dataset_analytics:
-            self.__dataset_analytics.pop(column)
-        self.__update_dataset_base_info()
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        if column_name not in self.__dataset_analytics:
+            if True:
+                self.__dataset_analytics[column_name] = DataSetColumnNum(column_name=column_name,
+                                                                         values=list(self.__dataset[column_name]))
+        return self.__dataset_analytics[column_name]
+
+    def get_columns_stat_info(self) -> Dict[str, DataSetColumnNum]:
+        """
+        This method returns DataSet columns stat info
+        :return: Dict["column_name", <DataSetColumn> class]
+        """
+        return self.__dataset_analytics
 
     def set_saving_path(self, path: str) -> None:
         """
@@ -469,31 +495,6 @@ class DataSet:
             result.append(this_dataset)
             counter += 1
         return result
-
-    def get_column_info(self, column_name: str, extended: bool) -> DataSetColumn:
-        """
-        This method returns statistical analytics for a given column
-        :param column_name: The name of the dataset column for which we output statistics
-        :param extended: Responsible for calculating additional parameters
-        :return: DataSetColumn
-        """
-        if not self.__is_dataset_loaded:
-            raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
-            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        if column_name not in self.__dataset_analytics or \
-                (not self.__dataset_analytics[column_name].get_is_extended() == extended and extended == True):
-            self.__dataset_analytics[column_name] = DataSetColumn(column_name=column_name,
-                                                                  values=list(self.__dataset[column_name]),
-                                                                  extended=None)
-        return self.__dataset_analytics[column_name]
-
-    def get_columns_stat_info(self) -> Dict[str, DataSetColumn]:
-        """
-        This method returns DataSet columns stat info
-        :return: Dict["column_name", <DataSetColumn> class]
-        """
-        return self.__dataset_analytics
 
     def get_DataFrame(self) -> pd.DataFrame:
         """
