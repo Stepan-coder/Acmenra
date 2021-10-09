@@ -26,7 +26,7 @@ class NormalDistribution:
         if self.__is_normal_distribution:
             table.add_row(["Math mode", self.get_math_mode()])
             table.add_row(["Math expectation", self.get_math_expectation()])
-            table.add_row(["Math dispersion", self.get_math_distribution()])
+            table.add_row(["Math dispersion", self.get_distribution()])
             table.add_row(["Math sigma", self.get_math_sigma()])
             table.add_row(["Moda - 3 * sigma", self.get_math_expectation() - 3 * self.get_math_sigma()])
             table.add_row(["Moda - 2 * sigma", self.get_math_expectation() - 2 * self.get_math_sigma()])
@@ -36,7 +36,7 @@ class NormalDistribution:
             table.add_row(["Moda + 3 * sigma", self.get_math_expectation() + 3 * self.get_math_sigma()])
         return str(table)
 
-    def get_math_distribution(self) -> Dict[int or float, float]:
+    def get_distribution(self) -> Dict[int or float, float]:
         """
         This method return mathematical distribution dict
         """
@@ -150,7 +150,7 @@ class NormalDistribution:
         :param values: list of column values
         """
 
-        self.__math_distribution = self.__get_math_distribution(values)
+        self.__math_distribution = self.__get_values_distribution(values)
         self.__math_mode = stats.mode(values)[0][0]
         self.__math_expectation = self.__get_math_expectation(self.__math_distribution)
         self.__math_sigma = np.std(values)
@@ -160,10 +160,10 @@ class NormalDistribution:
         self.__is_normal_distribution = True
 
     @staticmethod
-    def __get_math_distribution(values: list) -> Dict[int or float, float]:
+    def __get_values_distribution(values: list) -> Dict[bool or int or float or bool, float]:
         """
         This method calculates the frequency of list values as a percentage
-        :return: dict
+        :return: Dict[bool or int or float or bool, float]
         """
         math_rasp = {}
         for value in values:
@@ -226,28 +226,40 @@ class NormalDistribution:
 
 
 class NumericalIndicators:
-    def __init__(self, extended: bool, values: List[int or float] = None):
-        self.__min = None
-        self.__mean = None
-        self.__median = None
-        self.__max = None
-        self.normal_distribution = None
-        self.__use_normal_distribution = extended
-        self.__is_numerical_indicators = False  # Отвечает за наличие данных в классе NumericalIndicators
-        self.__is_normal_distribution = False  # Отвечает за наличие данных в классе NormalDistribution
-        if values is not None:
-            self.__fill_numerical_indicators(values=values,
-                                             extended=extended)
+    def __init__(self, values: List[int or float], extended: bool) -> None:
+        """
+        This method init work of class
+        :param values: Values from column
+        :param extended: Param switched brtween simple or extended statistics
+        :return None
+        """
+        values = [val for val in values if not math.isnan(val)]
+        self.__min = min(values)
+        self.__mean = np.mean(values)
+        self.__median = np.median(values)
+        self.__max = max(values)
+        self.__normal_distribution = None
+        self.__is_extended = extended
+        self.__is_normal_distribution = False
+        if extended:
+            # It is easier and clearer for us to recalculate basic statistics than to pile up incomprehensible code
+            # To download advanced statistics from a json file, you can calculate "basic statistics",
+            # because it's not long.
+            self.values_distribution = NormalDistribution(values=values)
+            self.__is_normal_distribution = True  # Отвечает за наличие данных в классе NormalDistribution
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        This method shows the column base info
+        :return: str
+        """
         table = PrettyTable()
         table.title = f"\"NumericalIndicators\""
         table.field_names = ["Indicator", "Value"]
-        if self.__is_numerical_indicators:
-            table.add_row(["Min val", self.get_min()])
-            table.add_row(["Mean val", self.get_mean()])
-            table.add_row(["Median val", self.get_median()])
-            table.add_row(["Max val", self.get_max()])
+        table.add_row(["Min val", self.get_min()])
+        table.add_row(["Mean val", self.get_mean()])
+        table.add_row(["Median val", self.get_median()])
+        table.add_row(["Max val", self.get_max()])
         return str(table)
 
     def get_min(self):
@@ -278,30 +290,12 @@ class NumericalIndicators:
         """
         return self.__median
 
-    def get_is_normal_distribution(self) -> bool:
+    def get_is_extended(self) -> bool:
         return self.__is_normal_distribution
 
-    def get_normal_distribution(self) -> NormalDistribution:
+    def get_values_distribution(self) -> NormalDistribution:
         if self.__is_normal_distribution:
-            return self.normal_distribution
-
-    def get_is_numerical_indicators(self) -> bool:
-        """
-        This method return the current state of filling numerical indicators
-        """
-        return self.__is_numerical_indicators
-
-    def set_values(self, values: List[int or float], extended: bool):
-        """
-        This method init the filling params of this class
-        :param values: Values from DataSetColumn - values of column from the dataset
-        :param extended: The switch responsible for calculating the indicators of the normal distribution
-        :return: None
-        """
-        if not self.__is_numerical_indicators:
-            if values is not None:
-                self.__fill_numerical_indicators(values=values,
-                                                 extended=extended)
+            return self.values_distribution
 
     def get_from_json(self, data: dict) -> None:
         """
@@ -319,8 +313,8 @@ class NumericalIndicators:
         self.__median = data["Median value"]
         self.__is_numerical_indicators = True
         if "Normal distribution" in data:
-            self.normal_distribution = NormalDistribution()
-            self.normal_distribution.from_json(data["Normal distribution"])
+            self.values_distribution = NormalDistribution()
+            self.values_distribution.from_json(data["Normal distribution"])
             self.__is_normal_distribution = True
             self.__use_normal_distribution = True
 
@@ -336,26 +330,6 @@ class NumericalIndicators:
                 "Mean value": self.__mean,
                 "Median value": self.__median}
         if self.__use_normal_distribution and self.__is_normal_distribution:
-            data['Normal distribution'] = self.normal_distribution.to_json()
+            data['Normal distribution'] = self.values_distribution.to_json()
         return data
-
-    def __fill_numerical_indicators(self, values: List[int or float] or pd.DataFrame, extended: bool):
-        """
-        This method fill this class when we use values
-        :param values: list of column values
-        :param extended: The switch responsible for calculating the indicators of the normal distribution
-        """
-        values = values
-        values = [val for val in values if not math.isnan(val)]
-        self.__min = min(values)
-        self.__max = max(values)
-        self.__mean = np.mean(values)
-        self.__median = np.median(values)
-        self.__use_extended = extended
-        self.__is_numerical_indicators = True
-        if extended and not self.__is_normal_distribution:
-            self.normal_distribution = NormalDistribution()
-            self.normal_distribution.set_values(values=values)
-            self.__use_extended = True
-            self.__is_normal_distribution = True
 

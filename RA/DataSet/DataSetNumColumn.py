@@ -6,18 +6,19 @@ from RA.DataSet.DataSetColumnNumStat import *
 """
 
 
-class DataSetColumnNum:
+class DataSetNumColumn:
     def __init__(self,
                  column_name: str,
-                 values: list = None,
+                 values: list,
+                 extended: bool,
                  categorical: int = 25) -> None:
         self.__column_name = column_name
         self.__values = values
-        self.__count = len(values) # Указываем явно, потому что этот класс не должен хранить все значения с колонки
+        self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(self.__values)))
         self.__nan_count = self.__get_nan_count()
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
-        self.__num_stat = NumericalIndicators(extended=False)
+        self.__num_stat = NumericalIndicators(values=values, extended=extended)
 
     def __str__(self):
         table = PrettyTable()
@@ -25,29 +26,31 @@ class DataSetColumnNum:
         table.title = f"{'Empty ' if not is_dataset else ''}Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
         table.add_row(["Сolumn name", self.get_column_name()])
-        table.add_row(["Type", self.get_type()])
+        # table.add_row(["Type", self.get_type()])
         table.add_row(["DType", self.get_dtype(threshold=0.15)])
         table.add_row(["Count", self.__count])
-        table.add_row(["Count unique", self.get_count_unique()])
+        table.add_row(["Count unique", self.get_unique_count()])
         table.add_row(["NaN count", self.get_nan_count()])
+        table.add_row(["Numerical indicators", "".join(len("Numerical indicators") * [" "])])
+        table.add_row(["Min val", self.get_min()])
+        table.add_row(["Mean val", self.get_mean()])
+        table.add_row(["Median val", self.get_median()])
+        table.add_row(["Max val", self.get_max()])
 
-        if self.__is_num_stat:
-            table.add_row(["Numerical indicators", "".join(len("Numerical indicators") * [" "])])
-            table.add_row(["Min val", self.get_min()])
-            table.add_row(["Mean val", self.get_mean()])
-            table.add_row(["Median val", self.get_median()])
-            table.add_row(["Max val", self.get_max()])
-
-            if self.get_num_stat().get_normal_distribution():
-                table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
-                table.add_row(["Mathematical mode", self.get_math_mode()])
-                table.add_row(["Mathematical expectation", self.get_math_expectation()])
-                table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
-                table.add_row(["Mathematical sigma", self.get_math_sigma()])
-                table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
+        if self.get_num_stat().get_values_distribution():
+            table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
+            table.add_row(["Mathematical mode", self.get_math_mode()])
+            table.add_row(["Mathematical expectation", self.get_math_expectation()])
+            table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
+            table.add_row(["Mathematical sigma", self.get_math_sigma()])
+            table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
         return str(table)
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """
+        This method returns the len[count] of values in this column
+        :return: int
+        """
         return self.__count
 
     def get_num_stat(self) -> NumericalIndicators:
@@ -60,7 +63,7 @@ class DataSetColumnNum:
         """
         return self.__column_name
 
-    def get_count_unique(self) -> int:
+    def get_unique_count(self) -> int:
         """
         This method returns count of unique values in this column
         :return: Count of unique values
@@ -106,61 +109,69 @@ class DataSetColumnNum:
         """
         return self.__num_stat.get_median()
 
-    def get_distribution(self):
+    def get_values_distribution(self) -> Dict[bool or float or int or str, float]:
         """
-        This method return mathematical distribution dict
+        This method returns the percentage of values in the column
+        :return Dict[bool or float or int or str, float]
         """
         if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_math_distribution()
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_distribution()
 
     def get_math_mode(self):
         """
         This method return mathematical mode
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_math_mode()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_math_mode()
 
     def get_math_expectation(self):
         """
         This method return mathematical expectation
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_math_expectation()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_math_expectation()
 
     def get_math_dispersion(self):
         """
         This method return mathematical dispersion
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_math_dispersion()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_math_dispersion()
 
     def get_math_sigma(self):
         """
         This method return mathematical sigma
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_math_sigma()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_math_sigma()
 
     def get_coef_of_variation(self):
         """
         This method return mathematical sigma
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_coef_of_variation()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_coef_of_variation()
 
     def get_Z_score(self):
         """
         This method return mathematical sigma
         """
-        if not self.get_num_stat().get_is_normal_distribution():
-            pass
-        return self.__num_stat.get_normal_distribution().get_Z_score()
+        if not self.get_num_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__num_stat.get_values_distribution().get_Z_score()
 
     def get_column_type(self) -> str:
         types = []

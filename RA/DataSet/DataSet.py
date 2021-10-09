@@ -8,7 +8,7 @@ from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
 
-from RA.DataSet.DataSetColumnNum import *
+from RA.DataSet.DataSetNumColumn import *
 
 
 class DataSet:
@@ -389,7 +389,7 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def get_column_statinfo(self, column_name: str) -> DataSetColumnNum:
+    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetNumColumn:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -402,11 +402,12 @@ class DataSet:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics:
             if True:
-                self.__dataset_analytics[column_name] = DataSetColumnNum(column_name=column_name,
-                                                                         values=list(self.__dataset[column_name]))
+                self.__dataset_analytics[column_name] = DataSetNumColumn(column_name=column_name,
+                                                                         values=list(self.__dataset[column_name]),
+                                                                         extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_columns_stat_info(self) -> Dict[str, DataSetColumnNum]:
+    def get_columns_stat_info(self) -> Dict[str, DataSetNumColumn]:
         """
         This method returns DataSet columns stat info
         :return: Dict["column_name", <DataSetColumn> class]
@@ -874,67 +875,67 @@ class DataSet:
 
     # CREATE-LOAD-EXPORT DATASET
 
-    def __save_plots(self, path: str, column: DataSetColumn):
-        if column.get_is_num_stat():
-            self.__save_min_average_max_plot(path=path,
-                                             column=column)
-            if column.num_stat.get_is_normal_distribution():
-                self.__save_normal_distribution_plot(path=path,
-                                                     column=column)
-
-    def __save_normal_distribution_plot(self, path: str, column: DataSetColumn):
-        plot_title = f'Normal Distribution of _{column.get_column_name()}_'
-        math_exp_v = column.num_stat.normal_distribution.get_math_expectation()
-        math_sigma_v = column.num_stat.normal_distribution.get_math_sigma()
-
-        values_plot = column.get_values()
-        math_expectation = len(values_plot) * [column.num_stat.normal_distribution.get_math_expectation()]
-        plt.title(plot_title)
-        plt.plot(values_plot, 'b-', label=f"Values count={len(values_plot)}")
-        plt.plot(math_expectation, 'b--', label=f"Expectation(Sigma)={math_exp_v}({math_sigma_v})")
-
-        plt.plot(len(values_plot) * [math_exp_v + 3 * math_sigma_v], 'r--',
-                 label=f"Moda + 3 * sigma={math_exp_v + 3 * math_sigma_v}")
-
-        plt.plot(len(values_plot) * [math_exp_v + 2 * math_sigma_v], 'y--',
-                 label=f"Moda + 2 * sigma={math_exp_v + 2 * math_sigma_v}")
-
-        plt.plot(len(values_plot) * [math_exp_v + 1 * math_sigma_v], 'g--',
-                 label=f"Moda + 1 * sigma={math_exp_v + 1 * math_sigma_v}")
-
-        plt.plot(len(values_plot) * [math_exp_v - 1 * math_sigma_v], 'g--',
-                 label=f"Moda - 1 * sigma={math_exp_v - 1 * math_sigma_v}")
-
-        plt.plot(len(values_plot) * [math_exp_v - 2 * math_sigma_v], 'y--',
-                 label=f"Moda - 2 * sigma={math_exp_v - 2 * math_sigma_v}")
-
-        plt.plot(len(values_plot) * [math_exp_v - 3 * math_sigma_v], 'y--',
-                 label=f"Moda - 2 * sigma={math_exp_v - 3 * math_sigma_v}")
-
-        plt.legend(loc='best')
-        if path is not None:
-            if not os.path.exists(path):  # Надо что то с путём что то адекватное придумать
-                raise Exception("The specified path was not found!")
-            plt.savefig(os.path.join(path, plot_title + ".png"))
-        plt.close()
-
-    def __save_min_average_max_plot(self, path: str, column: DataSetColumn):
-        plot_title = f'Numerical Indicators of _{column.get_column_name()}_'
-        values_plot = column.get_values()
-        max_plot = len(values_plot) * [column.get_max()]
-        min_plot = len(values_plot) * [column.get_min()]
-        average_plot = len(values_plot) * [column.get_mean()]
-        plt.title(plot_title)
-        plt.plot(values_plot, 'b-', label=f"Values count={len(values_plot)}")
-        plt.plot(max_plot, 'r-', label=f"Max value={column.get_max()}")
-        plt.plot(min_plot, 'r--', label=f"Min value={column.get_min()}")
-        plt.plot(average_plot, 'g--', label=f"Average value={column.get_mean()}")
-        plt.legend(loc='best')
-        if path is not None:
-            if not os.path.exists(path):  # Надо что то с путём что то адекватное придумать
-                raise Exception("The specified path was not found!")
-            plt.savefig(os.path.join(path, plot_title + ".png"))
-        plt.close()
+    # def __save_plots(self, path: str, column: DataSetNumColumn):
+    #     if column.get_is_num_stat():
+    #         self.__save_min_average_max_plot(path=path,
+    #                                          column=column)
+    #         if column.num_stat.get_is_normal_distribution():
+    #             self.__save_normal_distribution_plot(path=path,
+    #                                                  column=column)
+    #
+    # def __save_normal_distribution_plot(self, path: str, column: DataSetNumColumn):
+    #     plot_title = f'Normal Distribution of _{column.get_column_name()}_'
+    #     math_exp_v = column.num_stat.normal_distribution.get_math_expectation()
+    #     math_sigma_v = column.num_stat.normal_distribution.get_math_sigma()
+    #
+    #     values_plot = column.get_values()
+    #     math_expectation = len(values_plot) * [column.num_stat.normal_distribution.get_math_expectation()]
+    #     plt.title(plot_title)
+    #     plt.plot(values_plot, 'b-', label=f"Values count={len(values_plot)}")
+    #     plt.plot(math_expectation, 'b--', label=f"Expectation(Sigma)={math_exp_v}({math_sigma_v})")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v + 3 * math_sigma_v], 'r--',
+    #              label=f"Moda + 3 * sigma={math_exp_v + 3 * math_sigma_v}")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v + 2 * math_sigma_v], 'y--',
+    #              label=f"Moda + 2 * sigma={math_exp_v + 2 * math_sigma_v}")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v + 1 * math_sigma_v], 'g--',
+    #              label=f"Moda + 1 * sigma={math_exp_v + 1 * math_sigma_v}")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v - 1 * math_sigma_v], 'g--',
+    #              label=f"Moda - 1 * sigma={math_exp_v - 1 * math_sigma_v}")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v - 2 * math_sigma_v], 'y--',
+    #              label=f"Moda - 2 * sigma={math_exp_v - 2 * math_sigma_v}")
+    #
+    #     plt.plot(len(values_plot) * [math_exp_v - 3 * math_sigma_v], 'y--',
+    #              label=f"Moda - 2 * sigma={math_exp_v - 3 * math_sigma_v}")
+    #
+    #     plt.legend(loc='best')
+    #     if path is not None:
+    #         if not os.path.exists(path):  # Надо что то с путём что то адекватное придумать
+    #             raise Exception("The specified path was not found!")
+    #         plt.savefig(os.path.join(path, plot_title + ".png"))
+    #     plt.close()
+    #
+    # def __save_min_average_max_plot(self, path: str, column: DataSetNumColumn):
+    #     plot_title = f'Numerical Indicators of _{column.get_column_name()}_'
+    #     values_plot = column.get_values()
+    #     max_plot = len(values_plot) * [column.get_max()]
+    #     min_plot = len(values_plot) * [column.get_min()]
+    #     average_plot = len(values_plot) * [column.get_mean()]
+    #     plt.title(plot_title)
+    #     plt.plot(values_plot, 'b-', label=f"Values count={len(values_plot)}")
+    #     plt.plot(max_plot, 'r-', label=f"Max value={column.get_max()}")
+    #     plt.plot(min_plot, 'r--', label=f"Min value={column.get_min()}")
+    #     plt.plot(average_plot, 'g--', label=f"Average value={column.get_mean()}")
+    #     plt.legend(loc='best')
+    #     if path is not None:
+    #         if not os.path.exists(path):  # Надо что то с путём что то адекватное придумать
+    #             raise Exception("The specified path was not found!")
+    #         plt.savefig(os.path.join(path, plot_title + ".png"))
+    #     plt.close()
 
     def __read_dataset_info_from_json(self, data) -> None:
         """
