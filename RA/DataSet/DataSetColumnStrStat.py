@@ -113,9 +113,16 @@ class StringIndicators:
                 self.__fill_string_indicators(values=values,
                                               extended=extended)
 
-    def get_min(self):
+    def get_min(self) -> int:
         """
-        This method return minimal value of column
+        This method return minimal len of string in column
+        :return int
+        """
+        return self.__min_len
+
+    def get_min_value(self):
+        """
+        This method return minimal string in column
         :return Minimal value of column
         """
         return self.__min_len

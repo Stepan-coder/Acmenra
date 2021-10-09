@@ -16,8 +16,9 @@ class DataSetColumnNum:
         self.__values = values
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(self.__values)))
-        self.__nan_count = self.__get_nan_count()
+        self.__field_type = self.get_column_type()
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
+        self.__nan_count = self.__get_nan_count()
         self.__num_stat = NumericalIndicators(values=values, extended=extended)
 
     def __str__(self):
@@ -76,6 +77,15 @@ class DataSetColumnNum:
         :return: Count of NaN values
         """
         return self.__nan_count
+
+    def get_type(self) -> str:
+        """
+        This method returns type of column
+        :return: Type of column
+        """
+        if self.__field_type is None:
+            raise Exception("The values were not loaded!")
+        return self.__field_type
 
     def get_dtype(self, threshold: float):
         self.__field_dtype = "variable" if self.__count_unique >= len(self.__values) * threshold else "categorical"

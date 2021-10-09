@@ -1,5 +1,5 @@
 from prettytable import PrettyTable
-from RA.DataSet.DataSetColumnNumStat import *
+from RA.DataSet.DataSetColumnStrStat import *
 
 """
 Этот класс чисто под str! Методы и функционал только под него
@@ -16,9 +16,10 @@ class DataSetColumnSTtr:
         self.__values = values
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(self.__values)))
-        self.__nan_count = self.__get_nan_count()
+        self.__field_type = self.get_column_type()
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
-        self.__num_stat = NumericalIndicators(values=values, extended=extended)
+        self.__nan_count = self.__get_nan_count()
+        self.__str_stat = StringIndicators(values=values, extended=extended)
 
     def __str__(self):
         table = PrettyTable()
@@ -39,11 +40,6 @@ class DataSetColumnSTtr:
 
         if self.get_num_stat().get_values_distribution():
             table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
-            table.add_row(["Mathematical mode", self.get_math_mode()])
-            table.add_row(["Mathematical expectation", self.get_math_expectation()])
-            table.add_row(["Mathematical dispersion", self.get_math_dispersion()])
-            table.add_row(["Mathematical sigma", self.get_math_sigma()])
-            table.add_row(["Coefficient of Variation", self.get_coef_of_variation()])
         return str(table)
 
     def __len__(self) -> int:
@@ -114,7 +110,7 @@ class DataSetColumnSTtr:
         This method returns the percentage of values in the column
         :return Dict[bool or float or int or str, float]
         """
-        if not self.get_num_stat().get_is_normal_distribution():
+        if not self.get_num_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_distribution()
