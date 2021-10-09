@@ -2,11 +2,11 @@ from prettytable import PrettyTable
 from RA.DataSet.DataSetColumnNumStat import *
 
 """
-Этот класс чисто под int и float! Методы и функционал только под них, остальное - удаляй.
+Этот класс чисто под int и float! Методы и функционал только под них
 """
 
 
-class DataSetNumColumn:
+class DataSetColumnNum:
     def __init__(self,
                  column_name: str,
                  values: list,
@@ -81,45 +81,45 @@ class DataSetNumColumn:
         self.__field_dtype = "variable" if self.__count_unique >= len(self.__values) * threshold else "categorical"
         return self.__field_dtype
 
-    def get_min(self) -> int or float or bool:
+    def get_min(self) -> int or float:
         """
         This method return minimal value of column
         :return Minimal value of column
         """
         return self.__num_stat.get_min()
 
-    def get_max(self) -> int or float or bool:
+    def get_max(self) -> int or float:
         """
         This method return maximal value of column
         :return Maximal value of column
         """
         return self.__num_stat.get_max()
 
-    def get_mean(self) -> int or float or bool:
+    def get_mean(self) -> int or float:
         """
         This method return maximal value of column
         :return Mean value of column
         """
         return self.__num_stat.get_mean()
 
-    def get_median(self) -> int or float or bool:
+    def get_median(self) -> int or float:
         """
         This method return maximal value of column
         :return Median value of column
         """
         return self.__num_stat.get_median()
 
-    def get_values_distribution(self) -> Dict[bool or float or int or str, float]:
+    def get_values_distribution(self) -> Dict[float or int or str, float]:
         """
         This method returns the percentage of values in the column
         :return Dict[bool or float or int or str, float]
         """
-        if not self.get_num_stat().get_is_normal_distribution():
+        if not self.get_num_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_distribution()
 
-    def get_math_mode(self):
+    def get_math_mode(self) -> int or float:
         """
         This method return mathematical mode
         """
@@ -128,7 +128,7 @@ class DataSetNumColumn:
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_math_mode()
 
-    def get_math_expectation(self):
+    def get_math_expectation(self) -> int or float:
         """
         This method return mathematical expectation
         """
@@ -137,7 +137,7 @@ class DataSetNumColumn:
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_math_expectation()
 
-    def get_math_dispersion(self):
+    def get_math_dispersion(self) -> float:
         """
         This method return mathematical dispersion
         """
@@ -146,7 +146,7 @@ class DataSetNumColumn:
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_math_dispersion()
 
-    def get_math_sigma(self):
+    def get_math_sigma(self) -> float:
         """
         This method return mathematical sigma
         """
@@ -155,7 +155,7 @@ class DataSetNumColumn:
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_math_sigma()
 
-    def get_coef_of_variation(self):
+    def get_coef_of_variation(self) -> float:
         """
         This method return mathematical sigma
         """
@@ -164,7 +164,7 @@ class DataSetNumColumn:
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__num_stat.get_values_distribution().get_coef_of_variation()
 
-    def get_Z_score(self):
+    def get_Z_score(self) -> float:
         """
         This method return mathematical sigma
         """

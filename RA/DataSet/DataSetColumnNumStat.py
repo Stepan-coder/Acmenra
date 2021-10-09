@@ -7,7 +7,7 @@ from prettytable import PrettyTable
 
 
 class NormalDistribution:
-    def __init__(self, values: List[int or float] = None):
+    def __init__(self):
         self.__math_mode = None
         self.__math_expectation = None
         self.__math_dispersion = None
@@ -16,8 +16,6 @@ class NormalDistribution:
         self.__coef_of_variation = None
         self.__z_score = None
         self.__is_normal_distribution = False
-        if values is not None:
-            self.__fill_normal_distribution(values=values)
 
     def __str__(self):
         table = PrettyTable()
@@ -45,7 +43,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_math_mode(self):
+    def get_math_mode(self) -> int or float:
         """
         This method return mathematical mode
         """
@@ -54,7 +52,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_math_expectation(self):
+    def get_math_expectation(self) -> int or float:
         """
         This method return mathematical expectation
         """
@@ -63,7 +61,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_math_dispersion(self):
+    def get_math_dispersion(self) -> float:
         """
         This method return mathematical dispersion
         """
@@ -72,7 +70,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_math_sigma(self):
+    def get_math_sigma(self) -> float:
         """
         This method return mathematical sigma
         """
@@ -81,7 +79,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_coef_of_variation(self):
+    def get_coef_of_variation(self) -> float:
         """
         This method return Coefficient of Variation
         """
@@ -90,7 +88,7 @@ class NormalDistribution:
         else:
             raise Exception("The data has not been loaded yet!")
 
-    def get_Z_score(self):
+    def get_Z_score(self) -> float:
         """
         This method return the Z-score
         """
@@ -139,25 +137,22 @@ class NormalDistribution:
                 "Moda + 2 * sigma": float(self.__math_expectation + 2 * self.__math_sigma),
                 "Moda + 3 * sigma": float(self.__math_expectation + 3 * self.__math_sigma)}
 
-    def set_values(self, values: List[int or float]):
+    def set_values(self, values: List[int or float]) -> None:
+        """
+        This method calculated extended satatistisc params
+        :param values:
+        :return: None
+        """
         if not self.__is_normal_distribution:
             if values is not None:
-                self.__fill_normal_distribution(values=values)
-
-    def __fill_normal_distribution(self, values: List[int or float]) -> None:
-        """
-        This method fill NormalDistribution class when we use values
-        :param values: list of column values
-        """
-
-        self.__math_distribution = self.__get_values_distribution(values)
-        self.__math_mode = stats.mode(values)[0][0]
-        self.__math_expectation = self.__get_math_expectation(self.__math_distribution)
-        self.__math_sigma = np.std(values)
-        self.__math_dispersion = self.__math_sigma ** 2
-        self.__coef_of_variation = np.std(values) / np.mean(values) * 100
-        self.__z_score = stats.zscore(values)
-        self.__is_normal_distribution = True
+                self.__math_distribution = self.__get_values_distribution(values)
+                self.__math_mode = stats.mode(values)[0][0]
+                self.__math_expectation = self.__get_math_expectation(self.__math_distribution)
+                self.__math_sigma = np.std(values)
+                self.__math_dispersion = self.__math_sigma ** 2
+                self.__coef_of_variation = np.std(values) / np.mean(values) * 100
+                self.__z_score = stats.zscore(values)
+                self.__is_normal_distribution = True
 
     @staticmethod
     def __get_values_distribution(values: list) -> Dict[bool or int or float or bool, float]:
@@ -174,11 +169,11 @@ class NormalDistribution:
         return math_rasp
 
     @staticmethod
-    def __get_math_dispersion(math_rasp_dict: dict) -> float:
+    def __get_math_dispersion(math_rasp_dict: dict) -> int or float:
         """
         This method calculates the mathematical variance
         :param math_rasp_dict: Dictionary of the frequency of values
-        :return: float
+        :return: int or float
         """
         math_wait = NormalDistribution.__get_math_expectation(math_rasp_dict)
         math_wait_x2 = math_wait * math_wait
@@ -186,7 +181,7 @@ class NormalDistribution:
         return math_wait_2 - math_wait_x2
 
     @staticmethod
-    def __get_math_moda(math_rasp_dict: dict):
+    def __get_math_moda(math_rasp_dict: dict) -> int or float:
         """
         This method calculates the mathematical mode (the most frequent value)
         :param math_rasp_dict: Dictionary of the frequency of values
@@ -201,7 +196,7 @@ class NormalDistribution:
         return moda_key
 
     @staticmethod
-    def __get_math_expectation(math_rasp_dict: dict) -> float:
+    def __get_math_expectation(math_rasp_dict: dict) -> int or float:
         """
         This method calculates the mathematical expectation
         :param math_rasp_dict: Dictionary of the frequency of values
@@ -213,7 +208,7 @@ class NormalDistribution:
         return math_wait
 
     @staticmethod
-    def __get_math_wait_2(math_rasp_dict: dict) -> float:
+    def __get_math_wait_2(math_rasp_dict: dict) -> int or float:
         """
         This method calculates the mathematical expectation squared
         :param math_rasp_dict: Dictionary of the frequency of values
@@ -245,7 +240,8 @@ class NumericalIndicators:
             # It is easier and clearer for us to recalculate basic statistics than to pile up incomprehensible code
             # To download advanced statistics from a json file, you can calculate "basic statistics",
             # because it's not long.
-            self.values_distribution = NormalDistribution(values=values)
+            self.values_distribution = NormalDistribution()
+            self.values_distribution.set_values(values=values)
             self.__is_normal_distribution = True  # Отвечает за наличие данных в классе NormalDistribution
 
     def __str__(self) -> str:
@@ -262,28 +258,28 @@ class NumericalIndicators:
         table.add_row(["Max val", self.get_max()])
         return str(table)
 
-    def get_min(self):
+    def get_min(self) -> int or float:
         """
         This method return minimal value of column
-        :return Minimal value of column
+        :return int or float
         """
         return self.__min
 
-    def get_max(self):
+    def get_max(self) -> int or float:
         """
         This method return maximal value of column
         :return Maximal value of column
         """
         return self.__max
 
-    def get_mean(self):
+    def get_mean(self) -> int or float:
         """
         This method return mean value of column
         :return Mean value of column
         """
         return self.__mean
 
-    def get_median(self):
+    def get_median(self) -> int or float:
         """
         This method return median value of column
         :return Median value of column

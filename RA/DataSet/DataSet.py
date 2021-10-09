@@ -8,7 +8,7 @@ from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
 
-from RA.DataSet.DataSetNumColumn import *
+from RA.DataSet.DataSetColumnNum import *
 
 
 class DataSet:
@@ -389,7 +389,7 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetNumColumn:
+    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetColumnNum:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -402,12 +402,12 @@ class DataSet:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics:
             if True:
-                self.__dataset_analytics[column_name] = DataSetNumColumn(column_name=column_name,
+                self.__dataset_analytics[column_name] = DataSetColumnNum(column_name=column_name,
                                                                          values=list(self.__dataset[column_name]),
                                                                          extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_columns_stat_info(self) -> Dict[str, DataSetNumColumn]:
+    def get_columns_stat_info(self) -> Dict[str, DataSetColumnNum]:
         """
         This method returns DataSet columns stat info
         :return: Dict["column_name", <DataSetColumn> class]
@@ -468,8 +468,8 @@ class DataSet:
         :return: None
         """
         for key in self.__dataset_keys:
-            column_type = self.get_column_info(column_name=key,
-                                               extended=False).get_type()
+            column_type = self.get_column_statinfo(column_name=key,
+                                                   extended=False).get_type()
             if column_type.startswith('str'):
                 self.__dataset[key] = self.__dataset[key].fillna(value="-")
             elif column_type.startswith('int') or column_type.startswith('float'):
@@ -599,9 +599,9 @@ class DataSet:
             is_extended = False
             if key in self.__dataset_analytics:
                 is_extended = self.__dataset_analytics[key].get_is_extended()
-            self.__dataset_analytics[key] = DataSetColumn(column_name=key,
-                                                          values=self.__dataset[key],
-                                                          extended=is_extended)
+            self.__dataset_analytics[key] = DataSetColumnNum(column_name=key,
+                                                             values=self.__dataset[key],
+                                                             extended=is_extended)
 
     # CREATE-LOAD-EXPORT DATASET
     def create_empty_dataset(self,
