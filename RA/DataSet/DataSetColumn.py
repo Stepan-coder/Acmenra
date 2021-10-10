@@ -47,8 +47,8 @@ class DataSetColumn:
             table.add_row(["Median val", self.get_median()])
             table.add_row(["Max val", self.get_max()])
 
-            if self.get_num_stat().get_normal_distribution():
-                table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
+            if self.get_num_stat().get_is_extended():
+                table.add_row(["Values Distribution", "".join(len("Normal Distribution") * [" "])])
                 table.add_row(["Mathematical mode", self.get_math_mode()])
                 table.add_row(["Mathematical expectation", self.get_math_expectation()])
                 table.add_row(["Mathematical dispersion", self.get_math_dispersion()])

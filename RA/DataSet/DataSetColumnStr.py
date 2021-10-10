@@ -6,7 +6,7 @@ from RA.DataSet.DataSetColumnStrStat import *
 """
 
 
-class DataSetColumnSTtr:
+class DataSetColumnStr:
     def __init__(self,
                  column_name: str,
                  values: list,
@@ -34,11 +34,9 @@ class DataSetColumnSTtr:
         table.add_row(["NaN count", self.get_nan_count()])
         table.add_row(["String indicators", "".join(len("String indicators") * [" "])])
         table.add_row(["Min val", self.get_min()])
-        table.add_row(["Mean val", self.get_mean()])
-        table.add_row(["Median val", self.get_median()])
         table.add_row(["Max val", self.get_max()])
 
-        if self.get_num_stat().get_values_distribution():
+        if self.get_str_stat().get_values_distribution():
             table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
         return str(table)
 
@@ -49,8 +47,8 @@ class DataSetColumnSTtr:
         """
         return self.__count
 
-    def get_num_stat(self) -> NumericalIndicators:
-        return self.__num_stat
+    def get_str_stat(self) -> StringIndicators:
+        return self.__str_stat
 
     def get_column_name(self) -> str:
         """
@@ -79,41 +77,48 @@ class DataSetColumnSTtr:
 
     def get_min(self) -> int or float or bool:
         """
+        This method return minimal str len in column
+        :return Minimal value of column
+        """
+        return self.__str_stat.get_min()
+
+    def get_min_value(self) -> int or float or bool:
+        """
         This method return minimal value of column
         :return Minimal value of column
         """
-        return self.__num_stat.get_min()
+        return self.__str_stat.get_min_value()
 
     def get_max(self) -> int or float or bool:
+        """
+        This method return maximal str len of column
+        :return Maximal value of column
+        """
+        return self.__str_stat.get_max()
+
+    def get_max_value(self) -> int or float or bool:
         """
         This method return maximal value of column
         :return Maximal value of column
         """
-        return self.__num_stat.get_max()
+        return self.__str_stat.get_max_value()
 
-    def get_mean(self) -> int or float or bool:
+    def get_mean(self) -> int or float:
         """
         This method return maximal value of column
         :return Mean value of column
         """
-        return self.__num_stat.get_mean()
-
-    def get_median(self) -> int or float or bool:
-        """
-        This method return maximal value of column
-        :return Median value of column
-        """
-        return self.__num_stat.get_median()
+        return self.__str_stat.get_mean()
 
     def get_values_distribution(self) -> Dict[bool or float or int or str, float]:
         """
         This method returns the percentage of values in the column
         :return Dict[bool or float or int or str, float]
         """
-        if not self.get_num_stat().get_is_extended():
+        if not self.get_str_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
-        return self.__num_stat.get_values_distribution().get_distribution()
+        return self.__str_stat.get_letter_counter().get_distribution()
 
     def get_column_type(self) -> str:
         types = []

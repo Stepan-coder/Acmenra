@@ -235,14 +235,14 @@ class NumericalIndicators:
         self.__max = max(values)
         self.__normal_distribution = None
         self.__is_extended = extended
-        self.__is_normal_distribution = False
+        self.__is_values_distribution = False
         if extended:
             # It is easier and clearer for us to recalculate basic statistics than to pile up incomprehensible code
             # To download advanced statistics from a json file, you can calculate "basic statistics",
             # because it's not long.
-            self.values_distribution = NormalDistribution()
-            self.values_distribution.set_values(values=values)
-            self.__is_normal_distribution = True  # Отвечает за наличие данных в классе NormalDistribution
+            self.__values_distribution = NormalDistribution()
+            self.__values_distribution.set_values(values=values)
+            self.__is_values_distribution = True  # Отвечает за наличие данных в классе NormalDistribution
 
     def __str__(self) -> str:
         """
@@ -287,11 +287,11 @@ class NumericalIndicators:
         return self.__median
 
     def get_is_extended(self) -> bool:
-        return self.__is_normal_distribution
+        return self.__is_values_distribution
 
     def get_values_distribution(self) -> NormalDistribution:
-        if self.__is_normal_distribution:
-            return self.values_distribution
+        if self.__is_values_distribution:
+            return self.__values_distribution
 
     def get_from_json(self, data: dict) -> None:
         """
@@ -309,9 +309,9 @@ class NumericalIndicators:
         self.__median = data["Median value"]
         self.__is_numerical_indicators = True
         if "Normal distribution" in data:
-            self.values_distribution = NormalDistribution()
-            self.values_distribution.from_json(data["Normal distribution"])
-            self.__is_normal_distribution = True
+            self.__values_distribution = NormalDistribution()
+            self.__values_distribution.from_json(data["Normal distribution"])
+            self.__is_values_distribution = True
             self.__use_normal_distribution = True
 
     def to_json(self):
@@ -325,7 +325,7 @@ class NumericalIndicators:
                 "Maximal value": self.__max,
                 "Mean value": self.__mean,
                 "Median value": self.__median}
-        if self.__use_normal_distribution and self.__is_normal_distribution:
-            data['Normal distribution'] = self.values_distribution.to_json()
+        if self.__use_normal_distribution and self.__is_values_distribution:
+            data['Normal distribution'] = self.__values_distribution.to_json()
         return data
 

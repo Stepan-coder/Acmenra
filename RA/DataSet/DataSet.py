@@ -9,6 +9,7 @@ from typing import Any
 from prettytable import PrettyTable
 
 from RA.DataSet.DataSetColumnNum import *
+from RA.DataSet.DataSetColumnStr import *
 
 
 class DataSet:
@@ -45,7 +46,7 @@ class DataSet:
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:
-                column = self.get_column_info(column_name=key, extended=False)
+                column = self.get_column_statinfo(column_name=key, extended=False)
 
                 if column.get_dtype(threshold=0.15) == 'variable':
                     dtype = "\033[32m {}\033[0m".format(column.get_dtype(threshold=0.15))
@@ -55,7 +56,7 @@ class DataSet:
                                column.get_type(),
                                dtype,
                                column.get_count(),
-                               column.get_count_unique(),
+                               column.get_unique_count(),
                                column.get_nan_count()])
         return str(table)
 
@@ -389,7 +390,7 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetColumnNum:
+    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetColumnNum or DataSetColumnStr:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -401,8 +402,13 @@ class DataSet:
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         if column_name not in self.__dataset_analytics:
-            if True:
+            if self.__get_column_type(column_name=column_name).startswith("int") or \
+                    self.__get_column_type(column_name=column_name).startswith("float"):
                 self.__dataset_analytics[column_name] = DataSetColumnNum(column_name=column_name,
+                                                                         values=list(self.__dataset[column_name]),
+                                                                         extended=extended)
+            elif self.__get_column_type(column_name=column_name).startswith("str"):
+                self.__dataset_analytics[column_name] = DataSetColumnStr(column_name=column_name,
                                                                          values=list(self.__dataset[column_name]),
                                                                          extended=extended)
         return self.__dataset_analytics[column_name]
@@ -803,8 +809,7 @@ class DataSet:
                            "columns": {}}
             for key in self.__dataset_keys:
                 if key not in self.__dataset_analytics:
-                    self.__dataset_analytics[key] = self.get_column_info(column_name=key,
-                                                                         extended=True)
+                    self.__dataset_analytics[key] = self.get_column_statinfo(column_name=key, extended=True)
                 json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                          self.__dataset_analytics[key].to_json())
             with open(os.path.join(folder, f"{dataset_filename}.json"), 'w') as json_file:
@@ -936,6 +941,23 @@ class DataSet:
     #             raise Exception("The specified path was not found!")
     #         plt.savefig(os.path.join(path, plot_title + ".png"))
     #     plt.close()
+
+    def __get_column_type(self, column_name: str) -> str:
+        """
+        This method learns the column type
+        :param column_name: Name of DataSet column
+        :return: str
+        """
+        types = []
+        for i in range(len(self.__dataset)):
+            types.append(type(self.__dataset.at[i, column_name]).__name__)
+        types = list(set(types))
+        if len(types) == 1:
+            return types[0]
+        else:
+            if len(types) == 2 and 'str' in types:
+                return 'str'
+            return "object"
 
     def __read_dataset_info_from_json(self, data) -> None:
         """

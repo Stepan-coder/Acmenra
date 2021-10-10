@@ -27,7 +27,7 @@ class DataSetColumnNum:
         table.title = f"{'Empty ' if not is_dataset else ''}Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
         table.add_row(["Сolumn name", self.get_column_name()])
-        # table.add_row(["Type", self.get_type()])
+        table.add_row(["Type", self.get_type()])
         table.add_row(["DType", self.get_dtype(threshold=0.15)])
         table.add_row(["Count", self.__count])
         table.add_row(["Count unique", self.get_unique_count()])
@@ -63,6 +63,13 @@ class DataSetColumnNum:
         :return: Name of column
         """
         return self.__column_name
+
+    def get_count(self) -> int:
+        """"
+        This method returns count of values in this column
+        :return: Count of values
+        """
+        return self.__count
 
     def get_unique_count(self) -> int:
         """
