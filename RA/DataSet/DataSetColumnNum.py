@@ -126,7 +126,7 @@ class DataSetColumnNum:
         """
         return self.__num_stat.get_median()
 
-    def get_values_distribution(self) -> Dict[float or int or str, float]:
+    def get_values_distribution(self) -> Dict[float or int, float]:
         """
         This method returns the percentage of values in the column
         :return Dict[bool or float or int or str, float]

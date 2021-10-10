@@ -27,7 +27,7 @@ class DataSetColumnStr:
         table.title = f"{'Empty ' if not is_dataset else ''}Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
         table.add_row(["Сolumn name", self.get_column_name()])
-        # table.add_row(["Type", self.get_type()])
+        table.add_row(["Type", self.get_type()])
         table.add_row(["DType", self.get_dtype(threshold=0.15)])
         table.add_row(["Count", self.__count])
         table.add_row(["Count unique", self.get_unique_count()])
@@ -36,7 +36,7 @@ class DataSetColumnStr:
         table.add_row(["Min val", self.get_min()])
         table.add_row(["Max val", self.get_max()])
 
-        if self.get_str_stat().get_values_distribution():
+        if self.get_str_stat().get_letter_counter().get_distribution():
             table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
         return str(table)
 
@@ -70,6 +70,15 @@ class DataSetColumnStr:
         :return: Count of NaN values
         """
         return self.__nan_count
+
+    def get_type(self) -> str:
+        """
+        This method returns type of column
+        :return: Type of column
+        """
+        if self.__field_type is None:
+            raise Exception("The values were not loaded!")
+        return self.__field_type
 
     def get_dtype(self, threshold: float):
         self.__field_dtype = "variable" if self.__count_unique >= len(self.__values) * threshold else "categorical"
@@ -110,7 +119,7 @@ class DataSetColumnStr:
         """
         return self.__str_stat.get_mean()
 
-    def get_values_distribution(self) -> Dict[bool or float or int or str, float]:
+    def get_values_distribution(self) -> Dict[str, float]:
         """
         This method returns the percentage of values in the column
         :return Dict[bool or float or int or str, float]
@@ -119,6 +128,17 @@ class DataSetColumnStr:
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
                             f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
         return self.__str_stat.get_letter_counter().get_distribution()
+
+    def get_letters_distribution(self) -> Dict[str, float]:
+        """
+        This method returns the percentage of values in the column
+        :return Dict[bool or float or int or str, float]
+        """
+        if not self.get_str_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__str_stat.get_letter_counter().get_letters_distribution()
+
 
     def get_column_type(self) -> str:
         types = []

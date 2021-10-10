@@ -7,10 +7,11 @@ from typing import Dict, List
 from prettytable import PrettyTable
 
 
-class LetterDistribution:
+class StringStatistics:
     def __init__(self, values: List[int or float] = None):
-        self.__letter_distribution = None
-        self.__is_letter_distribution = False
+        self.__strings_distribution = None
+        self.__letters_distribution = None
+        self.__is_string_statistics = False
         if values is not None:
             self.__fill_letter_distribution(values=values)
 
@@ -18,7 +19,7 @@ class LetterDistribution:
         table = PrettyTable()
         table.title = f"\"LetterDistribution\""
         table.field_names = ["Indicator", "Value"]
-        if self.__is_letter_distribution:
+        if self.__is_string_statistics:
             letter_distr = self.get_distribution()
             for ld in letter_distr:
                 table.add_row([ld, letter_distr[ld]])
@@ -28,10 +29,17 @@ class LetterDistribution:
         """
         This method return mathematical distribution dict
         """
-        if self.__is_letter_distribution is not None:
-            return self.__letter_distribution
-        else:
+        if not self.__is_string_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__strings_distribution
+
+    def get_letters_distribution(self) -> Dict[int or float, float]:
+        """
+        This method return mathematical distribution dict
+        """
+        if not self.__is_string_statistics:
+            raise Exception("The data has not been loaded yet!")
+        return self.__letters_distribution
 
     def from_json(self, data) -> None:
         """
@@ -39,17 +47,17 @@ class LetterDistribution:
         :param data: Input json object
         :return: None
         """
-        self.__letter_distribution = data
-        self.__is_letter_distribution = True
+        self.__letters_distribution = data
+        self.__is_string_statistics = True
 
     def to_json(self):
         """
         This method export class NormalDistribution to json object
         :return: json object
         """
-        if not self.__is_letter_distribution:
+        if not self.__is_string_statistics:
             raise Exception("The values were not loaded!")
-        return self.__letter_distribution
+        return self.__is_string_statistics
 
     def set_values(self, values: List[int or float]) -> None:
         """
@@ -57,7 +65,7 @@ class LetterDistribution:
         :param values:
         :return: None
         """
-        if not self.__is_letter_distribution:
+        if not self.__is_string_statistics:
             if values is not None:
                 self.__fill_letter_distribution(values=values)
 
@@ -67,15 +75,25 @@ class LetterDistribution:
         :param values: list of column values
         :return None
         """
-        self.__letter_distribution = {}
+        self.__letters_distribution = {}
+        self.__strings_distribution = {}
         for string in tqdm(values):
+            if string not in self.__strings_distribution:
+                self.__strings_distribution[string] = 1
+            else:
+                self.__strings_distribution[string] += 1
             for letter in string:
-                if letter not in self.__letter_distribution:
-                    self.__letter_distribution[letter] = 1
+                if letter not in self.__letters_distribution:
+                    self.__letters_distribution[letter] = 1
                 else:
-                    self.__letter_distribution[letter] += 1
-        self.__letter_distribution = dict(sorted(self.__letter_distribution.items(), key=lambda x: x[1], reverse=True))
-        self.__is_letter_distribution = True
+                    self.__letters_distribution[letter] += 1
+        self.__letters_distribution = dict(sorted(self.__letters_distribution.items(),
+                                                  key=lambda x: x[1],
+                                                  reverse=True))
+        self.__strings_distribution = dict(sorted(self.__strings_distribution.items(),
+                                                  key=lambda x: x[1],
+                                                  reverse=True))
+        self.__is_string_statistics = True
 
 
 class StringIndicators:
@@ -90,8 +108,9 @@ class StringIndicators:
         self.__is_extended = extended
         self.__is_letter_counter = False
         if extended:
-            self.__letter_counter = LetterDistribution()
+            self.__letter_counter = StringStatistics()
             self.__letter_counter.set_values(values=values)
+            self.__is_letter_counter = True
 
     def __str__(self):
         table = PrettyTable()
@@ -143,7 +162,7 @@ class StringIndicators:
     def get_is_extended(self) -> bool:
         return self.__is_letter_counter
 
-    def get_letter_counter(self) -> LetterDistribution:
+    def get_letter_counter(self) -> StringStatistics:
         if self.__is_letter_counter:
             return self.__letter_counter
 
@@ -168,7 +187,7 @@ class StringIndicators:
         self.__mean_len = data["Mean string length"]
         self.__is_string_indicators = True
         if "Letter counter" in data:
-            self.__letter_counter = LetterDistribution()
+            self.__letter_counter = StringStatistics()
             self.__letter_counter.from_json(data["Letter counter"])
             self.__use_letter_counter = True
             self.__is_letter_counter = True

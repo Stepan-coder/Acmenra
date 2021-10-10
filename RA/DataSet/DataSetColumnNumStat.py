@@ -6,7 +6,7 @@ from typing import Dict, List
 from prettytable import PrettyTable
 
 
-class NormalDistribution:
+class NumericalStatistics:
     def __init__(self):
         self.__math_mode = None
         self.__math_expectation = None
@@ -15,13 +15,13 @@ class NormalDistribution:
         self.__math_distribution = None
         self.__coef_of_variation = None
         self.__z_score = None
-        self.__is_normal_distribution = False
+        self.__is_numerical_statistics = False
 
     def __str__(self):
         table = PrettyTable()
         table.title = f"\"NormalDistribution\""
         table.field_names = ["Indicator", "Value"]
-        if self.__is_normal_distribution:
+        if self.__is_numerical_statistics:
             table.add_row(["Math mode", self.get_math_mode()])
             table.add_row(["Math expectation", self.get_math_expectation()])
             table.add_row(["Math dispersion", self.get_distribution()])
@@ -38,70 +38,63 @@ class NormalDistribution:
         """
         This method return mathematical distribution dict
         """
-        if self.__is_normal_distribution is not None:
-            return self.__math_distribution
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__math_distribution
 
     def get_math_mode(self) -> int or float:
         """
         This method return mathematical mode
         """
-        if self.__is_normal_distribution is not None:
-            return self.__math_mode
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__math_mode
 
     def get_math_expectation(self) -> int or float:
         """
         This method return mathematical expectation
         """
-        if self.__is_normal_distribution is not None:
-            return self.__math_expectation
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__math_expectation
 
     def get_math_dispersion(self) -> float:
         """
         This method return mathematical dispersion
         """
-        if self.__is_normal_distribution is not None:
-            return self.__math_dispersion
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__math_dispersion
 
     def get_math_sigma(self) -> float:
         """
         This method return mathematical sigma
         """
-        if self.__is_normal_distribution is not None:
-            return self.__math_sigma
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__math_sigma
 
     def get_coef_of_variation(self) -> float:
         """
         This method return Coefficient of Variation
         """
-        if self.__is_normal_distribution is not None:
-            return self.__coef_of_variation
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__coef_of_variation
 
     def get_Z_score(self) -> float:
         """
         This method return the Z-score
         """
-        if self.__is_normal_distribution is not None:
-            return self.__z_score
-        else:
+        if not self.__is_numerical_statistics:
             raise Exception("The data has not been loaded yet!")
+        return self.__z_score
 
     def get_is_normal_distribution(self) -> bool:
         """
         This method return the current state of filling normal distribution
         """
-        return self.__is_normal_distribution
+        return self.__is_numerical_statistics
 
     def from_json(self, data) -> None:
         """
@@ -117,14 +110,14 @@ class NormalDistribution:
         self.__math_expectation = data["Math expectation"]
         self.__math_dispersion = data["Math dispersion"]
         self.__math_sigma = data["Math sigma"]
-        self.__is_normal_distribution = True
+        self.__is_numerical_statistics = True
 
     def to_json(self):
         """
         This method export class NormalDistribution to json object
         :return: json object
         """
-        if not self.__is_normal_distribution:
+        if not self.__is_numerical_statistics:
             raise Exception("The values were not loaded!")
         return {"Math mode": float(self.__math_mode),
                 "Math expectation": float(self.__math_expectation),
@@ -143,7 +136,7 @@ class NormalDistribution:
         :param values:
         :return: None
         """
-        if not self.__is_normal_distribution:
+        if not self.__is_numerical_statistics:
             if values is not None:
                 self.__math_distribution = self.__get_values_distribution(values)
                 self.__math_mode = stats.mode(values)[0][0]
@@ -152,7 +145,7 @@ class NormalDistribution:
                 self.__math_dispersion = self.__math_sigma ** 2
                 self.__coef_of_variation = np.std(values) / np.mean(values) * 100
                 self.__z_score = stats.zscore(values)
-                self.__is_normal_distribution = True
+                self.__is_numerical_statistics = True
 
     @staticmethod
     def __get_values_distribution(values: list) -> Dict[bool or int or float or bool, float]:
@@ -175,9 +168,9 @@ class NormalDistribution:
         :param math_rasp_dict: Dictionary of the frequency of values
         :return: int or float
         """
-        math_wait = NormalDistribution.__get_math_expectation(math_rasp_dict)
+        math_wait = NumericalStatistics.__get_math_expectation(math_rasp_dict)
         math_wait_x2 = math_wait * math_wait
-        math_wait_2 = NormalDistribution.__get_math_wait_2(math_rasp_dict)
+        math_wait_2 = NumericalStatistics.__get_math_wait_2(math_rasp_dict)
         return math_wait_2 - math_wait_x2
 
     @staticmethod
@@ -235,12 +228,11 @@ class NumericalIndicators:
         self.__max = max(values)
         self.__normal_distribution = None
         self.__is_extended = extended
-        self.__is_values_distribution = False
         if extended:
             # It is easier and clearer for us to recalculate basic statistics than to pile up incomprehensible code
             # To download advanced statistics from a json file, you can calculate "basic statistics",
             # because it's not long.
-            self.__values_distribution = NormalDistribution()
+            self.__values_distribution = NumericalStatistics()
             self.__values_distribution.set_values(values=values)
             self.__is_values_distribution = True  # Отвечает за наличие данных в классе NormalDistribution
 
@@ -287,10 +279,10 @@ class NumericalIndicators:
         return self.__median
 
     def get_is_extended(self) -> bool:
-        return self.__is_values_distribution
+        return self.__is_extended
 
-    def get_values_distribution(self) -> NormalDistribution:
-        if self.__is_values_distribution:
+    def get_values_distribution(self) -> NumericalStatistics:
+        if self.__is_extended:
             return self.__values_distribution
 
     def get_from_json(self, data: dict) -> None:
@@ -307,25 +299,21 @@ class NumericalIndicators:
         self.__max = data["Maximal value"]
         self.__mean = data["Mean value"]
         self.__median = data["Median value"]
-        self.__is_numerical_indicators = True
         if "Normal distribution" in data:
-            self.__values_distribution = NormalDistribution()
+            self.__values_distribution = NumericalStatistics()
             self.__values_distribution.from_json(data["Normal distribution"])
-            self.__is_values_distribution = True
-            self.__use_normal_distribution = True
+            self.__is_extended = True
 
     def to_json(self):
         """
         This method export class NormalDistribution to json object
         :return: json data
         """
-        if not self.__is_numerical_indicators:
-            raise Exception("The values were not loaded!")
         data = {"Minimal value": self.__min,
                 "Maximal value": self.__max,
                 "Mean value": self.__mean,
                 "Median value": self.__median}
-        if self.__use_normal_distribution and self.__is_values_distribution:
+        if self.__is_extended and self.__is_values_distribution:
             data['Normal distribution'] = self.__values_distribution.to_json()
         return data
 

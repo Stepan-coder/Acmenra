@@ -7,8 +7,8 @@ warnings.filterwarnings("ignore")
 manager = Manager(path=os.getcwd(), project_name="test_project")
 manager.create_DataSet(dataset_name="Original DataSet")
 manager.create_DataSet(dataset_name="Original DataSet1")
-manager.DataSet("Original DataSet").add_row(new_row={"A": "AAAAA", "B": True})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "A", "B": True})
+manager.DataSet("Original DataSet").add_row(new_row={"A": "AAAAAAAAAA", "B": 1})
+manager.DataSet("Original DataSet").add_row(new_row={"A": "A", "B": 2})
 manager.DataSet("Original DataSet").add_row(new_row={"A": "A", "B": 3})
 manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 1})
 manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 2})
@@ -24,7 +24,7 @@ manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 3})
 manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 3})
 
 
-print(manager.DataSet("Original DataSet").get_column_statinfo(column_name="A", extended=True).get_values_distribution())
+print(manager.DataSet("Original DataSet").get_column_statinfo(column_name="A", extended=True).get_letters_distribution())
 #
 # print(manager.DataSet("Original DataSet"))
 
