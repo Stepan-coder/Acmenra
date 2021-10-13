@@ -21,10 +21,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNum.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNum.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNumStat.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNumStat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStrStat.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStrStat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSet.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/task1.py" beforeDir="false" afterPath="$PROJECT_DIR$/task1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,7 +100,7 @@
       </list>
     </recent_temporary>
   </component>
-  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -128,23 +125,5 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state width="2539" height="225" key="GridCell.Tab.0.bottom" timestamp="1633893582516">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="225" key="GridCell.Tab.0.bottom/0.0.2560.1080@0.0.2560.1080" timestamp="1633893582516" />
-    <state width="2539" height="225" key="GridCell.Tab.0.center" timestamp="1633893582516">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="225" key="GridCell.Tab.0.center/0.0.2560.1080@0.0.2560.1080" timestamp="1633893582516" />
-    <state width="2539" height="225" key="GridCell.Tab.0.left" timestamp="1633893582516">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="225" key="GridCell.Tab.0.left/0.0.2560.1080@0.0.2560.1080" timestamp="1633893582516" />
-    <state width="2539" height="225" key="GridCell.Tab.0.right" timestamp="1633893582516">
-      <screen x="0" y="0" width="2560" height="1080" />
-    </state>
-    <state width="2539" height="225" key="GridCell.Tab.0.right/0.0.2560.1080@0.0.2560.1080" timestamp="1633893582516" />
   </component>
 </project>

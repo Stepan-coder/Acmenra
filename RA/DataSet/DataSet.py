@@ -710,7 +710,7 @@ class DataSet:
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith((".xlsx", ".xls", ".xlsb", '.ods')):
+            if not excel_file.endswith((".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods')):
                 raise Exception("The dataset format should be '.xls', '.xlsx', '.xlsb', '.ods'!")
         self.__dataset_file = excel_file
         self.__dataset = self.__read_from_xlsx(filename=str(excel_file),

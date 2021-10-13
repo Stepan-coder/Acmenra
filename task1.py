@@ -5,26 +5,13 @@ from RA.DataSet.DataSet import *
 warnings.filterwarnings("ignore")
 
 manager = Manager(path=os.getcwd(), project_name="test_project")
-manager.create_DataSet(dataset_name="Original DataSet")
-manager.create_DataSet(dataset_name="Original DataSet1")
-manager.DataSet("Original DataSet").add_row(new_row={"A": "AAAAAAAAAA", "B": 1})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "A", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "A", "B": 3})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 1})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "B", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 3})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 1})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 2})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 3})
-manager.DataSet("Original DataSet").add_row(new_row={"A": "C", "B": 3})
+manager.create_DataSet(dataset_name="table")
+manager.DataSet("table").load_excel_dataset(excel_file="skladskoy-uchet.xlsx",
+                                            sheet_name="Поставщики")
+print(manager.DataSet("table").get_column_statinfo(column_name="Поставщики", extended=True).get_letters_distribution())
 
 
-print(manager.DataSet("Original DataSet").get_column_statinfo(column_name="A", extended=True).get_letters_distribution())
+# print(manager.DataSet("Original DataSet").get_column_statinfo(column_name="A", extended=True).get_letters_distribution())
 #
 # print(manager.DataSet("Original DataSet"))
 
