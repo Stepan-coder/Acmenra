@@ -8,7 +8,7 @@ manager = Manager(path=os.getcwd(), project_name="test_project")
 manager.create_DataSet(dataset_name="table")
 manager.DataSet("table").load_excel_dataset(excel_file="skladskoy-uchet.xlsx",
                                             sheet_name="Поставщики")
-print(manager.DataSet("table").get_column_statinfo(column_name="Поставщики", extended=True).get_letters_distribution())
+print(manager.DataSet("table").get_column_statinfo(column_name="Поставщики", extended=True).get_min_value())
 
 
 # print(manager.DataSet("Original DataSet").get_column_statinfo(column_name="A", extended=True).get_letters_distribution())
