@@ -57,6 +57,13 @@ class DataSetColumnStr:
         """
         return self.__column_name
 
+    def get_count(self) -> int:
+        """"
+        This method returns count of values in this column
+        :return: Count of values
+        """
+        return self.__count
+
     def get_unique_count(self) -> int:
         """
         This method returns count of unique values in this column

@@ -427,7 +427,6 @@ class DataSet:
         :return: None
         """
         self.__dataset_save_path = path
-
     # /SET_GET INIT PARAMS
 
     def get_is_loaded(self) -> bool:
@@ -464,6 +463,13 @@ class DataSet:
         if n > len(self.__dataset):
             n = len(self.__dataset)
         print(self.__dataset.iloc[-n:])
+
+    def get_supported_formats(self) -> List[str]:
+        """
+        This method returns a list of supported files
+        :return: List[str]
+        """
+        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
 
     def fillna(self) -> None:
         """
@@ -698,6 +704,17 @@ class DataSet:
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
+    def get_excel_sheet_names(self, excel_file: str) -> List[str]:
+        """
+        This method loads the dataset into the DataSet class
+        :param excel_file: The name of the excel file
+        :return: List[str]
+        """
+        if excel_file is not None:  # Checking that the uploaded file has the .csv format
+            if not excel_file.endswith(tuple(self.get_supported_formats())):
+                raise Exception(f"The dataset format should be {', '.join(self.get_supported_formats())}!")
+        return pd.ExcelFile(excel_file).sheet_names
+
     def load_excel_dataset(self,
                            excel_file: str,
                            sheet_name: str) -> None:
@@ -710,8 +727,10 @@ class DataSet:
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith((".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods')):
-                raise Exception("The dataset format should be '.xls', '.xlsx', '.xlsb', '.ods'!")
+            if not excel_file.endswith(tuple(self.get_supported_formats())):
+                raise Exception(f"The dataset format should be {', '.join(self.get_supported_formats())}!")
+        if sheet_name not in pd.ExcelFile(excel_file).sheet_names:
+            raise Exception(f"Sheet name \'{sheet_name}\' not found!")
         self.__dataset_file = excel_file
         self.__dataset = self.__read_from_xlsx(filename=str(excel_file),
                                                sheet_name=sheet_name)
