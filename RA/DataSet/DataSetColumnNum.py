@@ -14,6 +14,7 @@ class DataSetColumnNum:
                  categorical: int = 25) -> None:
         self.__column_name = column_name
         self.__values = values
+        self.__is_extended = extended
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(self.__values)))
         self.__field_type = self.get_column_type()
@@ -56,6 +57,9 @@ class DataSetColumnNum:
 
     def get_num_stat(self) -> NumericalIndicators:
         return self.__num_stat
+
+    def get_is_extended(self):
+        return self.__is_extended
 
     def get_column_name(self) -> str:
         """
