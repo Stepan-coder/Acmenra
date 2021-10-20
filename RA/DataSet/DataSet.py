@@ -611,9 +611,15 @@ class DataSet:
             is_extended = False
             if key in self.__dataset_analytics:
                 is_extended = self.__dataset_analytics[key].get_is_extended()
-            self.__dataset_analytics[key] = DataSetColumnNum(column_name=key,
-                                                             values=self.__dataset[key],
-                                                             extended=is_extended)
+            if self.__get_column_type(column_name=key).startswith("int") or \
+                    self.__get_column_type(column_name=key).startswith("float"):
+                self.__dataset_analytics[key] = DataSetColumnNum(column_name=key,
+                                                                 values=self.__dataset[key],
+                                                                 extended=is_extended)
+            elif self.__get_column_type(column_name=key).startswith("str"):
+                self.__dataset_analytics[key] = DataSetColumnStr(column_name=key,
+                                                                 values=self.__dataset[key],
+                                                                 extended=is_extended)
 
     # CREATE-LOAD-EXPORT DATASET
     def create_empty_dataset(self,
