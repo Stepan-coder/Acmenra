@@ -857,49 +857,61 @@ class DataSet:
                                             encoding=self.__encoding)
 
     def to_csv(self,
-               path: str,
+               file_name: str = None,
+               path_to_saving_folder: str = None,
                delimeter: str = None,
                encoding: str = None) -> None:
         """
         This method saves pd.DataFrame to .csv file
-        :param path: Path to .csv file
-        :param delimeter: Symbol-split in a .csv file
-        :param encoding: Explicit indication of the .csv file encoding
+        :param file_name: File name
+        :param path_to_saving_folder: The path to the folder where the file will be saved
+        :param delimeter: Symbol-split in a .csv/.tsv file
+        :param encoding: Explicit indication of the .csv/.tsv file encoding
         :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        if not path.endswith(".csv"):
-            raise Exception("The dataset format should be '.csv'!")
+        if file_name is not None and not file_name.endswith((".csv", ".tsv")):
+            raise Exception("The dataset format should be '.csv' or '.tsv'!")
+        if file_name is None:
+            file_name = f"{self.__dataset_name}.csv"
+        if path_to_saving_folder is None:
+            path_to_saving_folder = self.__dataset_save_path
         if encoding is not None and isinstance(encoding, str):
             self.set_encoding(encoding=encoding)
         if delimeter is not None and isinstance(delimeter, str):
             self.set_delimiter(delimiter=delimeter)
-        pd.DataFrame(self.__dataset).to_csv(path,
+        pd.DataFrame(self.__dataset).to_csv(os.path.join(path_to_saving_folder, file_name),
                                             index=False,
                                             sep=self.__delimiter,
                                             encoding=self.__encoding)
 
     def to_excel(self,
-                 path: str,
+                 file_name: str = None,
+                 path_to_saving_folder: str = None,
                  sheet_name: str = None) -> None:
         """
         This method saves pd.DataFrame to excel file
-        :param path: The path to save the excel file
+        :param file_name: File name
+        :param path_to_saving_folder: The path to the folder where the file will be saved
         :param sheet_name: Name of sheet in excel file
         :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        if not path.endswith(".xlsx"):
+        if not file_name.endswith(".xlsx"):
             raise Exception("The dataset format should be '.xlsx'!")
-        if sheet_name is not None:  # Если явно указано имя выходного файла
+        if file_name is None:
+            file_name = f"{self.__dataset_name}.xlsx"
+        if path_to_saving_folder is None:
+            path_to_saving_folder = self.__dataset_save_path
+        if sheet_name is not None:  
             sheet_name = sheet_name
-        elif self.__dataset_file is None:  # Иначе - берём имя датасета, указанное в классе
+        elif self.__dataset_file is None:
             sheet_name = self.__dataset_name
-        else:  # Иначе - берём имя из загруженного файла
+        else:
             sheet_name = os.path.basename(self.__dataset_file).replace(".csv", "").replace(".xlsx", "")
-        pd.DataFrame(self.__dataset).to_excel(path,
+        pd.DataFrame(self.__dataset).to_excel(os.path.join(path_to_saving_folder, file_name),
                                               index=False,
                                               sheet_name=sheet_name)
 
