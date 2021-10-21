@@ -905,7 +905,7 @@ class DataSet:
             file_name = f"{self.__dataset_name}.xlsx"
         if path_to_saving_folder is None:
             path_to_saving_folder = self.__dataset_save_path
-        if sheet_name is not None:  
+        if sheet_name is not None:
             sheet_name = sheet_name
         elif self.__dataset_file is None:
             sheet_name = self.__dataset_name
