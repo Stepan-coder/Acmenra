@@ -60,6 +60,13 @@ class DataSet:
                                column.get_nan_count()])
         return str(table)
 
+    def get_supported_formats(self) -> List[str]:
+        """
+        This method returns a list of supported files
+        :return: List[str]
+        """
+        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
+
     # SET_GET INIT PARAMS
     def set_name(self, dataset_name: str) -> None:
         """
@@ -464,13 +471,6 @@ class DataSet:
             n = len(self.__dataset)
         print(self.__dataset.iloc[-n:])
 
-    def get_supported_formats(self) -> List[str]:
-        """
-        This method returns a list of supported files
-        :return: List[str]
-        """
-        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
-
     def fillna(self) -> None:
         """
         This method automatically fills in "null" values:
@@ -508,6 +508,27 @@ class DataSet:
             result.append(this_dataset)
             counter += 1
         return result
+
+    def sort_by_column(self, column_name: str, reverse: bool = False) -> None:
+        """
+        This method sorts the dataset by column "column_name"
+        :param column_name: The name of the column by which the sorting will take place
+        :param reverse: The parameter responsible for the sorting order (ascending/descending)
+        :return: None
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if column_name not in self.__dataset_keys:
+            raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
+        for sort_tpe in ["quicksort", "mergesort", "heapsort", "stable"]:
+            try:
+                self.__dataset = self.__dataset.sort_values(by=column_name,
+                                                            ascending=reverse,
+                                                            kind=sort_tpe)
+                self.__dataset = self.__dataset.reset_index(level=0, drop=True)
+                return
+            except:
+                pass
 
     def get_DataFrame(self) -> pd.DataFrame:
         """

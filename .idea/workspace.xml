@@ -22,7 +22,6 @@
     <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSet.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/task1.py" beforeDir="false" afterPath="$PROJECT_DIR$/task1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -126,5 +125,16 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/RA/DataSet/DataSet.py</url>
+          <line>511</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
