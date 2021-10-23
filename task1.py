@@ -1,3 +1,5 @@
+import time
+
 from RA.Manager.Manager import *
 from RA.DataSet.DataSet import *
 
@@ -6,14 +8,13 @@ warnings.filterwarnings("ignore")
 
 manager = Manager(path=os.getcwd(), project_name="test_project")
 manager.create_DataSet(dataset_name="table")
-manager.DataSet("table").create_dataset_from_list(data=[["A", 1, 2],
-                                                        ["ADS", 5, 3],
-                                                        ["qeqqweq", 2, 9],
-                                                        ["", 10, 1]],
-                                                  columns=["A", "B", "C"])
-print(manager.DataSet("table").head(10))
-manager.DataSet("table").sort_by_column(column_name="C", reverse=False)
-print(manager.DataSet("table").head(10))
+manager.DataSet("table").load_excel_dataset(excel_file="Пример_датасета_для_xакатона_Tender_Hack.xlsx",
+                                            sheet_name="exp")
+print(manager.DataSet("table").tail(10))
+# t1 = time.time()
+# manager.DataSet("table").sort_by_column(column_name="Категория", reverse=False)
+# print(time.time() - t1)
+# print(manager.DataSet("table").head(10))
 # print(manager.DataSet("table").get_column_statinfo(column_name="Поставщики", extended=True))
 
 

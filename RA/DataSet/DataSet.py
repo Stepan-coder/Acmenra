@@ -455,7 +455,13 @@ class DataSet:
             raise Exception("Count of rows 'n' should be large, then 0!")
         if n > len(self.__dataset):
             n = len(self.__dataset)
-        print(self.__dataset.iloc[:n])
+        table = PrettyTable()
+        table.title = self.__dataset_name
+        table.field_names = self.__dataset_keys
+        for i in range(n):
+            this_row = self.get_row(index=i)
+            table.add_row([this_row[c] for c in self.__dataset_keys])
+        print(table)
 
     def tail(self, n: int = 5) -> None:
         """
@@ -469,7 +475,13 @@ class DataSet:
             raise Exception("Count of rows 'n' should be large, then 0!")
         if n > len(self.__dataset):
             n = len(self.__dataset)
-        print(self.__dataset.iloc[-n:])
+        table = PrettyTable()
+        table.title = self.__dataset_name
+        table.field_names = self.__dataset_keys
+        for i in range(self.__dataset_len - n, self.__dataset_len):
+            this_row = self.get_row(index=i)
+            table.add_row([this_row[c] for c in self.__dataset_keys])
+        print(table)
 
     def fillna(self) -> None:
         """
