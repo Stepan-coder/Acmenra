@@ -559,7 +559,6 @@ class DataSet:
                     for i in range(len(self.__dataset)):
                         some[i] = self.__dataset.at[i, column_name]
                     some = list(dict(sorted(some.items(), key=lambda x: len(x[1]))).keys())
-                    print(some)
                     self.__dataset = self.__dataset.reindex(some)
                 else:
                     self.__dataset = self.__dataset.sort_values(by=column_name,
