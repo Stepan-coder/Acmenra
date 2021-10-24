@@ -1,8 +1,10 @@
 import os
 import sys
 import json
+import math
 import warnings
 import matplotlib.pyplot as plt
+import numpy as np
 
 from tqdm import tqdm
 from typing import Any
@@ -460,7 +462,15 @@ class DataSet:
         table.field_names = self.__dataset_keys
         for i in range(n):
             this_row = self.get_row(index=i)
-            table.add_row([this_row[c] for c in self.__dataset_keys])
+            table_row = []
+            for column_name in self.__dataset_keys:
+                column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+                if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                        len(this_row[column_name]) > 50:
+                    table_row.append(f"{str(this_row[column_name])[:47]}...")
+                else:
+                    table_row.append(this_row[column_name])
+            table.add_row(table_row)
         print(table)
 
     def tail(self, n: int = 5) -> None:
@@ -480,7 +490,15 @@ class DataSet:
         table.field_names = self.__dataset_keys
         for i in range(self.__dataset_len - n, self.__dataset_len):
             this_row = self.get_row(index=i)
-            table.add_row([this_row[c] for c in self.__dataset_keys])
+            table_row = []
+            for column_name in self.__dataset_keys:
+                column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+                if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                        len(this_row[column_name]) > 50:
+                    table_row.append(f"{str(this_row[column_name])[:47]}...")
+                else:
+                    table_row.append(this_row[column_name])
+            table.add_row(table_row)
         print(table)
 
     def fillna(self) -> None:
@@ -532,11 +550,21 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        for sort_tpe in ["quicksort", "mergesort", "heapsort", "stable"]:
+        column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+        self.fillna()
+        for sort_type in ["mergesort", "quicksort", "heapsort", "stable"]:
             try:
-                self.__dataset = self.__dataset.sort_values(by=column_name,
-                                                            ascending=reverse,
-                                                            kind=sort_tpe)
+                if column_type.startswith("str"):
+                    some = {}
+                    for i in range(len(self.__dataset)):
+                        some[i] = self.__dataset.at[i, column_name]
+                    some = list(dict(sorted(some.items(), key=lambda x: len(x[1]))).keys())
+                    print(some)
+                    self.__dataset = self.__dataset.reindex(some)
+                else:
+                    self.__dataset = self.__dataset.sort_values(by=column_name,
+                                                                ascending=reverse,
+                                                                kind=sort_type)
                 self.__dataset = self.__dataset.reset_index(level=0, drop=True)
                 return
             except:
