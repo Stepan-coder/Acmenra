@@ -45,6 +45,9 @@ class DataSet:
         table = PrettyTable()
         is_dataset = True if self.__dataset is not None and self.__dataset_len > 0 else False
         table.title = f"{'Empty ' if not is_dataset else ''}DataSet \"{self.__dataset_name}\""
+        if is_dataset:
+            table.title += f" ({len(self.__dataset_keys)} "
+            table.title += "columns)" if self.__dataset_len > 1 else "column)"
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:

@@ -7,13 +7,13 @@ class DataSetColumnStr:
                  column_name: str,
                  values: list,
                  extended: bool,
-                 categorical: int = 25) -> None:
+                 categorical: float = 0.15) -> None:
         self.__column_name = column_name
         self.__is_extended = extended
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(values)))
         self.__field_type = self.get_column_type(values=values)
-        self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
+        self.__field_dtype = "variable" if self.__count_unique >= self.__count * categorical else "categorical"
         self.__nan_count = self.__get_nan_count(values=values)
         self.__str_stat = StringIndicators(values=values, extended=extended)
 
