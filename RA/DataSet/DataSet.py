@@ -3,8 +3,8 @@ import sys
 import json
 import math
 import warnings
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from typing import Any
@@ -51,7 +51,7 @@ class DataSet:
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
             for key in self.__dataset_keys:
-                column = self.get_column_statinfo(column_name=key, extended=False)
+                column = self.get_column_stat(column_name=key, extended=False)
 
                 if column.get_dtype() == 'variable':
                     dtype = "\033[32m {}\033[0m".format(column.get_dtype())
@@ -64,13 +64,6 @@ class DataSet:
                                column.get_unique_count(),
                                column.get_nan_count()])
         return str(table)
-
-    def get_supported_formats(self) -> List[str]:
-        """
-        This method returns a list of supported files
-        :return: List[str]
-        """
-        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
 
     # SET_GET INIT PARAMS
     def set_name(self, dataset_name: str) -> None:
@@ -402,7 +395,7 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def get_column_statinfo(self, column_name: str, extended: bool) -> DataSetColumnNum or DataSetColumnStr:
+    def get_column_stat(self, column_name: str, extended: bool) -> DataSetColumnNum or DataSetColumnStr:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -425,11 +418,17 @@ class DataSet:
                                                                          extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_columns_stat_info(self) -> Dict[str, DataSetColumnNum]:
+    def get_columns_stat(self, extended: bool) -> Dict[str, DataSetColumnNum]:
         """
         This method returns DataSet columns stat info
         :return: Dict["column_name", <DataSetColumn> class]
         """
+        for key in self.__dataset_keys:
+            if key in self.__dataset_analytics:
+                if not self.__dataset_analytics[key].get_is_extended() and extended:
+                    self.get_column_stat(key, extended)
+            else:
+                self.get_column_stat(key, extended)
         return self.__dataset_analytics
 
     def set_saving_path(self, path: str) -> None:
@@ -467,7 +466,7 @@ class DataSet:
             this_row = self.get_row(index=i)
             table_row = []
             for column_name in self.__dataset_keys:
-                column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
                 if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
                         len(this_row[column_name]) > 50:
                     table_row.append(f"{str(this_row[column_name])[:47]}...")
@@ -495,7 +494,7 @@ class DataSet:
             this_row = self.get_row(index=i)
             table_row = []
             for column_name in self.__dataset_keys:
-                column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
                 if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
                         len(this_row[column_name]) > 50:
                     table_row.append(f"{str(this_row[column_name])[:47]}...")
@@ -513,8 +512,7 @@ class DataSet:
         :return: None
         """
         for key in self.__dataset_keys:
-            column_type = self.get_column_statinfo(column_name=key,
-                                                   extended=False).get_type()
+            column_type = self.get_column_stat(column_name=key, extended=False).get_type()
             if column_type.startswith('str'):
                 self.__dataset[key] = self.__dataset[key].fillna(value="-")
             elif column_type.startswith('int') or column_type.startswith('float'):
@@ -553,7 +551,7 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        column_type = self.get_column_statinfo(column_name=column_name, extended=False).get_type()
+        column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
         self.fillna()
         for sort_type in ["mergesort", "quicksort", "heapsort", "stable"]:
             try:
@@ -780,8 +778,8 @@ class DataSet:
         :return: List[str]
         """
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith(tuple(self.get_supported_formats())):
-                raise Exception(f"The dataset format should be {', '.join(self.get_supported_formats())}!")
+            if not excel_file.endswith(tuple(DataSet.get_supported_formats())):
+                raise Exception(f"The dataset format should be {', '.join(DataSet.get_supported_formats())}!")
         return pd.ExcelFile(excel_file).sheet_names
 
     def load_excel_dataset(self,
@@ -796,8 +794,8 @@ class DataSet:
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith(tuple(self.get_supported_formats())):
-                raise Exception(f"The dataset format should be {', '.join(self.get_supported_formats())}!")
+            if not excel_file.endswith(tuple(DataSet.get_supported_formats())):
+                raise Exception(f"The dataset format should be {', '.join(DataSet.get_supported_formats())}!")
         if sheet_name not in pd.ExcelFile(excel_file).sheet_names:
             raise Exception(f"Sheet name \'{sheet_name}\' not found!")
         self.__dataset_file = excel_file
@@ -897,7 +895,7 @@ class DataSet:
                            "columns": {}}
             for key in self.__dataset_keys:
                 if key not in self.__dataset_analytics:
-                    self.__dataset_analytics[key] = self.get_column_statinfo(column_name=key, extended=True)
+                    self.__dataset_analytics[key] = self.get_column_stat(column_name=key, extended=True)
                 json_config["columns"] = merge_two_dicts(json_config["columns"],
                                                          self.__dataset_analytics[key].to_json())
             with open(os.path.join(folder, f"{dataset_filename}.json"), 'w') as json_file:
@@ -1089,6 +1087,14 @@ class DataSet:
             self.__dataset_keys_count = len(self.__dataset.keys())
 
     @staticmethod
+    def get_supported_formats() -> List[str]:
+        """
+        This method returns a list of supported files
+        :return: List[str]
+        """
+        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
+
+    @staticmethod
     def __read_from_csv(filename: str,
                         delimiter: str,
                         encoding: str = 'utf-8') -> pd.DataFrame:
@@ -1111,22 +1117,11 @@ class DataSet:
         :param filename: The name of the .csv file
         :return: pd.DataFrame
         """
-        try:
-            return pd.read_excel(filename, sheet_name=sheet_name, engine="xlrd")
-        except:
-            pass
-        try:
-            return pd.read_excel(filename, sheet_name=sheet_name, engine="openpyxl")
-        except:
-            pass
-        try:
-            return pd.read_excel(filename, sheet_name=sheet_name, engine="odf")
-        except:
-            pass
-        try:
-            return pd.read_excel(filename, sheet_name=sheet_name, engine="pyxlsb")
-        except:
-            pass
+        for engine in ["xlrd", "openpyxl", "odf", "pyxlsb"]:
+            try:
+                return pd.read_excel(filename, sheet_name=sheet_name, engine=engine)
+            except:
+                pass
 
 
 def merge_two_dicts(dict1: dict, dict2: dict) -> dict:

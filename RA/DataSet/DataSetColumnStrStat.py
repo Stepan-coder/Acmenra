@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 from scipy import stats
 from typing import Dict, List
 from prettytable import PrettyTable
@@ -77,7 +76,7 @@ class StringStatistics:
         """
         self.__letters_distribution = {}
         self.__strings_distribution = {}
-        for string in tqdm(values):
+        for string in values:
             if string not in self.__strings_distribution:
                 self.__strings_distribution[string] = 1
             else:
