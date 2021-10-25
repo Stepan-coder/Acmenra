@@ -50,10 +50,10 @@ class DataSet:
             for key in self.__dataset_keys:
                 column = self.get_column_statinfo(column_name=key, extended=False)
 
-                if column.get_dtype(threshold=0.15) == 'variable':
-                    dtype = "\033[32m {}\033[0m".format(column.get_dtype(threshold=0.15))
+                if column.get_dtype() == 'variable':
+                    dtype = "\033[32m {}\033[0m".format(column.get_dtype())
                 else:
-                    dtype = "\033[31m {}\033[0m".format(column.get_dtype(threshold=0.15))
+                    dtype = "\033[31m {}\033[0m".format(column.get_dtype())
                 table.add_row([column.get_column_name(),
                                column.get_type(),
                                dtype,

@@ -11,7 +11,7 @@ manager.create_DataSet(dataset_name="table")
 manager.DataSet("table").load_excel_dataset(excel_file="Пример_датасета_для_xакатона_Tender_Hack.xlsx",
                                             sheet_name="exp")
 manager.DataSet("table").sort_by_column(column_name="Категория", reverse=True)
-print(manager.DataSet("table").head(1000))
+print(manager.DataSet("table"))
 # t1 = time.time()
 # manager.DataSet("table").sort_by_column(column_name="Категория", reverse=False)
 # print(time.time() - t1)

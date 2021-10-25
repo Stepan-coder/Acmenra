@@ -1,10 +1,6 @@
 from prettytable import PrettyTable
 from RA.DataSet.DataSetColumnStrStat import *
 
-"""
-Этот класс чисто под str! Методы и функционал только под него
-"""
-
 
 class DataSetColumnStr:
     def __init__(self,
@@ -13,23 +9,21 @@ class DataSetColumnStr:
                  extended: bool,
                  categorical: int = 25) -> None:
         self.__column_name = column_name
-        self.__values = values
         self.__is_extended = extended
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
-        self.__count_unique = len(list(set(self.__values)))
-        self.__field_type = self.get_column_type()
+        self.__count_unique = len(list(set(values)))
+        self.__field_type = self.get_column_type(values=values)
         self.__field_dtype = "variable" if self.__count_unique >= categorical else "categorical"
-        self.__nan_count = self.__get_nan_count()
+        self.__nan_count = self.__get_nan_count(values=values)
         self.__str_stat = StringIndicators(values=values, extended=extended)
 
     def __str__(self):
         table = PrettyTable()
-        is_dataset = True if self.__values is not None and len(self.__values) > 0 else False
-        table.title = f"{'Empty ' if not is_dataset else ''}Column \"{self.__column_name}\""
+        table.title = f"{'Simple' if not self.__is_extended else 'Extended'} Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
         table.add_row(["Сolumn name", self.get_column_name()])
         table.add_row(["Type", self.get_type()])
-        table.add_row(["DType", self.get_dtype(threshold=0.15)])
+        table.add_row(["DType", self.get_dtype()])
         table.add_row(["Count", self.__count])
         table.add_row(["Count unique", self.get_unique_count()])
         table.add_row(["NaN count", self.get_nan_count()])
@@ -91,8 +85,11 @@ class DataSetColumnStr:
             raise Exception("The values were not loaded!")
         return self.__field_type
 
-    def get_dtype(self, threshold: float):
-        self.__field_dtype = "variable" if self.__count_unique >= len(self.__values) * threshold else "categorical"
+    def get_dtype(self):
+        """
+        This method returns the real type of column
+        :return: Real type of column
+        """
         return self.__field_dtype
 
     def get_min(self) -> int or float or bool:
@@ -151,10 +148,10 @@ class DataSetColumnStr:
         return self.__str_stat.get_letter_counter().get_letters_distribution()
 
 
-    def get_column_type(self) -> str:
+    def get_column_type(self, values: list) -> str:
         types = []
-        for i in range(len(self.__values)):
-            types.append(type(self.__values[i]).__name__)
+        for i in range(len(values)):
+            types.append(type(values[i]).__name__)
         types = list(set(types))
         if len(types) == 1:
             return types[0]
@@ -220,13 +217,13 @@ class DataSetColumnStr:
     #     else:
     #         raise Exception("The values were not loaded!")
 
-    def __get_nan_count(self) -> int:
+    def __get_nan_count(self, values: list) -> int:
         """
         This method calculate count of NaN values
         :return: int
         """
         nan_cnt = 0
-        for value in self.__values:
+        for value in values:
             if pd.isna(value):
                 nan_cnt += 1
         return nan_cnt
