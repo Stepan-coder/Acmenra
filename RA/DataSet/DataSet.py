@@ -10,7 +10,7 @@ from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
 
-from RA.DataSet.DataSetColumn import *
+from RA.DataSet.DataSetColumnStr import *
 from RA.DataSet.DataSetColumnNumStat import *
 from RA.DataSet.DataSetColumnStrStat import *
 
