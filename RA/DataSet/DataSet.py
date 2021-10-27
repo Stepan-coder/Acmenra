@@ -10,8 +10,9 @@ from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
 
-from RA.DataSet.DataSetColumnNum import *
-from RA.DataSet.DataSetColumnStr import *
+from RA.DataSet.DataSetColumn import *
+from RA.DataSet.DataSetColumnNumStat import *
+from RA.DataSet.DataSetColumnStrStat import *
 
 
 class DataSet:
@@ -36,10 +37,24 @@ class DataSet:
         self.__dataset_analytics = {}
 
     def __len__(self) -> int:
+        """
+        This method returns count rows in this dataset
+        :return: int
+        """
         if self.__dataset is not None:
             return len(self.__dataset)
         else:
             return 0
+
+    def __iter__(self) -> Dict[str, Any]:
+        """
+        This method allows you to iterate over a data set in a loop. I.e. makes it iterative
+        :return: Dict[str, Any]
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        for i in range(len(self.__dataset)):
+            yield self.get_row(index=i)
 
     def __str__(self):
         table = PrettyTable()
@@ -65,7 +80,6 @@ class DataSet:
                                column.get_nan_count()])
         return str(table)
 
-    # SET_GET INIT PARAMS
     def set_name(self, dataset_name: str) -> None:
         """
         This method sets the project_name of the DataSet
@@ -294,7 +308,7 @@ class DataSet:
         self.__dataset[column_name] = values
         self.__update_dataset_base_info()
 
-    def get_column_values(self, column_name: str) -> list:
+    def get_column(self, column_name: str) -> DataSetColumnStr:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column_name: List of column names
@@ -304,7 +318,8 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        return self.__dataset[column_name].tolist()
+        col_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
+        return DataSetColumnStr(self.__dataset[column_name], col_type)
 
     def rename_column(self, column_name: str, new_column_name: str) -> None:
         """
@@ -395,7 +410,7 @@ class DataSet:
         else:
             raise Exception("There is no such column in the presented dataset!")
 
-    def get_column_stat(self, column_name: str, extended: bool) -> DataSetColumnNum or DataSetColumnStr:
+    def get_column_stat(self, column_name: str, extended: bool) -> DataSetColumnNumStat or DataSetColumnStrStat:
         """
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
@@ -409,16 +424,16 @@ class DataSet:
         if column_name not in self.__dataset_analytics:
             if self.__get_column_type(column_name=column_name).startswith("int") or \
                     self.__get_column_type(column_name=column_name).startswith("float"):
-                self.__dataset_analytics[column_name] = DataSetColumnNum(column_name=column_name,
-                                                                         values=list(self.__dataset[column_name]),
-                                                                         extended=extended)
+                self.__dataset_analytics[column_name] = DataSetColumnNumStat(column_name=column_name,
+                                                                             values=list(self.__dataset[column_name]),
+                                                                             extended=extended)
             elif self.__get_column_type(column_name=column_name).startswith("str"):
-                self.__dataset_analytics[column_name] = DataSetColumnStr(column_name=column_name,
-                                                                         values=list(self.__dataset[column_name]),
-                                                                         extended=extended)
+                self.__dataset_analytics[column_name] = DataSetColumnStrStat(column_name=column_name,
+                                                                             values=list(self.__dataset[column_name]),
+                                                                             extended=extended)
         return self.__dataset_analytics[column_name]
 
-    def get_columns_stat(self, extended: bool) -> Dict[str, DataSetColumnNum]:
+    def get_columns_stat(self, extended: bool) -> Dict[str, DataSetColumnNumStat]:
         """
         This method returns DataSet columns stat info
         :return: Dict["column_name", <DataSetColumn> class]
@@ -438,7 +453,6 @@ class DataSet:
         :return: None
         """
         self.__dataset_save_path = path
-    # /SET_GET INIT PARAMS
 
     def get_is_loaded(self) -> bool:
         """
@@ -674,13 +688,13 @@ class DataSet:
                 is_extended = self.__dataset_analytics[key].get_is_extended()
             if self.__get_column_type(column_name=key).startswith("int") or \
                     self.__get_column_type(column_name=key).startswith("float"):
-                self.__dataset_analytics[key] = DataSetColumnNum(column_name=key,
-                                                                 values=self.__dataset[key],
-                                                                 extended=is_extended)
+                self.__dataset_analytics[key] = DataSetColumnNumStat(column_name=key,
+                                                                     values=self.__dataset[key],
+                                                                     extended=is_extended)
             elif self.__get_column_type(column_name=key).startswith("str"):
-                self.__dataset_analytics[key] = DataSetColumnStr(column_name=key,
-                                                                 values=self.__dataset[key],
-                                                                 extended=is_extended)
+                self.__dataset_analytics[key] = DataSetColumnStrStat(column_name=key,
+                                                                     values=self.__dataset[key],
+                                                                     extended=is_extended)
 
     # CREATE-LOAD-EXPORT DATASET
     def create_empty_dataset(self,

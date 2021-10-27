@@ -1,207 +1,231 @@
-import math
-import numpy as np
-import pandas as pd
-from scipy import stats
-from typing import Dict, List
 from prettytable import PrettyTable
+from RA.DataSet.DataSetColumnStrStatExtended import *
 
 
-class StringStatistics:
-    def __init__(self, values: List[int or float] = None):
-        self.__strings_distribution = None
-        self.__letters_distribution = None
-        self.__is_string_statistics = False
-        if values is not None:
-            self.__fill_letter_distribution(values=values)
-
-    def __str__(self):
-        table = PrettyTable()
-        table.title = f"\"LetterDistribution\""
-        table.field_names = ["Indicator", "Value"]
-        if self.__is_string_statistics:
-            letter_distr = self.get_distribution()
-            for ld in letter_distr:
-                table.add_row([ld, letter_distr[ld]])
-        return str(table)
-
-    def get_distribution(self) -> Dict[int or float, float]:
-        """
-        This method return mathematical distribution dict
-        """
-        if not self.__is_string_statistics:
-            raise Exception("The data has not been loaded yet!")
-        return self.__strings_distribution
-
-    def get_letters_distribution(self) -> Dict[int or float, float]:
-        """
-        This method return mathematical distribution dict
-        """
-        if not self.__is_string_statistics:
-            raise Exception("The data has not been loaded yet!")
-        return self.__letters_distribution
-
-    def from_json(self, data) -> None:
-        """
-        This method load class fields from json
-        :param data: Input json object
-        :return: None
-        """
-        self.__letters_distribution = data
-        self.__is_string_statistics = True
-
-    def to_json(self):
-        """
-        This method export class NormalDistribution to json object
-        :return: json object
-        """
-        if not self.__is_string_statistics:
-            raise Exception("The values were not loaded!")
-        return self.__is_string_statistics
-
-    def set_values(self, values: List[int or float]) -> None:
-        """
-        This method set values to the LetterDistribution class
-        :param values:
-        :return: None
-        """
-        if not self.__is_string_statistics:
-            if values is not None:
-                self.__fill_letter_distribution(values=values)
-
-    def __fill_letter_distribution(self, values: List[int or float]) -> None:
-        """
-        This method fill LetterCounter class when we use values
-        :param values: list of column values
-        :return None
-        """
-        self.__letters_distribution = {}
-        self.__strings_distribution = {}
-        for string in values:
-            if string not in self.__strings_distribution:
-                self.__strings_distribution[string] = 1
-            else:
-                self.__strings_distribution[string] += 1
-            for letter in string:
-                if letter not in self.__letters_distribution:
-                    self.__letters_distribution[letter] = 1
-                else:
-                    self.__letters_distribution[letter] += 1
-        self.__letters_distribution = dict(sorted(self.__letters_distribution.items(),
-                                                  key=lambda x: x[1],
-                                                  reverse=True))
-        self.__strings_distribution = dict(sorted(self.__strings_distribution.items(),
-                                                  key=lambda x: x[1],
-                                                  reverse=True))
-        self.__is_string_statistics = True
-
-
-class StringIndicators:
-    def __init__(self, values: List[int or float], extended: bool):
-        values = [val for val in values if isinstance(val, str)]
-        self.__min_len = min([len(v) for v in values])
-        self.__min_val = min(values, key=len)
-        self.__max_len = max([len(v) for v in values])
-        self.__max_val = max(values, key=len)
-        self.__mean_len = len("".join(values)) / len(values)
-        self.__letter_counter = None
+class DataSetColumnStrStat():
+    def __init__(self,
+                 column_name: str,
+                 values: list,
+                 extended: bool,
+                 categorical: float = 0.15) -> None:
+        self.__column_name = column_name
         self.__is_extended = extended
-        self.__is_letter_counter = False
-        if extended:
-            self.__letter_counter = StringStatistics()
-            self.__letter_counter.set_values(values=values)
-            self.__is_letter_counter = True
+        self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
+        self.__count_unique = len(list(set(values)))
+        self.__field_type = self.get_column_type(values=values)
+        self.__field_dtype = "variable" if self.__count_unique >= self.__count * categorical else "categorical"
+        self.__nan_count = self.__get_nan_count(values=values)
+        self.__str_stat = StringIndicators(values=values, extended=extended)
 
     def __str__(self):
         table = PrettyTable()
-        table.title = f"\"StringIndicators\""
+        table.title = f"{'Simple' if not self.__is_extended else 'Extended'} Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
-        if self.__is_string_indicators:
-            table.add_row(["Minimal string", self.get_min_value()])
-            table.add_row(["Minimal string length", self.get_min()])
-            table.add_row(["Mean string length", self.get_mean()])
-            table.add_row(["Maximal string", self.get_max_value()])
-            table.add_row(["Maximal string length", self.get_max()])
+        table.add_row(["Сolumn name", self.get_column_name()])
+        table.add_row(["Type", self.get_type()])
+        table.add_row(["DType", self.get_dtype()])
+        table.add_row(["Count", self.__count])
+        table.add_row(["Count unique", self.get_unique_count()])
+        table.add_row(["NaN count", self.get_nan_count()])
+        table.add_row(["String indicators", "".join(len("String indicators") * [" "])])
+        table.add_row(["Min val", self.get_min()])
+        table.add_row(["Max val", self.get_max()])
+
+        if self.get_str_stat().get_letter_counter().get_distribution():
+            table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
         return str(table)
 
-    def get_min(self) -> int:
+    def __len__(self) -> int:
         """
-        This method return minimal len of string in column
-        :return int
+        This method returns the len[count] of values in this column
+        :return: int
         """
-        return self.__min_len
+        return self.__count
 
-    def get_min_value(self):
+    def get_str_stat(self) -> StringIndicators:
+        return self.__str_stat
+
+    def get_is_extended(self):
+        return self.__is_extended
+
+    def get_column_name(self) -> str:
         """
-        This method return minimal string in column
+        This method return the name of current column
+        :return: Name of column
+        """
+        return self.__column_name
+
+    def get_count(self) -> int:
+        """"
+        This method returns count of values in this column
+        :return: Count of values
+        """
+        return self.__count
+
+    def get_unique_count(self) -> int:
+        """
+        This method returns count of unique values in this column
+        :return: Count of unique values
+        """
+        return self.__count_unique
+
+    def get_nan_count(self) -> int:
+        """
+        This method returns count of NaN values in this column
+        :return: Count of NaN values
+        """
+        return self.__nan_count
+
+    def get_type(self) -> str:
+        """
+        This method returns type of column
+        :return: Type of column
+        """
+        if self.__field_type is None:
+            raise Exception("The values were not loaded!")
+        return self.__field_type
+
+    def get_dtype(self):
+        """
+        This method returns the real type of column
+        :return: Real type of column
+        """
+        return self.__field_dtype
+
+    def get_min(self) -> int or float or bool:
+        """
+        This method return minimal str len in column
         :return Minimal value of column
         """
-        return self.__min_val
+        return self.__str_stat.get_min()
 
-    def get_max(self):
+    def get_min_value(self) -> int or float or bool:
+        """
+        This method return minimal value of column
+        :return Minimal value of column
+        """
+        return self.__str_stat.get_min_value()
+
+    def get_max(self) -> int or float or bool:
+        """
+        This method return maximal str len of column
+        :return Maximal value of column
+        """
+        return self.__str_stat.get_max()
+
+    def get_max_value(self) -> int or float or bool:
         """
         This method return maximal value of column
         :return Maximal value of column
         """
-        return self.__max_len
+        return self.__str_stat.get_max_value()
 
-    def get_max_value(self):
+    def get_mean(self) -> int or float:
         """
-        This method return maximal string in column
-        :return Maximal value of column
-        """
-        return self.__max_val
-
-    def get_mean(self):
-        """
-        This method return mean value of column
+        This method return maximal value of column
         :return Mean value of column
         """
-        return self.__mean_len
+        return self.__str_stat.get_mean()
 
-    def get_is_extended(self) -> bool:
-        return self.__is_letter_counter
+    def get_values_distribution(self) -> Dict[str, float]:
+        """
+        This method returns the percentage of values in the column
+        :return Dict[bool or float or int or str, float]
+        """
+        if not self.get_str_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__str_stat.get_letter_counter().get_distribution()
 
-    def get_letter_counter(self) -> StringStatistics:
-        if self.__is_letter_counter:
-            return self.__letter_counter
+    def get_letters_distribution(self) -> Dict[str, float]:
+        """
+        This method returns the percentage of values in the column
+        :return Dict[bool or float or int or str, float]
+        """
+        if not self.get_str_stat().get_is_extended():
+            raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
+                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+        return self.__str_stat.get_letter_counter().get_letters_distribution()
 
-    def get_from_json(self, data: dict) -> None:
-        """
-        This method load NumericalIndicators indicators from json
-        :param data: Incoming data in json format
-        :return: None
-        """
-        required_fields = ["Minimal string",
-                           "Minimal string length",
-                           "Mean string length",
-                           "Maximal string",
-                           "Maximal string length"]
-        for rf in required_fields:
-            if rf not in data:
-                raise Exception("The resulting json file does not contain required arguments! Try another file.")
-        self.__min_val = data["Minimal string"]
-        self.__max_val = data["Maximal string"]
-        self.__min_len = data["Minimal string length"]
-        self.__max_len = data["Maximal string length"]
-        self.__mean_len = data["Mean string length"]
-        self.__is_string_indicators = True
-        if "Letter counter" in data:
-            self.__letter_counter = StringStatistics()
-            self.__letter_counter.from_json(data["Letter counter"])
-            self.__use_letter_counter = True
-            self.__is_letter_counter = True
 
-    def to_json(self) -> dict:
+    def get_column_type(self, values: list) -> str:
+        types = []
+        for i in range(len(values)):
+            types.append(type(values[i]).__name__)
+        types = list(set(types))
+        if len(types) == 1:
+            return types[0]
+        else:
+            if len(types) == 2 and 'str' in types:
+                return 'str'
+            return "object"
+
+    # def get_from_json(self, data: dict, values: dict) -> None:
+    #     """
+    #     This method load DataSet indicators from json
+    #     :param data:
+    #     :param values:
+    #     :return: None
+    #     """
+    #     required_fields = ["column_name", "type", "count", "count_unique", "count_NaN"]
+    #     for rf in required_fields:
+    #         if rf not in data:
+    #             raise Exception("The resulting json file does not contain required arguments! Try another file.")
+    #     self.__column_name = data["column_name"]
+    #     self.__values = values
+    #     self.__count = data["count"]
+    #     self.__count_unique = data["count_unique"]
+    #     self.__nan_count = data["count_NaN"]
+    #     self.__field_type = data["type"]
+    #     self.__field_dtype = data["dtype"]
+    #     if "Numerical indicators" in data:
+    #         self.__num_stat: NumericalIndicators = NumericalIndicators(extended=False)
+    #         self.__num_stat.get_from_json(data=data["Numerical indicators"])
+    #         self.__is_num_stat = True
+    #     if "String Indicators" in data:
+    #         self.__str_stat: StringIndicators = StringIndicators(extended=False)
+    #         self.__str_stat.get_from_json(data=data["String Indicators"])
+    #         self.__is_str_stat = True
+    #
+    # def to_json(self) -> Dict[str, dict]:
+    #     """
+    #     This method export DataSet statistics as json
+    #     :return: Dict[str, json]
+    #     """
+    #     if self.__values is not None:
+    #         data = {"column_name": self.__column_name,
+    #                 "count": self.__count,
+    #                 "count_unique": self.__count_unique,
+    #                 "count_NaN": self.__nan_count,
+    #                 "type": self.__field_type,
+    #                 "dtype": self.__field_dtype}
+    #         if self.__field_type.startswith("int") or self.__field_type.startswith("float"):
+    #             if not self.__num_stat.get_is_numerical_indicators():
+    #                 self.__num_stat = NumericalIndicators(extended=self.__use_extended)
+    #                 self.__num_stat.set_values(values=self.__values,
+    #                                            extended=self.__use_extended)
+    #                 self.__is_num_stat = True
+    #             data["Numerical indicators"] = self.__num_stat.to_json()
+    #         elif self.__field_type.startswith("str"):
+    #             if not self.__str_stat.get_is_string_indicators():
+    #                 self.__str_stat = StringIndicators(extended=self.__use_extended)
+    #                 self.__str_stat.set_values(values=self.__values,
+    #                                            extended=self.__use_extended)
+    #                 self.__is_str_stat = True
+    #             data["String Indicators"] = self.__str_stat.to_json()
+    #         return {self.__column_name: data}
+    #     else:
+    #         raise Exception("The values were not loaded!")
+
+    def __get_nan_count(self, values: list) -> int:
         """
-        This method export class NormalDistribution to json object
-        :return: json data
+        This method calculate count of NaN values
+        :return: int
         """
-        if not self.__is_string_indicators:
-            raise Exception("The values were not loaded!")
-        data = {"Minimal string length": self.__min_len,
-                "Maximal string length": self.__max_len,
-                "Mean string length": self.__mean_len}
-        if self.__use_letter_counter and self.__is_letter_counter:
-            data['Letter counter'] = self.__letter_counter.to_json()
-        return data
+        nan_cnt = 0
+        for value in values:
+            if pd.isna(value):
+                nan_cnt += 1
+        return nan_cnt
+
 
