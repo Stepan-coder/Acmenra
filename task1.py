@@ -17,7 +17,7 @@ manager.DataSet("table").add_row(new_row={"A": "456"})
 manager.DataSet("table").add_row(new_row={"A": "567"})
 manager.DataSet("table").add_row(new_row={"A": "678"})
 
-manager.DataSet("table").get_column(column_name="A").upper().lower().
+manager.DataSet("table").get_column(column_name="A").strip().capitalize()
 for row in manager.DataSet(dataset_name="table"):
     print(row)
 
