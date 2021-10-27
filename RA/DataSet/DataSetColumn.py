@@ -30,25 +30,30 @@ class DataSetColumnStr:
     def upper(self):
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).upper()
+        return self
 
     def lower(self):
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).lower()
+        return self
 
     def strip(self, chars: str = None):
         if chars is not None and not isinstance(chars, str):
             raise Exception("Error")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).strip(chars)
+        return self
 
     def lstrip(self, chars: str = None):
         if chars is not None and not isinstance(chars, str):
             raise Exception("Error")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).lstrip(chars)
+        return self
 
     def rstrip(self, chars: str = None):
         if chars is not None and not isinstance(chars, str):
             raise Exception("Error")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).rstrip(chars)
+        return self
