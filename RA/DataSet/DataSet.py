@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 import json
@@ -11,6 +12,7 @@ from typing import Any
 from prettytable import PrettyTable
 
 from RA.DataSet.DataSetColumnStr import *
+from RA.DataSet.DataSetColumnNum import *
 from RA.DataSet.DataSetColumnNumStat import *
 from RA.DataSet.DataSetColumnStrStat import *
 
@@ -79,6 +81,15 @@ class DataSet:
                                column.get_unique_count(),
                                column.get_nan_count()])
         return str(table)
+
+    def __reversed__(self):
+        """
+        This method return a reversed copy of self-class
+        :return: DataSet
+        """
+        copied_class = copy.copy(self)
+        copied_class.reverse()
+        return copied_class
 
     def set_name(self, dataset_name: str) -> None:
         """
@@ -308,7 +319,7 @@ class DataSet:
         self.__dataset[column_name] = values
         self.__update_dataset_base_info()
 
-    def get_column(self, column_name: str) -> DataSetColumnStr:
+    def get_column(self, column_name: str) -> DataSetColumnStr or DataSetColumnNum:
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column_name: List of column names
@@ -318,8 +329,11 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        col_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-        return DataSetColumnStr(self.__dataset[column_name], col_type)
+        col_type = str(self.get_column_stat(column_name=column_name, extended=False).get_type())
+        if col_type.startswith("str"):
+            return DataSetColumnStr(self.__dataset[column_name], col_type)
+        elif  col_type.startswith("int") or col_type.startswith("float"):
+            return DataSetColumnNum(self.__dataset[column_name], col_type)
 
     def rename_column(self, column_name: str, new_column_name: str) -> None:
         """
@@ -516,6 +530,14 @@ class DataSet:
                     table_row.append(this_row[column_name])
             table.add_row(table_row)
         print(table)
+
+    def reverse(self) -> None:
+        """
+        This method expands the order of rows in the dataset
+        :return: None
+        """
+        self.__dataset = self.__dataset.reindex(index=self.__dataset.index[::-1])
+        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
 
     def fillna(self) -> None:
         """

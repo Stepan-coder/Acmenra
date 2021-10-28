@@ -7,7 +7,7 @@ class DataSetColumnStr:
         self.__column = column
         self.__type = type
 
-    def __add__(self, other) -> List[str]:
+    def __add__(self, other: str) -> List[str]:
         """
         This method adds a other value to each column cell
         :param other: What needs to be added
@@ -20,7 +20,7 @@ class DataSetColumnStr:
             new_some[i] = str(new_some[i]) + other
         return new_some.to_list()
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: str):
         if not isinstance(other, str):
             raise Exception("Error")
         for i in range(len(self.__column)):
@@ -28,7 +28,7 @@ class DataSetColumnStr:
         # DataSetColumnStr(self.__column, self.__type)
         return self
 
-    def __mul__(self, other) -> List[str]:
+    def __mul__(self, other: int or float) -> List[str]:
         """
         This method repeats the value of each cell other count
         :param other: What needs to be added
@@ -171,3 +171,10 @@ class DataSetColumnStr:
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).rstrip(chars)
         return self
+
+    def to_list(self) -> list:
+        """
+        This method returns column values as a list
+        :return: list
+        """
+        return self.__column.to_list()
