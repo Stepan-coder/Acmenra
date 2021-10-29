@@ -14,7 +14,7 @@ class DataSetColumnStr:
         :return: List[str]
         """
         if not isinstance(other, str):
-            raise Exception("Error")
+            raise Exception("The type of \'other\' must be \'str\'")
         new_some = self.__column.copy()
         for i in range(len(self.__column)):
             new_some[i] = str(new_some[i]) + other
@@ -22,7 +22,7 @@ class DataSetColumnStr:
 
     def __iadd__(self, other: str):
         if not isinstance(other, str):
-            raise Exception("Error")
+            raise Exception("The type of \'other\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] += other
         # DataSetColumnStr(self.__column, self.__type)
@@ -35,7 +35,7 @@ class DataSetColumnStr:
         :return: List[str]
         """
         if not isinstance(other, int or float):
-            raise Exception("Error")
+            raise Exception("The type of \'other\' must be \'int\' or \'float\'")
         new_some = self.__column.copy()
         for i in range(len(self.__column)):
             new_some[i] *= other
@@ -48,7 +48,7 @@ class DataSetColumnStr:
         :return:
         """
         if not isinstance(other, str):
-            raise Exception("Error")
+            raise Exception("The type of \'other\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]) + other
 
@@ -123,9 +123,9 @@ class DataSetColumnStr:
         :return:
         """
         if old_string is not None and not isinstance(old_string, str):
-            raise Exception("Error")
+            raise Exception("The type of \'old_string\' must be \'str\'")
         if new_string is not None and not isinstance(new_string, str):
-            raise Exception("Error")
+            raise Exception("The type of \'new_string\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).replace(old_string, new_string)
         return self
@@ -139,7 +139,7 @@ class DataSetColumnStr:
         :return:
         """
         if chars is not None and not isinstance(chars, str):
-            raise Exception("Error")
+            raise Exception("The type of \'chars\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).strip(chars)
         return self
@@ -153,7 +153,7 @@ class DataSetColumnStr:
         :return:
         """
         if chars is not None and not isinstance(chars, str):
-            raise Exception("Error")
+            raise Exception("The type of \'chars\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).lstrip(chars)
         return self
@@ -167,7 +167,7 @@ class DataSetColumnStr:
         :return:
         """
         if chars is not None and not isinstance(chars, str):
-            raise Exception("Error")
+            raise Exception("The type of \'chars\' must be \'str\'")
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).rstrip(chars)
         return self
