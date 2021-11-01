@@ -475,9 +475,10 @@ class DataSet:
         """
         return self.__is_dataset_loaded
 
-    def head(self, n: int = 5) -> None:
+    def head(self, n: int = 5, full_view: bool = False) -> None:
         """
         This method prints the first n rows
+        :param full_view:
         :param n: Count of lines
         :return: None
         """
@@ -495,7 +496,7 @@ class DataSet:
             table_row = []
             for column_name in self.__dataset_keys:
                 column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-                if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
                         len(this_row[column_name]) > 50:
                     table_row.append(f"{str(this_row[column_name])[:47]}...")
                 else:
@@ -503,7 +504,7 @@ class DataSet:
             table.add_row(table_row)
         print(table)
 
-    def tail(self, n: int = 5) -> None:
+    def tail(self, n: int = 5, full_view: bool = False) -> None:
         """
         This method prints the last n rows
         :param n: Count of lines
@@ -523,7 +524,7 @@ class DataSet:
             table_row = []
             for column_name in self.__dataset_keys:
                 column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-                if column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
                         len(this_row[column_name]) > 50:
                     table_row.append(f"{str(this_row[column_name])[:47]}...")
                 else:
