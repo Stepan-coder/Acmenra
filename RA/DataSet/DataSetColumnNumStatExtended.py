@@ -221,7 +221,7 @@ class NumericalIndicators:
         :param extended: Param switched brtween simple or extended statistics
         :return None
         """
-        values = [val for val in values if not math.isnan(val)]
+        values = [val if not math.isnan(val) else 0 for val in values]
         self.__min = min(values)
         self.__mean = np.mean(values)
         self.__median = np.median(values)

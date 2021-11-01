@@ -435,16 +435,16 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        if column_name not in self.__dataset_analytics:
-            if self.__get_column_type(column_name=column_name).startswith("int") or \
-                    self.__get_column_type(column_name=column_name).startswith("float"):
-                self.__dataset_analytics[column_name] = DataSetColumnNumStat(column_name=column_name,
-                                                                             values=list(self.__dataset[column_name]),
-                                                                             extended=extended)
-            elif self.__get_column_type(column_name=column_name).startswith("str"):
-                self.__dataset_analytics[column_name] = DataSetColumnStrStat(column_name=column_name,
-                                                                             values=list(self.__dataset[column_name]),
-                                                                             extended=extended)
+        """ПЛОХО РАБОТАЕТ"""
+        if self.__get_column_type(column_name=column_name).startswith("int") or \
+                self.__get_column_type(column_name=column_name).startswith("float"):
+            self.__dataset_analytics[column_name] = DataSetColumnNumStat(column_name=column_name,
+                                                                         values=list(self.__dataset[column_name]),
+                                                                         extended=extended)
+        elif self.__get_column_type(column_name=column_name).startswith("str"):
+            self.__dataset_analytics[column_name] = DataSetColumnStrStat(column_name=column_name,
+                                                                         values=list(self.__dataset[column_name]),
+                                                                         extended=extended)
         return self.__dataset_analytics[column_name]
 
     def get_columns_stat(self, extended: bool) -> Dict[str, DataSetColumnNumStat]:

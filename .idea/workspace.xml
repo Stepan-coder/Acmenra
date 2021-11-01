@@ -19,11 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNum.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnNum.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSetColumnStr.py" afterDir="false" />
-    </list>
+    <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -121,6 +117,7 @@
       <workItem from="1635274222548" duration="3098000" />
       <workItem from="1635313095542" duration="11842000" />
       <workItem from="1635348208680" duration="1706000" />
+      <workItem from="1635778671668" duration="1132000" />
     </task>
     <servers />
   </component>
@@ -138,5 +135,8 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/task1_py$task1.coverage" NAME="task1 Coverage Results" MODIFIED="1635780619871" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

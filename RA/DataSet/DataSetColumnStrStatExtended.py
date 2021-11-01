@@ -110,6 +110,7 @@ class StringIndicators:
             self.__letter_counter = StringStatistics()
             self.__letter_counter.set_values(values=values)
             self.__is_letter_counter = True
+            print(self.__is_letter_counter)
 
     def __str__(self):
         table = PrettyTable()

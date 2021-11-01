@@ -134,7 +134,7 @@ class DataSetColumnStrStat():
         """
         if not self.get_str_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
-                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+                            f"To get statistical values, use 'get_column_stat' with the 'extended' parameter")
         return self.__str_stat.get_letter_counter().get_distribution()
 
     def get_letters_distribution(self) -> Dict[str, float]:
@@ -144,9 +144,8 @@ class DataSetColumnStrStat():
         """
         if not self.get_str_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
-                            f"To get statistical values, use 'get_column_statinfo' with the 'extended' parameter")
+                            f"To get statistical values, use 'get_column_stat' with the 'extended' parameter")
         return self.__str_stat.get_letter_counter().get_letters_distribution()
-
 
     def get_column_type(self, values: list) -> str:
         types = []
