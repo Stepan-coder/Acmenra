@@ -435,17 +435,19 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_keys:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        """ПЛОХО РАБОТАЕТ"""
-        if self.__get_column_type(column_name=column_name).startswith("int") or \
-                self.__get_column_type(column_name=column_name).startswith("float"):
-            self.__dataset_analytics[column_name] = DataSetColumnNumStat(column_name=column_name,
-                                                                         values=list(self.__dataset[column_name]),
-                                                                         extended=extended)
-        elif self.__get_column_type(column_name=column_name).startswith("str"):
-            self.__dataset_analytics[column_name] = DataSetColumnStrStat(column_name=column_name,
-                                                                         values=list(self.__dataset[column_name]),
-                                                                         extended=extended)
-        return self.__dataset_analytics[column_name]
+        col = column_name
+        if col in self.__dataset_analytics:
+            if extended and not  self.__dataset_analytics[col].get_is_extended():
+                if self.__get_column_type(col).startswith("int") or self.__get_column_type(col).startswith("float"):
+                    self.__dataset_analytics[col] = DataSetColumnNumStat(col, list(self.__dataset[col]), extended)
+                elif self.__get_column_type(col).startswith("str"):
+                    self.__dataset_analytics[col] = DataSetColumnStrStat(col, list(self.__dataset[col]), extended)
+        else:
+            if self.__get_column_type(col).startswith("int") or self.__get_column_type(col).startswith("float"):
+                self.__dataset_analytics[col] = DataSetColumnNumStat(col, list(self.__dataset[col]), extended)
+            elif self.__get_column_type(col).startswith("str"):
+                self.__dataset_analytics[col] = DataSetColumnStrStat(col, list(self.__dataset[col]), extended)
+        return self.__dataset_analytics[col]
 
     def get_columns_stat(self, extended: bool) -> Dict[str, DataSetColumnNumStat]:
         """
