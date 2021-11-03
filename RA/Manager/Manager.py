@@ -38,6 +38,14 @@ class Manager:
             table.add_row([dataset, "<DataSet>", status])
         return str(table)
 
+    def __instancecheck__(self, instance: Any) -> bool:
+        """
+        This method checks is instance type is Manager
+        :param instance: Checked value
+        :return: bool
+        """
+        return isinstance(instance, type(self))
+
     def __len__(self) -> int:
         return len(self.__datasets) + len(self.__models)
 

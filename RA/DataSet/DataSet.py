@@ -1,8 +1,8 @@
-import copy
 import os
 import sys
 import json
 import math
+import copy
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,26 +38,6 @@ class DataSet:
         self.__dataset_save_path = None
         self.__dataset_analytics = {}
 
-    def __len__(self) -> int:
-        """
-        This method returns count rows in this dataset
-        :return: int
-        """
-        if self.__dataset is not None:
-            return len(self.__dataset)
-        else:
-            return 0
-
-    def __iter__(self) -> Dict[str, Any]:
-        """
-        This method allows you to iterate over a data set in a loop. I.e. makes it iterative
-        :return: Dict[str, Any]
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet!")
-        for i in range(len(self.__dataset)):
-            yield self.get_row(index=i)
-
     def __str__(self):
         table = PrettyTable()
         is_dataset = True if self.__dataset is not None and self.__dataset_len > 0 else False
@@ -82,6 +62,16 @@ class DataSet:
                                column.get_nan_count()])
         return str(table)
 
+    def __iter__(self) -> Dict[str, Any]:
+        """
+        This method allows you to iterate over a data set in a loop. I.e. makes it iterative
+        :return: Dict[str, Any]
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        for i in range(len(self.__dataset)):
+            yield self.get_row(index=i)
+
     def __reversed__(self):
         """
         This method return a reversed copy of self-class
@@ -90,6 +80,24 @@ class DataSet:
         copied_class = copy.copy(self)
         copied_class.reverse()
         return copied_class
+
+    def __instancecheck__(self, instance: Any) -> bool:
+        """
+        This method checks is instance type is DataSet
+        :param instance: Checked value
+        :return: bool
+        """
+        return isinstance(instance, type(self))
+
+    def __len__(self) -> int:
+        """
+        This method returns count rows in this dataset
+        :return: int
+        """
+        if self.__dataset is not None:
+            return len(self.__dataset)
+        else:
+            return 0
 
     def set_name(self, dataset_name: str) -> None:
         """
@@ -1119,7 +1127,7 @@ class DataSet:
         :return None
         """
         if self.__dataset is None:
-            print("dataset is None")
+            raise Exception("The dataset has not been loaded yet!")
         if self.__dataset is not None:
             self.__dataset_len = len(self.__dataset)
             self.__dataset_keys = self.__dataset.keys()

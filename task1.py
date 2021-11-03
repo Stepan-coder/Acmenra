@@ -17,8 +17,8 @@ manager.DataSet("table").add_row(new_row={"A": "456", "B": 456})
 manager.DataSet("table").add_row(new_row={"A": "567", "B": 567})
 manager.DataSet("table").add_row(new_row={"A": "678", "B": 678})
 
-manager.DataSet("table").head()
-print(manager.DataSet("table").get_column_stat(column_name="A", extended=True).get_values_distribution())
+
+print(type(manager.DataSet("table")), isinstance(manager, Manager))
 
 for row in manager.DataSet("table"):
     print(row)
