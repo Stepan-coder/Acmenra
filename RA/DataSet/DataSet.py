@@ -11,10 +11,10 @@ from tqdm import tqdm
 from typing import Any
 from prettytable import PrettyTable
 
-from RA.DataSet.DataSetColumnStr import *
-from RA.DataSet.DataSetColumnNum import *
-from RA.DataSet.DataSetColumnNumStat import *
-from RA.DataSet.DataSetColumnStrStat import *
+from RA.DataSet.ColumnStr import *
+from RA.DataSet.ColumnNum import *
+from RA.DataSet.ColumnNumStat import *
+from RA.DataSet.ColumnStrStat import *
 
 
 class DataSet:

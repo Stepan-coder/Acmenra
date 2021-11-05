@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List
+from typing import List, Any
 
 
 class DataSetColumnStr:
@@ -40,6 +40,21 @@ class DataSetColumnStr:
         for i in range(len(self.__column)):
             new_some[i] *= other
         return new_some.to_list()
+
+    def __instancecheck__(self, instance: Any) -> bool:
+        """
+        This method checks is instance type is DataSet
+        :param instance: Checked value
+        :return: bool
+        """
+        return isinstance(instance, type(self))
+
+    def __len__(self) -> int:
+        """
+        This method returns count of elements in column
+        :return: int
+        """
+        return len(self.__column)
 
     def add(self, other: str) -> None:
         """
