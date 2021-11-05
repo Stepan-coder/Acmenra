@@ -2,7 +2,7 @@ import pandas as pd
 from typing import List, Any
 
 
-class DataSetColumnStr:
+class ColumnStr:
     def __init__(self, column: pd.Series, type: str):
         self.__column = column
         self.__type = type
@@ -19,14 +19,6 @@ class DataSetColumnStr:
         for i in range(len(self.__column)):
             new_some[i] = str(new_some[i]) + other
         return new_some.to_list()
-
-    def __iadd__(self, other: str):
-        if not isinstance(other, str):
-            raise Exception("The type of \'other\' must be \'str\'")
-        for i in range(len(self.__column)):
-            self.__column[i] += other
-        # DataSetColumnStr(self.__column, self.__type)
-        return self
 
     def __mul__(self, other: int or float) -> List[str]:
         """

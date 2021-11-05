@@ -2,7 +2,7 @@ from prettytable import PrettyTable
 from RA.DataSet.ColumnNumStatExt import *
 
 
-class DataSetColumnNumStat:
+class ColumnNumStat:
     def __init__(self,
                  column_name: str,
                  values: list,

@@ -4,7 +4,7 @@ import pandas as pd
 from typing import List, Any
 
 
-class DataSetColumnNum:
+class ColumnNum:
     def __init__(self, column: pd.Series, column_type: str):
         """
         This method init a class work
