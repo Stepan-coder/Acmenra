@@ -16,7 +16,7 @@ manager.DataSet("table").add_row(new_row={"A": "456", "B": 456})
 manager.DataSet("table").add_row(new_row={"A": "567", "B": 567})
 manager.DataSet("table").add_row(new_row={"A": "678", "B": 678})
 
-manager.DataSet("table").get_column("A").add("234")
+manager.DataSet("table").Column("B").add(234)
 print(type(manager.DataSet("table").get_column(column_name="A")),
       isinstance(manager.DataSet("table").get_column(column_name="A"), RA.DataSet.ColumnStr.ColumnStr))
 

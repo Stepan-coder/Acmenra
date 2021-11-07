@@ -390,7 +390,7 @@ class DataSet:
             self.__dataset_analytics.pop(column_name)
         self.__update_dataset_base_info()
 
-    def set_column_types(self, new_column_types: type, exception: Dict[str, type] = None) -> None:
+    def set_columns_types(self, new_column_types: type, exception: Dict[str, type] = None) -> None:
         """
         This method converts column types
         :param new_column_types: New type of dataset columns (excluding exceptions)
