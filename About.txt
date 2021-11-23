@@ -1,8 +1,0 @@
-# Комманды для датасета
-LOAD DATASET "dataset name" FROM "C:\.....\some.csv"
-LOAD DATASET "dataset name" FROM "C:\.....\some.xlsx"
-IN DATASET "dataset name" DELETE ROW 1
-
-
-# Комманды для моделей
-LOAD MODEL "RandomForestRegressor" FROM "C:\.....\some.model"
