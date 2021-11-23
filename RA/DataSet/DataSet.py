@@ -771,8 +771,8 @@ class DataSet:
                                  delimiter: str = ",",
                                  encoding: str = 'utf-8') -> None:
         """
-        This method creates a dataset from list
-        :param data: List[List[Any] - lines of dataset]
+        This method creates a dataset from list of columns values
+        :param data: List[List[Any] - data columns]
         :param columns: List of column names
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
@@ -780,11 +780,13 @@ class DataSet:
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
-        if len(data) == 0:
-            raise Exception('The number of elements in "data" must be greater than 0!')
-        if len(columns) == 0 or len(columns) != len(data[0]):
+        if len(data) == 0 or len(columns) == 0:
+            raise Exception('The number of columns in the table must be greater than 0!')
+        if len(set(columns)) != len(columns):
+            raise Exception('In the table, column names should not be duplicated!')
+        if len(columns) != len(data):
             raise Exception('There should be as many column names as there are columns in "data"!')
-        self.__dataset = pd.DataFrame(data, columns=columns)
+        self.__dataset = pd.DataFrame({columns[i]: data[i] for i in range(len(columns))})
         self.set_delimiter(delimiter=delimiter)
         self.set_encoding(encoding=encoding)
         self.__update_dataset_base_info()
