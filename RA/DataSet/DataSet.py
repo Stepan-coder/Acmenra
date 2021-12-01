@@ -649,11 +649,11 @@ class DataSet:
             self.create_empty_dataset()
         if len(dataframe) == 0:
             raise Exception("You are trying to add an empty dataset")
-        if len(self.__dataset) != len(dataframe):
+        if len(self.__dataset) != len(dataframe) and len(self.__dataset) > 0:
             if not dif_len:
                 raise Exception("The pd.DataFrames must have the same size!")
         columns_names = list(self.__dataset.keys()) + list(dataframe.keys())
-        if len(set(columns_names)) != len(columns_names):
+        if len(set(columns_names)) != len(columns_names) and len(list(self.__dataset.keys())) != 0:
             raise Exception("The current dataset and the new dataset have the same column names!")
         self.__dataset = self.__dataset.join(dataframe,
                                              how='outer')
