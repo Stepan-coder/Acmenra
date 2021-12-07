@@ -3,11 +3,13 @@ import sys
 import json
 import math
 import copy
+
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+from scipy import stats
 from typing import Any
 from prettytable import PrettyTable
 
@@ -627,6 +629,27 @@ class DataSet:
                 return
             except:
                 pass
+
+    def get_correlations(self) -> Dict[str, Dict[str, float]]:
+        """
+        This method calculate correlations between columns
+        :return: Dict[str, Dict[str, float]]
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        correlations = {}
+        for keya in self.__dataset_keys:
+            corr = {}
+            for keyb in self.__dataset_keys:
+                row_type = self.get_column_stat(column_name=keya, extended=False).get_type()
+                column_type = self.get_column_stat(column_name=keyb, extended=False).get_type()
+                if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith('float')) \
+                    and (row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
+                    corr[keyb] = np.corrcoef(self.__dataset[keya], self.__dataset[keyb])[0][1]
+                else:
+                    corr[keyb] = float('nan')
+            correlations[keya] = corr
+        return correlations
 
     def get_DataFrame(self) -> pd.DataFrame:
         """
