@@ -100,6 +100,13 @@ class DataSet:
         else:
             return 0
 
+    def get_is_loaded(self) -> bool:
+        """
+        This method returns the state of this DataSet
+        :return: bool
+        """
+        return self.__is_dataset_loaded
+
     def set_name(self, dataset_name: str) -> None:
         """
         This method sets the project_name of the DataSet
@@ -491,13 +498,6 @@ class DataSet:
         """
         self.__dataset_save_path = path
 
-    def get_is_loaded(self) -> bool:
-        """
-        This method returns the state of this DataSet
-        :return: bool
-        """
-        return self.__is_dataset_loaded
-
     def head(self, n: int = 5, full_view: bool = False) -> None:
         """
         This method prints the first n rows
@@ -574,7 +574,7 @@ class DataSet:
         for key in self.__dataset_keys:
             column_type = self.get_column_stat(column_name=key, extended=False).get_type()
             if column_type.startswith('str'):
-                self.__dataset[key] = self.__dataset[key].fillna(value="-")
+                self.__dataset[key] = self.__dataset[key].fillna(value="⁣")
             elif column_type.startswith('int') or column_type.startswith('float'):
                 self.__dataset[key] = self.__dataset[key].fillna(value=0)
         self.update_dataset_info()
@@ -640,8 +640,8 @@ class DataSet:
         correlations = {}
         for keya in self.__dataset_keys:
             corr = {}
+            row_type = self.get_column_stat(column_name=keya, extended=False).get_type()
             for keyb in self.__dataset_keys:
-                row_type = self.get_column_stat(column_name=keya, extended=False).get_type()
                 column_type = self.get_column_stat(column_name=keyb, extended=False).get_type()
                 if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith('float')) \
                     and (row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
