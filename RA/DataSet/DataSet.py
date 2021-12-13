@@ -15,6 +15,7 @@ from prettytable import PrettyTable
 
 from RA.DataSet.ColumnStr import *
 from RA.DataSet.ColumnNum import *
+from RA.DataSet.DataSetStat import *
 from RA.DataSet.ColumnNumStat import *
 from RA.DataSet.ColumnStrStat import *
 
@@ -630,26 +631,27 @@ class DataSet:
             except:
                 pass
 
-    def get_correlations(self) -> Dict[str, Dict[str, float]]:
+    def get_correlations(self) -> CorrelationMatrix:
         """
         This method calculate correlations between columns
         :return: Dict[str, Dict[str, float]]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        correlations = {}
+        corr_matrix = CorrelationMatrix(keys=self.__dataset_keys)
+        print(corr_matrix)
         for keya in self.__dataset_keys:
-            corr = {}
             row_type = self.get_column_stat(column_name=keya, extended=False).get_type()
             for keyb in self.__dataset_keys:
-                column_type = self.get_column_stat(column_name=keyb, extended=False).get_type()
-                if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith('float')) \
-                    and (row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
-                    corr[keyb] = np.corrcoef(self.__dataset[keya], self.__dataset[keyb])[0][1]
-                else:
-                    corr[keyb] = float('nan')
-            correlations[keya] = corr
-        return correlations
+                if corr_matrix.is_cell_free(keya, keyb):
+                    column_type = self.get_column_stat(column_name=keyb, extended=False).get_type()
+                    if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith('float')) \
+                        and (row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
+                        corr_matrix.add_corr(keya, keyb, np.corrcoef(self.__dataset[keya], self.__dataset[keyb])[0][1])
+                    else:
+                        corr_matrix.add_corr(keya, keyb, float('nan'))
+        print(corr_matrix)
+        return corr_matrix
 
     def get_DataFrame(self) -> pd.DataFrame:
         """
