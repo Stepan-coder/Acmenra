@@ -28,13 +28,12 @@ class Manager:
         table.field_names = ["Name", "Type", "Status"]
         for dataset in self.__datasets:
             status = "Ups.."
-            if not self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) == 0:
-                status = self.__set_str_cmd_clr("Just created", 'RED')
-            elif self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) == 0:
-                status = self.__set_str_cmd_clr("Empty", 'YELLOW')
-            elif self.DataSet(dataset).get_is_loaded() and len(self.DataSet(dataset)) > 0:
-                status = self.__set_str_cmd_clr("Enable", 'GREEN')
-
+            if self.DataSet(dataset).status == DataSetStatus.CREATED:
+                status = Manager.__set_str_cmd_clr(self.DataSet(dataset).status.value, 'RED')
+            elif self.DataSet(dataset).status == DataSetStatus.EMPTY:
+                status = Manager.__set_str_cmd_clr(self.DataSet(dataset).status.value, 'YELLOW')
+            elif self.DataSet(dataset).status == DataSetStatus.ENABLE:
+                status = Manager.__set_str_cmd_clr(self.DataSet(dataset).status.value, 'GREEN')
             table.add_row([dataset, "<DataSet>", status])
         return str(table)
 
@@ -48,16 +47,6 @@ class Manager:
 
     def __len__(self) -> int:
         return len(self.__datasets) + len(self.__models)
-
-    def __set_str_cmd_clr(self, text: str, color: str) -> str:
-        clr_text = ""
-        if color == 'RED':
-            clr_text = "\033[31m {}\033[0m".format(text)
-        elif color == 'GREEN':
-            clr_text = "\033[32m {}\033[0m".format(text)
-        elif color == 'YELLOW':
-            clr_text = "\033[33m {}\033[0m".format(text)
-        return clr_text
 
     def __create_project_folder(self, path: str) -> str:
         """
@@ -289,3 +278,14 @@ class Manager:
                                                 prefit=prefit,
                                                 n_jobs=n_jobs,
                                                 show=show)
+
+    @staticmethod
+    def __set_str_cmd_clr(text: str, color: str) -> str:
+        clr_text = ""
+        if color == 'RED':
+            clr_text = "\033[31m {}\033[0m".format(text)
+        elif color == 'GREEN':
+            clr_text = "\033[32m {}\033[0m".format(text)
+        elif color == 'YELLOW':
+            clr_text = "\033[33m {}\033[0m".format(text)
+        return clr_text

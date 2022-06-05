@@ -12,26 +12,12 @@ manager = Manager(path=os.getcwd(), project_name="test_project")
 if manager:
     print(True)
 manager.create_DataSet(dataset_name="test")
-manager.create_DataSet(dataset_name="test1")
-manager.create_DataSet(dataset_name="test2")
-# Корреляция работает только с числами... Поэтому, нужно проверять, что вызывается на корреляци.
-some = [i for i in range(0, 1000, 1)]
-t1 = time.time()
-manager.DataSet("test").create_dataset_from_list(data=[some,
-                                                       reversed(some),
-                                                       some,
-                                                       reversed(some)],
-                                                 columns=["a", "b", "c", "d"])
-manager.DataSet("test1").create_dataset_from_list(data=[reversed(some), some, reversed(some), some],
-                                                  columns=["a", "b", "c", "d"])
-print(time.time() -t1)
-manager.DataSet("test").concat_DataSet(manager.DataSet("test1"))
-print(manager.DataSet("test").get_DataFrame().head(10))
-# Обязательно нужно добавить кореляционную матрицу! (Пусть это будет словарь, где ключ это название столбца,
-cors = manager.DataSet("test").get_correlations()
-# for c in cors:
-#     print(c, cors)
-
-# manager.DataSet("some_dataset").head()
+manager.DataSet('test').add_row(new_row={"a": 5, "b": 10})
+manager.DataSet('test').add_row(new_row={"a": 15, "b": 110})
+print(manager.DataSet('test').get_row(index=1))
+print(manager.DataSet('test').get_from_field(column="a", index=1))
+# manager.DataSet('test').delete_row(index=0)
+print(manager.DataSet('test').head())
+print(len(manager.DataSet('test')), manager.DataSet('test').columns_count)
 
 

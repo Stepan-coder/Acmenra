@@ -5,6 +5,9 @@ from typing import List
 def show_grid_params(params: dict, locked_params: list, single_model_time, n_jobs: int):
     """
     This method show grid parameters from dict 'params'
+    :param n_jobs:
+    :param single_model_time:
+    :param locked_params:
     :param params: Dict of grid params
     """
     count_elements = []

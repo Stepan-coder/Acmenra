@@ -3,16 +3,14 @@ import sys
 import json
 import math
 import copy
-
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
-
+from enum import Enum
 from tqdm import tqdm
 from scipy import stats
 from typing import Any
 from prettytable import PrettyTable
-
 from RA.DataSet.ColumnStr import *
 from RA.DataSet.ColumnNum import *
 from RA.DataSet.DataSetStat import *
@@ -20,7 +18,13 @@ from RA.DataSet.ColumnNumStat import *
 from RA.DataSet.ColumnStrStat import *
 
 
-class DataSet:
+class DataSetStatus(Enum):
+    CREATED = "JUST CREATED"
+    EMPTY = "EMPTY"
+    ENABLE = "ENABLE"
+
+
+class DataSet(object):
     def __init__(self, dataset_name: str, show: bool = False) -> None:
         """
         This is an init method
@@ -29,14 +33,13 @@ class DataSet:
         :return None
         """
         self.__dataset_name = dataset_name
-        self.__show = show
         self.__delimiter = ","
         self.__encoding = 'utf-8'
         self.__is_dataset_loaded = False
         self.__dataset = None  # Dataset in pd.DataFrame
         self.__dataset_len = None  # Number of records in the dataset
-        self.__dataset_keys = None  # Column names in the dataset
-        self.__dataset_keys_count = None  # Number of columns in the dataset
+        self.__dataset_columns_name = None  # Column names in the dataset
+        self.__dataset_columns_name_count = None  # Number of columns in the dataset
         self.__dataset_file = None
         self.__dataset_save_path = None
         self.__dataset_analytics = {}
@@ -46,11 +49,11 @@ class DataSet:
         is_dataset = True if self.__dataset is not None and self.__dataset_len > 0 else False
         table.title = f"{'Empty ' if not is_dataset else ''}DataSet \"{self.__dataset_name}\""
         if is_dataset:
-            table.title += f" ({len(self.__dataset_keys)} "
+            table.title += f" ({len(self.__dataset_columns_name)} "
             table.title += "columns)" if self.__dataset_len > 1 else "column)"
         table.field_names = ["Column name", "Type", "Data type", "Count", "Count unique", "NaN count"]
         if is_dataset:
-            for key in self.__dataset_keys:
+            for key in self.__dataset_columns_name:
                 column = self.get_column_stat(column_name=key, extended=False)
                 if column.get_dtype() == 'variable':
                     dtype = "\033[32m {}\033[0m".format(column.get_dtype())
@@ -96,17 +99,76 @@ class DataSet:
         This method returns count rows in this dataset
         :return: int
         """
-        if self.__dataset is not None:
-            return len(self.__dataset)
-        else:
-            return 0
+        return len(self.__dataset) if self.__dataset is not None else 0
 
-    def get_is_loaded(self) -> bool:
+    @property
+    def name(self) -> str:
         """
-        This method returns the state of this DataSet
+        This method returns the dataset name of the current DataSet
+        :return: str
+        """
+        return self.__dataset_name
+
+    @property
+    def status(self) -> DataSetStatus:
+        if not self.is_loaded and len(self) == 0:
+            return DataSetStatus.CREATED
+        elif self.is_loaded and len(self) == 0:
+            return DataSetStatus.EMPTY
+        elif self.is_loaded and len(self) > 0:
+            return DataSetStatus.ENABLE
+
+    @property
+    def is_loaded(self) -> bool:
+        """
+        This property returns the state of this DataSet
         :return: bool
         """
         return self.__is_dataset_loaded
+
+    @property
+    def delimiter(self) -> str:
+        """
+        This property returns a delimiter character
+        :return Symbol-split in a .csv file
+        """
+        return self.__delimiter
+
+    @property
+    def encoding(self) -> str:
+        """
+        This property returns the encoding of the current dataset file
+        :return: Encoding for the dataset. Example: 'utf-8', 'windows1232'
+        """
+        return self.__encoding
+
+    @property
+    def columns_name(self) -> List[str]:
+        """
+        This property return column names of dataset pd.DataFrame
+        :return: List[str]
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        return list(self.__dataset_columns_name)
+
+    @property
+    def columns_count(self) -> int:
+        """
+        This method return count of column names of dataset pd.DataFrame
+        :return: int
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet")
+        return self.__dataset_columns_name_count
+
+    @property
+    def supported_formats(self) -> List[str]:
+        """
+        This property returns a list of supported files
+        :return: List[str]
+        """
+        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
 
     def set_name(self, dataset_name: str) -> None:
         """
@@ -120,29 +182,13 @@ class DataSet:
             raise Exception("The name must be longer than 0 characters!")
         self.__dataset_name = dataset_name
 
-    def get_name(self) -> str:
+    def set_saving_path(self, path: str) -> None:
         """
-        This method returns the dataset name of the current DataSet
-        :return: str
+        This method removes the column from the dataset
+        :param path: The path to save the "DataSet" project
+        :return: None
         """
-        return self.__dataset_name
-
-    def set_show(self, show: bool) -> None:
-        """
-        This method sets the show switcher
-        :param show: Name of this
-        :return None
-        """
-        if not isinstance(show, bool):
-            raise Exception('The "show" parameter must be boolean!')
-        self.__show = show
-
-    def get_show(self) -> bool:
-        """
-        This method returns the show switcher
-        :return: bool
-        """
-        return self.__show
+        self.__dataset_save_path = path
 
     def set_delimiter(self, delimiter: str) -> None:
         """
@@ -156,13 +202,6 @@ class DataSet:
             raise Exception("A separator with a length of 1 character is allowed!")
         self.__delimiter = delimiter
 
-    def get_delimiter(self) -> str:
-        """
-        This method returns a delimiter character
-        :return Symbol-split in a .csv file
-        """
-        return self.__delimiter
-
     def set_encoding(self, encoding: str) -> None:
         """
         This method sets the encoding for the future export of the dataset
@@ -175,24 +214,64 @@ class DataSet:
             raise Exception("The name must be longer than 0 characters!")
         self.__encoding = encoding
 
-    def get_encoding(self) -> str:
+    def head(self, n: int = 5, full_view: bool = False) -> str:
         """
-        This method returns the encoding of the current dataset file
-        :return: Encoding for the dataset. Example: 'utf-8', 'windows1232'
-        """
-        return self.__encoding
-
-    def get_keys(self) -> List[str]:
-        """
-        This method return column names of dataset pd.DataFrame
-        :return: List[str]
+        This method prints the first n rows
+        :param full_view:
+        :param n: Count of lines
+        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        self.__update_dataset_base_info()
-        return list(self.__dataset_keys)
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            n = len(self.__dataset)
+        table = PrettyTable()
+        table.title = self.__dataset_name
+        table.field_names = self.__dataset_columns_name
+        for i in range(n):
+            this_row = self.get_row(index=i)
+            table_row = []
+            for column_name in self.__dataset_columns_name:
+                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
+                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                        len(this_row[column_name]) > 50:
+                    table_row.append(f"{str(this_row[column_name])[:47]}...")
+                else:
+                    table_row.append(this_row[column_name])
+            table.add_row(table_row)
+        return str(table)
 
-    def set_keys_order(self, new_order_columns: List[str]) -> None:
+    def tail(self, n: int = 5, full_view: bool = False) -> None:
+        """
+        This method prints the last n rows
+        :param n: Count of lines
+        :return: None
+        """
+        if self.__dataset is None:
+            raise Exception("The dataset has not been loaded yet!")
+        if n <= 0:
+            raise Exception("Count of rows 'n' should be large, then 0!")
+        if n > len(self.__dataset):
+            n = len(self.__dataset)
+        table = PrettyTable()
+        table.title = self.__dataset_name
+        table.field_names = self.__dataset_columns_name
+        for i in range(self.__dataset_len - n, self.__dataset_len):
+            this_row = self.get_row(index=i)
+            table_row = []
+            for column_name in self.__dataset_columns_name:
+                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
+                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                        len(this_row[column_name]) > 50:
+                    table_row.append(f"{str(this_row[column_name])[:47]}...")
+                else:
+                    table_row.append(this_row[column_name])
+            table.add_row(table_row)
+        print(table)
+
+    def set_columns_order(self, new_order_columns: List[str]) -> None:
         """
         This method set columns order
         :param new_order_columns: List of new order of columns
@@ -201,23 +280,14 @@ class DataSet:
         if len(set(new_order_columns)) != len(new_order_columns):
             raise Exception(f"Column names should not be repeated!")
         for column in new_order_columns:
-            if column not in self.__dataset_keys:
+            if column not in self.__dataset_columns_name:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        for column in self.__dataset_keys:
+        for column in self.__dataset_columns_name:
             if column not in new_order_columns:
                 raise Exception(f"The \"{column}\" column is missing!")
         self.__dataset = pd.DataFrame(self.__dataset, columns=new_order_columns)
-        self.__update_dataset_base_info()
-
-    def get_keys_count(self) -> int:
-        """
-        This method return count of column names of dataset pd.DataFrame
-        :return: int
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet")
-        self.__update_dataset_base_info()
-        return self.__dataset_keys_count
+        self.__dataset_columns_name = self.__dataset.keys()
+        self.__dataset_columns_name_count = len(self.__dataset.keys())
 
     def set_to_field(self, column: str, index: int, value: Any) -> None:
         """
@@ -231,7 +301,7 @@ class DataSet:
             raise Exception("The string value must be greater than 0!")
         if index > self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
-        if column not in self.__dataset_keys:
+        if column not in self.__dataset_columns_name:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         if column in self.__dataset_analytics:
             self.__dataset_analytics.pop(column)
@@ -246,9 +316,9 @@ class DataSet:
         """
         if index < 0:
             raise Exception("The string value must be greater than 0!")
-        if index > self.__dataset_len:
+        if index >= self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
-        if column not in self.__dataset_keys:
+        if column not in self.__dataset_columns_name:
             raise Exception(f"The \"{column}\" column does not exist in this dataset!")
         return self.__dataset.at[index, column]
 
@@ -266,16 +336,16 @@ class DataSet:
         if len(set(new_row.keys())) != len(new_row.keys()):
             raise Exception(f"Column names should not be repeated!")
         for column in new_row:
-            if column not in self.__dataset_keys:
+            if column not in self.__dataset_columns_name:
                 raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        for column in self.__dataset_keys:
+        for column in self.__dataset_columns_name:
             if column not in new_row.keys():
                 raise Exception(f"The \"{column}\" column is missing!")
-        self.__dataset.loc[len(self.__dataset)] = [new_row[d] for d in self.__dataset_keys]
-        for key in self.__dataset_keys:
+        self.__dataset.loc[len(self.__dataset)] = [new_row[d] for d in self.__dataset_columns_name]
+        for key in self.__dataset_columns_name:
             if key in self.__dataset_analytics:
                 self.__dataset_analytics.pop(key)
-        self.__update_dataset_base_info()
+        self.__dataset_len += 1
 
     def get_row(self, index: int) -> Dict[str, Any]:
         """
@@ -290,9 +360,8 @@ class DataSet:
             raise Exception("The row index must be greater than 0!")
         if index > self.__dataset_len:
             raise Exception("The row index must be less than the number of rows in the dataset!")
-        self.__update_dataset_base_info()
         result = {}
-        for column in self.__dataset_keys:
+        for column in self.__dataset_columns_name:
             if column not in result:
                 result[column] = self.get_from_field(column=column,
                                                      index=index)
@@ -310,12 +379,11 @@ class DataSet:
             raise Exception("The row index must be greater than 0!")
         if index > self.__dataset_len:
             raise Exception("The row value must be less than the number of rows in the dataset!")
-        self.__dataset = self.__dataset.drop(index=index)
-        self.__dataset = self.__dataset.reset_index(level=0, drop=True)
-        for key in self.__dataset_keys:
+        self.__dataset = self.__dataset.drop(index=index).reset_index(level=0, drop=True)
+        for key in self.__dataset_columns_name:
             if key in self.__dataset_analytics:
                 self.__dataset_analytics.pop(key)
-        self.__update_dataset_base_info()
+        self.__dataset_len = self.__dataset_len - 1 if self.__dataset_len > 0 else 0
 
     def Column(self, column_name: str) -> ColumnStr or ColumnNum:
         """
@@ -325,7 +393,7 @@ class DataSet:
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         col_type = str(self.get_column_stat(column_name=column_name, extended=False).get_type())
         if col_type.startswith("str"):
@@ -344,13 +412,14 @@ class DataSet:
         if not self.__is_dataset_loaded:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
             self.create_empty_dataset()
-        if column_name in self.__dataset_keys:
+        if column_name in self.__dataset_columns_name:
             raise Exception(f"The '{column_name}' column already exists in the presented dataset!")
         if len(self.__dataset) != len(values) and len(self.__dataset) != 0:
             if not dif_len:
                 raise Exception("The column and dataset must have the same size!")
         self.__dataset[column_name] = values
-        self.__update_dataset_base_info()
+        self.__dataset_columns_name = self.__dataset.keys()
+        self.__dataset_columns_name_count += 1
 
     def get_column(self, column_name: str) -> list:
         """
@@ -360,7 +429,7 @@ class DataSet:
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         return self.__dataset[column_name].to_list()
 
@@ -373,9 +442,9 @@ class DataSet:
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        if new_column_name in self.__dataset_keys:
+        if new_column_name in self.__dataset_columns_name:
             raise Exception(f"The \"{new_column_name}\" column does already exist in this dataset!")
         self.__dataset = self.__dataset.rename(columns={column_name: new_column_name})
         if column_name in self.__dataset_analytics:
@@ -383,7 +452,7 @@ class DataSet:
             self.__dataset_analytics.pop(column_name)
             self.__dataset_analytics[new_column_name] = column_analytic
             self.__dataset_analytics[new_column_name].set_column_name(new_column_name=new_column_name)
-        self.__update_dataset_base_info()
+        self.__dataset_columns_name = self.__dataset.keys()
 
     def delete_column(self, column_name: str) -> None:
         """
@@ -393,12 +462,13 @@ class DataSet:
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         self.__dataset = self.__dataset.drop([column_name], axis=1)
         if column_name in self.__dataset_analytics:
             self.__dataset_analytics.pop(column_name)
-        self.__update_dataset_base_info()
+        self.__dataset_columns_name = self.__dataset.keys()
+        self.__dataset_columns_name_count = len(self.__dataset.keys())
 
     def set_columns_types(self, new_column_types: type, exception: Dict[str, type] = None) -> None:
         """
@@ -415,7 +485,6 @@ class DataSet:
                     self.set_column_type(column_name=field, new_column_type=exception[field])
                 else:
                     self.set_column_type(column_name=field, new_column_type=new_column_types)
-        self.__update_dataset_base_info()
 
     def set_column_type(self, column_name: str, new_column_type: type) -> None:
         """
@@ -448,8 +517,7 @@ class DataSet:
                 except Exception as e:
                     raise Exception(str(e).capitalize())
             secondary_type = str(self.__dataset[column_name].dtype)
-            if self.__show:
-                print(f"Convert DataSet field \'{column_name}\': {primary_type} -> {secondary_type}")
+            print(f"Convert DataSet field \'{column_name}\': {primary_type} -> {secondary_type}")
         else:
             raise Exception("There is no such column in the presented dataset!")
 
@@ -462,11 +530,11 @@ class DataSet:
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         col = column_name
         if col in self.__dataset_analytics:
-            if extended and not  self.__dataset_analytics[col].get_is_extended():
+            if extended and not self.__dataset_analytics[col].get_is_extended():
                 if self.__get_column_type(col).startswith("int") or self.__get_column_type(col).startswith("float"):
                     self.__dataset_analytics[col] = ColumnNumStat(col, list(self.__dataset[col]), extended)
                 elif self.__get_column_type(col).startswith("str"):
@@ -483,78 +551,13 @@ class DataSet:
         This method returns DataSet columns stat info
         :return: Dict["column_name", <DataSetColumn> class]
         """
-        for key in self.__dataset_keys:
+        for key in self.__dataset_columns_name:
             if key in self.__dataset_analytics:
                 if not self.__dataset_analytics[key].get_is_extended() and extended:
                     self.get_column_stat(key, extended)
             else:
                 self.get_column_stat(key, extended)
         return self.__dataset_analytics
-
-    def set_saving_path(self, path: str) -> None:
-        """
-        This method removes the column from the dataset
-        :param path: The path to save the "DataSet" project
-        :return: None
-        """
-        self.__dataset_save_path = path
-
-    def head(self, n: int = 5, full_view: bool = False) -> None:
-        """
-        This method prints the first n rows
-        :param full_view:
-        :param n: Count of lines
-        :return: None
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet!")
-        if n <= 0:
-            raise Exception("Count of rows 'n' should be large, then 0!")
-        if n > len(self.__dataset):
-            n = len(self.__dataset)
-        table = PrettyTable()
-        table.title = self.__dataset_name
-        table.field_names = self.__dataset_keys
-        for i in range(n):
-            this_row = self.get_row(index=i)
-            table_row = []
-            for column_name in self.__dataset_keys:
-                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
-                        len(this_row[column_name]) > 50:
-                    table_row.append(f"{str(this_row[column_name])[:47]}...")
-                else:
-                    table_row.append(this_row[column_name])
-            table.add_row(table_row)
-        print(table)
-
-    def tail(self, n: int = 5, full_view: bool = False) -> None:
-        """
-        This method prints the last n rows
-        :param n: Count of lines
-        :return: None
-        """
-        if self.__dataset is None:
-            raise Exception("The dataset has not been loaded yet!")
-        if n <= 0:
-            raise Exception("Count of rows 'n' should be large, then 0!")
-        if n > len(self.__dataset):
-            n = len(self.__dataset)
-        table = PrettyTable()
-        table.title = self.__dataset_name
-        table.field_names = self.__dataset_keys
-        for i in range(self.__dataset_len - n, self.__dataset_len):
-            this_row = self.get_row(index=i)
-            table_row = []
-            for column_name in self.__dataset_keys:
-                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
-                        len(this_row[column_name]) > 50:
-                    table_row.append(f"{str(this_row[column_name])[:47]}...")
-                else:
-                    table_row.append(this_row[column_name])
-            table.add_row(table_row)
-        print(table)
 
     def reverse(self) -> None:
         """
@@ -572,7 +575,7 @@ class DataSet:
          For "str" -> "-".
         :return: None
         """
-        for key in self.__dataset_keys:
+        for key in self.__dataset_columns_name:
             column_type = self.get_column_stat(column_name=key, extended=False).get_type()
             if column_type.startswith('str'):
                 self.__dataset[key] = self.__dataset[key].fillna(value="⁣")
@@ -595,8 +598,8 @@ class DataSet:
         while counter * count < len(self.__dataset):
             this_dataset = DataSet(dataset_name=f"splited_{self.__dataset_name}_{counter}")
             this_dataset.load_DataFrame(dataframe=self.__dataset[counter * count: (counter + 1) * count])
-            this_dataset.set_delimiter(delimiter=self.get_delimiter())
-            this_dataset.set_encoding(encoding=self.get_encoding())
+            this_dataset.set_delimiter(delimiter=self.delimiter)
+            this_dataset.set_encoding(encoding=self.encoding)
             result.append(this_dataset)
             counter += 1
         return result
@@ -610,7 +613,7 @@ class DataSet:
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        if column_name not in self.__dataset_keys:
+        if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
         column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
         self.fillna()
@@ -638,19 +641,19 @@ class DataSet:
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        corr_matrix = CorrelationMatrix(keys=self.__dataset_keys)
-        print(corr_matrix)
-        for keya in self.__dataset_keys:
+        corr_matrix = CorrelationMatrix(keys=self.__dataset_columns_name)
+        for keya in self.__dataset_columns_name:
             row_type = self.get_column_stat(column_name=keya, extended=False).get_type()
-            for keyb in self.__dataset_keys:
+            for keyb in self.__dataset_columns_name:
                 if corr_matrix.is_cell_free(keya, keyb):
                     column_type = self.get_column_stat(column_name=keyb, extended=False).get_type()
-                    if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith('float')) \
-                        and (row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
+                    if (column_type.startswith('int') or column_type.startswith('bool') or column_type.startswith(
+                            'float')) \
+                            and (
+                            row_type.startswith('int') or row_type.startswith('bool') or row_type.startswith('float')):
                         corr_matrix.add_corr(keya, keyb, np.corrcoef(self.__dataset[keya], self.__dataset[keyb])[0][1])
                     else:
                         corr_matrix.add_corr(keya, keyb, float('nan'))
-        print(corr_matrix)
         return corr_matrix
 
     def get_DataFrame(self) -> pd.DataFrame:
@@ -751,7 +754,7 @@ class DataSet:
         :return: None
         """
         self.__update_dataset_base_info()
-        for key in self.__dataset_keys:
+        for key in self.__dataset_columns_name:
             is_extended = False
             if key in self.__dataset_analytics:
                 is_extended = self.__dataset_analytics[key].get_is_extended()
@@ -785,8 +788,11 @@ class DataSet:
             self.__dataset = pd.DataFrame(columns=columns_names)
         else:
             self.__dataset = pd.DataFrame()
+        self.__dataset_len = 0
         self.__delimiter = delimiter
         self.__encoding = encoding
+        self.__dataset_columns_name = self.__dataset.keys()
+        self.__dataset_columns_name_count = len(self.__dataset.keys())
         self.__is_dataset_loaded = True
         self.__update_dataset_base_info()
 
@@ -856,17 +862,6 @@ class DataSet:
         self.__update_dataset_base_info()
         self.__is_dataset_loaded = True
 
-    def get_excel_sheet_names(self, excel_file: str) -> List[str]:
-        """
-        This method loads the dataset into the DataSet class
-        :param excel_file: The name of the excel file
-        :return: List[str]
-        """
-        if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith(tuple(DataSet.get_supported_formats())):
-                raise Exception(f"The dataset format should be {', '.join(DataSet.get_supported_formats())}!")
-        return pd.ExcelFile(excel_file).sheet_names
-
     def load_excel_dataset(self,
                            excel_file: str,
                            sheet_name: str) -> None:
@@ -879,8 +874,8 @@ class DataSet:
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
-            if not excel_file.endswith(tuple(DataSet.get_supported_formats())):
-                raise Exception(f"The dataset format should be {', '.join(DataSet.get_supported_formats())}!")
+            if not excel_file.endswith(tuple(DataSet.supported_formats)):
+                raise Exception(f"The dataset format should be {', '.join(DataSet.supported_formats)}!")
         if sheet_name not in pd.ExcelFile(excel_file).sheet_names:
             raise Exception(f"Sheet name \'{sheet_name}\' not found!")
         self.__dataset_file = excel_file
@@ -936,9 +931,8 @@ class DataSet:
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
-        if self.__show:
-            print(f"Saving DataSet \'{self.__dataset_name}\'...")
-            pass
+        print(f"Saving DataSet \'{self.__dataset_name}\'...")
+        pass
 
         if dataset_name is not None:  # Если явно указано имя выходного файла
             dataset_filename = dataset_name
@@ -972,13 +966,13 @@ class DataSet:
 
         if including_json and self.__dataset is not None:
             json_config = {"dataset_filename": f"{dataset_filename}.csv",
-                           "columns_names": list(self.__dataset_keys),
-                           "columns_count": self.__dataset_keys_count,
+                           "columns_names": list(self.__dataset_columns_name),
+                           "columns_count": self.__dataset_columns_name_count,
                            "rows": self.__dataset_len,
                            "delimiter": self.__delimiter,
                            "encoding": self.__encoding,
                            "columns": {}}
-            for key in self.__dataset_keys:
+            for key in self.__dataset_columns_name:
                 if key not in self.__dataset_analytics:
                     self.__dataset_analytics[key] = self.get_column_stat(column_name=key, extended=True)
                 json_config["columns"] = merge_two_dicts(json_config["columns"],
@@ -987,7 +981,7 @@ class DataSet:
                 json.dump(json_config, json_file, indent=4)
 
         if including_plots and self.__dataset is not None:
-            for key in tqdm(self.__dataset_keys,
+            for key in tqdm(self.__dataset_columns_name,
                             desc=str(f"Creating _{self.__dataset_name}_ columns plots"),
                             colour="blue"):
                 if key in self.__dataset_analytics:
@@ -1149,12 +1143,12 @@ class DataSet:
         :return None
         """
         self.__dataset_file = data["dataset_filename"]
-        self.__dataset_keys = data["columns_names"]
-        self.__dataset_keys_count = data["columns_count"]
+        self.__dataset_columns_name = data["columns_names"]
+        self.__dataset_columns_name_count = data["columns_count"]
         self.__dataset_len = data["rows"]
         self.__delimiter = data["delimiter"]
         self.__encoding = data["encoding"]
-        for dk in self.__dataset_keys:
+        for dk in self.__dataset_columns_name:
             self.__dataset_analytics[dk] = DataSetColumn(column_name=dk)
             self.__dataset_analytics[dk].get_from_json(data=data["columns"][dk],
                                                        values=self.__dataset[dk].values)
@@ -1168,16 +1162,8 @@ class DataSet:
             raise Exception("The dataset has not been loaded yet!")
         if self.__dataset is not None:
             self.__dataset_len = len(self.__dataset)
-            self.__dataset_keys = self.__dataset.keys()
-            self.__dataset_keys_count = len(self.__dataset.keys())
-
-    @staticmethod
-    def get_supported_formats() -> List[str]:
-        """
-        This method returns a list of supported files
-        :return: List[str]
-        """
-        return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
+            self.__dataset_columns_name = self.__dataset.keys()
+            self.__dataset_columns_name_count = len(self.__dataset.keys())
 
     @staticmethod
     def __read_from_csv(filename: str,
@@ -1207,6 +1193,18 @@ class DataSet:
                 return pd.read_excel(filename, sheet_name=sheet_name, engine=engine)
             except:
                 pass
+
+    @staticmethod
+    def get_excel_sheet_names(excel_file: str) -> List[str]:
+        """
+        This method loads the dataset into the DataSet class
+        :param excel_file: The name of the excel file
+        :return: List[str]
+        """
+        if excel_file is not None:  # Checking that the uploaded file has the .csv format
+            if not excel_file.endswith(tuple(DataSet.supported_formats)):
+                raise Exception(f"The dataset format should be {', '.join(DataSet.supported_formats)}!")
+        return pd.ExcelFile(excel_file).sheet_names
 
 
 def merge_two_dicts(dict1: dict, dict2: dict) -> dict:
