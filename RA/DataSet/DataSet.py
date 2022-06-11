@@ -170,50 +170,6 @@ class DataSet(object):
         """
         return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
 
-    def set_name(self, dataset_name: str) -> None:
-        """
-        This method sets the project_name of the DataSet
-        :param dataset_name: Name of this
-        :return None
-        """
-        if not isinstance(dataset_name, str):
-            raise Exception("The name must be a string!")
-        if not len(dataset_name) > 0:
-            raise Exception("The name must be longer than 0 characters!")
-        self.__dataset_name = dataset_name
-
-    def set_saving_path(self, path: str) -> None:
-        """
-        This method removes the column from the dataset
-        :param path: The path to save the "DataSet" project
-        :return: None
-        """
-        self.__dataset_save_path = path
-
-    def set_delimiter(self, delimiter: str) -> None:
-        """
-        This method sets the delimiter character
-        :param delimiter: Symbol-split in a .csv file
-        :return None
-        """
-        if not isinstance(delimiter, str):
-            raise Exception("The delimiter must be a one-symbol string!")
-        if len(delimiter) > 1 or len(delimiter) == 0:
-            raise Exception("A separator with a length of 1 character is allowed!")
-        self.__delimiter = delimiter
-
-    def set_encoding(self, encoding: str) -> None:
-        """
-        This method sets the encoding for the future export of the dataset
-        :param encoding: Encoding for the dataset. Example: 'utf-8', 'windows1232'
-        :return None
-        """
-        if not isinstance(encoding, str):
-            raise Exception("The encoding must be a string!")
-        if len(encoding) == 0:
-            raise Exception("The name must be longer than 0 characters!")
-        self.__encoding = encoding
-
     def head(self, n: int = 5, full_view: bool = False) -> str:
         """
         This method prints the first n rows
@@ -271,23 +227,49 @@ class DataSet(object):
             table.add_row(table_row)
         print(table)
 
-    def set_columns_order(self, new_order_columns: List[str]) -> None:
+    def set_name(self, dataset_name: str) -> None:
         """
-        This method set columns order
-        :param new_order_columns: List of new order of columns
+        This method sets the project_name of the DataSet
+        :param dataset_name: Name of this
         :return None
         """
-        if len(set(new_order_columns)) != len(new_order_columns):
-            raise Exception(f"Column names should not be repeated!")
-        for column in new_order_columns:
-            if column not in self.__dataset_columns_name:
-                raise Exception(f"The \"{column}\" column does not exist in this dataset!")
-        for column in self.__dataset_columns_name:
-            if column not in new_order_columns:
-                raise Exception(f"The \"{column}\" column is missing!")
-        self.__dataset = pd.DataFrame(self.__dataset, columns=new_order_columns)
-        self.__dataset_columns_name = self.__dataset.keys()
-        self.__dataset_columns_name_count = len(self.__dataset.keys())
+        if not isinstance(dataset_name, str):
+            raise Exception("The name must be a string!")
+        if not len(dataset_name) > 0:
+            raise Exception("The name must be longer than 0 characters!")
+        self.__dataset_name = dataset_name
+
+    def set_saving_path(self, path: str) -> None:
+        """
+        This method removes the column from the dataset
+        :param path: The path to save the "DataSet" project
+        :return: None
+        """
+        self.__dataset_save_path = path
+
+    def set_delimiter(self, delimiter: str) -> None:
+        """
+        This method sets the delimiter character
+        :param delimiter: Symbol-split in a .csv file
+        :return None
+        """
+        if not isinstance(delimiter, str):
+            raise Exception("The delimiter must be a one-symbol string!")
+        if len(delimiter) > 1 or len(delimiter) == 0:
+            raise Exception("A separator with a length of 1 character is allowed!")
+        self.__delimiter = delimiter
+
+    def set_encoding(self, encoding: str) -> None:
+        """
+        This method sets the encoding for the future export of the dataset
+        :param encoding: Encoding for the dataset. Example: 'utf-8', 'windows1232'
+        :return None
+        """
+        if not isinstance(encoding, str):
+            raise Exception("The encoding must be a string!")
+        if len(encoding) == 0:
+            raise Exception("The name must be longer than 0 characters!")
+        self.__encoding = encoding
 
     def set_to_field(self, column: str, index: int, value: Any) -> None:
         """
