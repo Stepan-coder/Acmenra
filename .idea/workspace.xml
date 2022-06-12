@@ -20,10 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/RocketAI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RocketAI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSet.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,7 +156,8 @@
       <workItem from="1635348208680" duration="1706000" />
       <workItem from="1635778671668" duration="2207000" />
       <workItem from="1636137221726" duration="5517000" />
-      <workItem from="1654972765175" duration="2707000" />
+      <workItem from="1654972765175" duration="2867000" />
+      <workItem from="1655058986368" duration="1000" />
     </task>
     <servers />
   </component>
