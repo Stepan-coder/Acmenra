@@ -124,43 +124,44 @@ class StringIndicators:
             table.add_row(["Maximal string length", self.get_max()])
         return str(table)
 
-    def get_min(self) -> int:
+    @property
+    def is_extended(self) -> bool:
+        return self.__is_letter_counter
+
+    def min(self) -> int:
         """
         This method return minimal len of string in column
         :return int
         """
         return self.__min_len
 
-    def get_min_value(self):
+    def min_value(self):
         """
         This method return minimal string in column
         :return Minimal value of column
         """
         return self.__min_val
 
-    def get_max(self):
+    def max(self):
         """
         This method return maximal value of column
         :return Maximal value of column
         """
         return self.__max_len
 
-    def get_max_value(self):
+    def max_value(self):
         """
         This method return maximal string in column
         :return Maximal value of column
         """
         return self.__max_val
 
-    def get_mean(self):
+    def mean(self):
         """
         This method return mean value of column
         :return Mean value of column
         """
         return self.__mean_len
-
-    def get_is_extended(self) -> bool:
-        return self.__is_letter_counter
 
     def get_letter_counter(self) -> StringStatistics:
         if self.__is_letter_counter:

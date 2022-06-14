@@ -1,11 +1,11 @@
 import math
 import pandas as pd
-
 from typing import List, Any
+from RA.DataSet.ColumnType import *
 
 
 class ColumnNum:
-    def __init__(self, column: pd.Series, column_type: str):
+    def __init__(self, column: pd.Series, column_type: ColumnType):
         """
         This method init a class work
         :param column: The column of DataSet
@@ -174,6 +174,21 @@ class ColumnNum:
         """
         return len(self.__column)
 
+    @property
+    def type(self) -> ColumnType:
+        """
+        This property returns a type of column
+        :return: ColumnType
+        """
+        return self.__column_type
+
+    def values(self) -> List[bool or int or float]:
+        """
+        This method returns column values as a list
+        :return: list
+        """
+        return self.__column.to_list()
+
     def add(self, other: int or float):
         """
         (For each cell in column)
@@ -313,10 +328,3 @@ class ColumnNum:
         for i in range(len(self.__column)):
             self.__column[i] = math.trunc(self.__column[i])
         return self
-
-    def to_list(self) -> list:
-        """
-        This method returns column values as a list
-        :return: list
-        """
-        return self.__column.to_list()

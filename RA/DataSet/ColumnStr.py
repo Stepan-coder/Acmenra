@@ -1,11 +1,12 @@
 import pandas as pd
 from typing import List, Any
+from RA.DataSet.ColumnType import *
 
 
 class ColumnStr:
-    def __init__(self, column: pd.Series, type: str):
+    def __init__(self, column: pd.Series, column_type: ColumnType):
         self.__column = column
-        self.__type = type
+        self.__column_type = column_type
 
     def __add__(self, other: str) -> List[str]:
         """
@@ -47,6 +48,21 @@ class ColumnStr:
         :return: int
         """
         return len(self.__column)
+
+    @property
+    def type(self) -> ColumnType:
+        """
+        This property returns a type of column
+        :return: ColumnType
+        """
+        return self.__column_type
+
+    def values(self) -> List[bool or int or float]:
+        """
+        This method returns column values as a list
+        :return: list
+        """
+        return self.__column.to_list()
 
     def add(self, other: str) -> None:
         """
@@ -178,10 +194,3 @@ class ColumnStr:
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).rstrip(chars)
         return self
-
-    def to_list(self) -> list:
-        """
-        This method returns column values as a list
-        :return: list
-        """
-        return self.__column.to_list()

@@ -6,22 +6,19 @@ import copy
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+
 from enum import Enum
 from tqdm import tqdm
+from typing import Any, List, Dict
 from scipy import stats
-from typing import Any
 from prettytable import PrettyTable
 from RA.DataSet.ColumnStr import *
 from RA.DataSet.ColumnNum import *
+from RA.DataSet.ColumnType import *
 from RA.DataSet.DataSetStat import *
+from RA.DataSet.DataSetStatus import *
 from RA.DataSet.ColumnNumStat import *
 from RA.DataSet.ColumnStrStat import *
-
-
-class DataSetStatus(Enum):
-    CREATED = "JUST CREATED"
-    EMPTY = "EMPTY"
-    ENABLE = "ENABLE"
 
 
 class DataSet(object):
@@ -55,16 +52,16 @@ class DataSet(object):
         if is_dataset:
             for key in self.__dataset_columns_name:
                 column = self.get_column_stat(column_name=key, extended=False)
-                if column.get_dtype() == 'variable':
-                    dtype = "\033[32m {}\033[0m".format(column.get_dtype())
+                if column.dtype == 'variable':
+                    dtype = "\033[32m {}\033[0m".format(column.dtype)
                 else:
-                    dtype = "\033[31m {}\033[0m".format(column.get_dtype())
-                table.add_row([column.get_column_name(),
-                               column.get_type(),
+                    dtype = "\033[31m {}\033[0m".format(column.dtype)
+                table.add_row([column.column_name,
+                               column.type,
                                dtype,
-                               column.get_count(),
-                               column.get_unique_count(),
-                               column.get_nan_count()])
+                               column.count,
+                               column.unique_count,
+                               column.nan_count])
         return str(table)
 
     def __iter__(self) -> Dict[str, Any]:
@@ -190,8 +187,8 @@ class DataSet(object):
             this_row = self.get_row(index=i)
             table_row = []
             for column_name in self.__dataset_columns_name:
-                column_type = self.get_column_stat(column_name=column_name, extended=False).get_type()
-                if not full_view and column_type.startswith("str") and isinstance(this_row[column_name], str) and \
+                column_type = self.get_column_stat(column_name=column_name, extended=False).type
+                if not full_view and column_type == ColumnType.STRING and isinstance(this_row[column_name], str) and \
                         len(this_row[column_name]) > 50:
                     table_row.append(f"{str(this_row[column_name])[:47]}...")
                 else:
@@ -202,6 +199,7 @@ class DataSet(object):
     def tail(self, n: int = 5, full_view: bool = False) -> None:
         """
         This method prints the last n rows
+        :param full_view:
         :param n: Count of lines
         :return: None
         """
@@ -377,11 +375,11 @@ class DataSet(object):
             raise Exception("The dataset has not been loaded yet!")
         if column_name not in self.__dataset_columns_name:
             raise Exception(f"The \"{column_name}\" column does not exist in this dataset!")
-        col_type = str(self.get_column_stat(column_name=column_name, extended=False).get_type())
-        if col_type.startswith("str"):
-            return ColumnStr(self.__dataset[column_name], col_type)
-        elif col_type.startswith("int") or col_type.startswith("float"):
-            return ColumnNum(self.__dataset[column_name], col_type)
+        col_type = self.get_column_stat(column_name=column_name, extended=False).type
+        if col_type == ColumnType.STRING:
+            return ColumnStr(column=self.__dataset[column_name], column_type=col_type)
+        elif col_type == ColumnType.INTEGER or col_type == ColumnType.FLOAT:
+            return ColumnNum(column=self.__dataset[column_name], column_type=col_type)
 
     def add_column(self, column_name: str, values: list, dif_len: bool = False) -> None:
         """
@@ -517,14 +515,14 @@ class DataSet(object):
         col = column_name
         if col in self.__dataset_analytics:
             if extended and not self.__dataset_analytics[col].get_is_extended():
-                if self.__get_column_type(col).startswith("int") or self.__get_column_type(col).startswith("float"):
+                if self.__get_column_type(col) == ColumnType.INTEGER or self.__get_column_type(col) == ColumnType.FLOAT:
                     self.__dataset_analytics[col] = ColumnNumStat(col, list(self.__dataset[col]), extended)
-                elif self.__get_column_type(col).startswith("str"):
+                elif self.__get_column_type(col) == ColumnType.STRING:
                     self.__dataset_analytics[col] = ColumnStrStat(col, list(self.__dataset[col]), extended)
         else:
-            if self.__get_column_type(col).startswith("int") or self.__get_column_type(col).startswith("float"):
+            if self.__get_column_type(col) == ColumnType.INTEGER or self.__get_column_type(col) == ColumnType.FLOAT:
                 self.__dataset_analytics[col] = ColumnNumStat(col, list(self.__dataset[col]), extended)
-            elif self.__get_column_type(col).startswith("str"):
+            elif self.__get_column_type(col) == ColumnType.STRING:
                 self.__dataset_analytics[col] = ColumnStrStat(col, list(self.__dataset[col]), extended)
         return self.__dataset_analytics[col]
 
@@ -564,6 +562,36 @@ class DataSet(object):
             elif column_type.startswith('int') or column_type.startswith('float'):
                 self.__dataset[key] = self.__dataset[key].fillna(value=0)
         self.update_dataset_info()
+
+    def equals(self, dataset) -> bool:
+        diff_responce = self.diff(dataset=dataset)
+        if 'length' not in diff_responce and 'columns' not in diff_responce and len(diff_responce["rows"].keys()) == 0:
+            return True
+        return False
+
+    def diff(self, dataset) -> json:
+        if not self.__is_dataset_loaded:
+            raise Exception("The dataset has not been loaded yet!")
+        some: DataSet = dataset
+        report = {}
+        if self.__dataset_len != some.__dataset_len:
+            report['length'] = {self.name: f"{self.__dataset_len}", some.name: f"{some.__dataset_len}"}
+        if some.columns_name != self.columns_name:
+            not_exist = [column for column in some.columns_name if column not in self.__dataset_columns_name]
+            missing = [column for column in self.__dataset_columns_name if column not in some.columns_name]
+            report['columns'] = list(set(not_exist + missing))
+        report['rows'] = {}
+        for column in self.__dataset_columns_name:
+            if column in self.__dataset_columns_name and column in some.columns_name:
+                indexes = DataSet.__dif_lists_index(list_a=self.Column(column_name=column).values(),
+                                                    list_b=some.Column(column_name=column).values())
+                for index in indexes:
+                    if index not in list(report['rows'].keys()):
+                        report['rows'][index] = [column]
+                    else:
+                        report['rows'][index].append(column)
+        print(len(report["rows"].keys()))
+        return report
 
     def split(self, count: int) -> List:
         """
@@ -740,12 +768,12 @@ class DataSet(object):
             is_extended = False
             if key in self.__dataset_analytics:
                 is_extended = self.__dataset_analytics[key].get_is_extended()
-            if self.__get_column_type(column_name=key).startswith("int") or \
-                    self.__get_column_type(column_name=key).startswith("float"):
+            if self.__get_column_type(column_name=key) == ColumnType.INTEGER or \
+                    self.__get_column_type(column_name=key) == ColumnType.FLOAT:
                 self.__dataset_analytics[key] = ColumnNumStat(column_name=key,
                                                               values=self.__dataset[key],
                                                               extended=is_extended)
-            elif self.__get_column_type(column_name=key).startswith("str"):
+            elif self.__get_column_type(column_name=key) == ColumnType.STRING:
                 self.__dataset_analytics[key] = ColumnStrStat(column_name=key,
                                                               values=self.__dataset[key],
                                                               extended=is_extended)
@@ -1101,7 +1129,7 @@ class DataSet(object):
     #         plt.savefig(os.path.join(path, plot_title + ".png"))
     #     plt.close()
 
-    def __get_column_type(self, column_name: str) -> str:
+    def __get_column_type(self, column_name: str) -> ColumnType:
         """
         This method learns the column type
         :param column_name: Name of DataSet column
@@ -1109,14 +1137,21 @@ class DataSet(object):
         """
         types = []
         for i in range(len(self.__dataset)):
-            types.append(type(self.__dataset.at[i, column_name]).__name__)
-        types = list(set(types))
-        if len(types) == 1:
+            column_type = type(self.__dataset.at[i, column_name]).__name__
+            if column_type == 'bool':
+                types.append(ColumnType.BOOLEAN)
+            elif column_type == 'int':
+                types.append(ColumnType.INTEGER)
+            elif column_type == 'float':
+                types.append(ColumnType.FLOAT)
+            elif column_type == 'str':
+                types.append(ColumnType.STRING)
+        if len(list(set(types))) == 1:
             return types[0]
         else:
-            if len(types) == 2 and 'str' in types:
-                return 'str'
-            return "object"
+            if len(types) == 2 and ColumnType.STRING in list(set(types)):
+                return ColumnType.STRING
+            return ColumnType.OBJECT
 
     def __read_dataset_info_from_json(self, data) -> None:
         """
@@ -1146,6 +1181,14 @@ class DataSet(object):
             self.__dataset_len = len(self.__dataset)
             self.__dataset_columns_name = self.__dataset.keys()
             self.__dataset_columns_name_count = len(self.__dataset.keys())
+
+    @staticmethod
+    def __dif_lists_index(list_a: list, list_b: list) -> List[int]:
+        diff = []
+        for i in range(min(len(list_a), len(list_b))):
+            if list_a[i] != list_b[i]:
+                diff.append(i)
+        return diff
 
     @staticmethod
     def __read_from_csv(filename: str,

@@ -1,4 +1,5 @@
 from prettytable import PrettyTable
+from RA.DataSet.ColumnType import *
 from RA.DataSet.ColumnStrStatExt import *
 
 
@@ -12,7 +13,7 @@ class ColumnStrStat():
         self.__is_extended = extended
         self.__count = len(values)  # Указываем явно, потому что этот класс не должен хранить все значения с колонки
         self.__count_unique = len(list(set(values)))
-        self.__field_type = self.get_column_type(values=values)
+        self.__field_type = self.__get_column_type(values=values)
         self.__field_dtype = "variable" if self.__count_unique >= self.__count * categorical else "categorical"
         self.__nan_count = self.__get_nan_count(values=values)
         self.__str_stat = StringIndicators(values=values, extended=extended)
@@ -21,15 +22,15 @@ class ColumnStrStat():
         table = PrettyTable()
         table.title = f"{'Simple' if not self.__is_extended else 'Extended'} Column \"{self.__column_name}\""
         table.field_names = ["Indicator", "Value"]
-        table.add_row(["Сolumn name", self.get_column_name()])
-        table.add_row(["Type", self.get_type()])
-        table.add_row(["DType", self.get_dtype()])
-        table.add_row(["Count", self.__count])
-        table.add_row(["Count unique", self.get_unique_count()])
-        table.add_row(["NaN count", self.get_nan_count()])
+        table.add_row(["Сolumn name", self.column_name])
+        table.add_row(["Type", self.type])
+        table.add_row(["DType", self.dtype])
+        table.add_row(["Count", self.count])
+        table.add_row(["Count unique", self.unique_count])
+        table.add_row(["NaN count", self.nan_count])
         table.add_row(["String indicators", "".join(len("String indicators") * [" "])])
-        table.add_row(["Min val", self.get_min()])
-        table.add_row(["Max val", self.get_max()])
+        table.add_row(["Min val", self.min()])
+        table.add_row(["Max val", self.max()])
 
         if self.get_str_stat().get_letter_counter().get_distribution():
             table.add_row(["Normal Distribution", "".join(len("Normal Distribution") * [" "])])
@@ -42,41 +43,16 @@ class ColumnStrStat():
         """
         return self.__count
 
-    def get_str_stat(self) -> StringIndicators:
-        return self.__str_stat
-
-    def get_is_extended(self):
-        return self.__is_extended
-
-    def get_column_name(self) -> str:
+    @property
+    def column_name(self) -> str:
         """
         This method return the name of current column
         :return: Name of column
         """
         return self.__column_name
 
-    def get_count(self) -> int:
-        """"
-        This method returns count of values in this column
-        :return: Count of values
-        """
-        return self.__count
-
-    def get_unique_count(self) -> int:
-        """
-        This method returns count of unique values in this column
-        :return: Count of unique values
-        """
-        return self.__count_unique
-
-    def get_nan_count(self) -> int:
-        """
-        This method returns count of NaN values in this column
-        :return: Count of NaN values
-        """
-        return self.__nan_count
-
-    def get_type(self) -> str:
+    @property
+    def type(self) -> ColumnType:
         """
         This method returns type of column
         :return: Type of column
@@ -85,42 +61,74 @@ class ColumnStrStat():
             raise Exception("The values were not loaded!")
         return self.__field_type
 
-    def get_dtype(self):
+    @property
+    def dtype(self):
         """
         This method returns the real type of column
         :return: Real type of column
         """
         return self.__field_dtype
 
-    def get_min(self) -> int or float or bool:
+    @property
+    def count(self) -> int:
+        """"
+        This method returns count of values in this column
+        :return: Count of values
+        """
+        return self.__count
+
+    @property
+    def unique_count(self) -> int:
+        """
+        This method returns count of unique values in this column
+        :return: Count of unique values
+        """
+        return self.__count_unique
+
+    @property
+    def nan_count(self) -> int:
+        """
+        This method returns count of NaN values in this column
+        :return: Count of NaN values
+        """
+        return self.__nan_count
+
+    @property
+    def is_extended(self) -> bool:
+        return self.__is_extended
+
+    def get_str_stat(self) -> StringIndicators:
+        return self.__str_stat
+
+    def min(self) -> int or float or bool:
         """
         This method return minimal str len in column
         :return Minimal value of column
         """
         return self.__str_stat.get_min()
 
-    def get_min_value(self) -> int or float or bool:
+    def min_value(self) -> int or float or bool:
         """
         This method return minimal value of column
         :return Minimal value of column
         """
         return self.__str_stat.get_min_value()
 
-    def get_max(self) -> int or float or bool:
+    def max(self) -> int or float or bool:
         """
         This method return maximal str len of column
         :return Maximal value of column
         """
         return self.__str_stat.get_max()
 
-    def get_max_value(self) -> int or float or bool:
+    def max_value(self) -> int or float or bool:
         """
         This method return maximal value of column
         :return Maximal value of column
         """
         return self.__str_stat.get_max_value()
 
-    def get_mean(self) -> int or float:
+    def mean(self) -> int or float:
         """
         This method return maximal value of column
         :return Mean value of column
@@ -147,17 +155,29 @@ class ColumnStrStat():
                             f"To get statistical values, use 'get_column_stat' with the 'extended' parameter")
         return self.__str_stat.get_letter_counter().get_letters_distribution()
 
-    def get_column_type(self, values: list) -> str:
+    def __get_column_type(self, values: list) -> ColumnType:
+        """
+        This method learns the column type
+        :param column_name: Name of DataSet column
+        :return: str
+        """
         types = []
         for i in range(len(values)):
-            types.append(type(values[i]).__name__)
-        types = list(set(types))
-        if len(types) == 1:
+            column_type = type(values[i]).__name__
+            if column_type == 'bool':
+                types.append(ColumnType.BOOLEAN)
+            elif column_type == 'int':
+                types.append(ColumnType.INTEGER)
+            elif column_type == 'float':
+                types.append(ColumnType.FLOAT)
+            elif column_type == 'str':
+                types.append(ColumnType.STRING)
+        if len(list(set(types))) == 1:
             return types[0]
         else:
-            if len(types) == 2 and 'str' in types:
-                return 'str'
-            return "object"
+            if len(types) == 2 and ColumnType.STRING in list(set(types)):
+                return ColumnType.STRING
+            return ColumnType.OBJECT
 
     # def get_from_json(self, data: dict, values: dict) -> None:
     #     """
@@ -216,7 +236,8 @@ class ColumnStrStat():
     #     else:
     #         raise Exception("The values were not loaded!")
 
-    def __get_nan_count(self, values: list) -> int:
+    @staticmethod
+    def __get_nan_count(values: list) -> int:
         """
         This method calculate count of NaN values
         :return: int
