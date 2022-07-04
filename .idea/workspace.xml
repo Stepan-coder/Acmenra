@@ -20,6 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fe8dd75-f6e1-4e10-8c9c-b167a8abf0d1" name="Default Changelist" comment="">
+<<<<<<< Updated upstream
       <change afterPath="$PROJECT_DIR$/RA/DataSet/ColumnType.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/RA/DataSet/DataSetStatus.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
@@ -31,6 +32,9 @@
       <change beforePath="$PROJECT_DIR$/RA/DataSet/ColumnStrStatExt.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/ColumnStrStatExt.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RA/DataSet/DataSet.py" beforeDir="false" afterPath="$PROJECT_DIR$/RA/DataSet/DataSet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/task1.py" beforeDir="false" afterPath="$PROJECT_DIR$/task1.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
