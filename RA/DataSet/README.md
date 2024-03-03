@@ -2,7 +2,7 @@
   <summary><strong>class DataSet</strong></summary>
   <ul>
     <li><code>func</code> <strong>__init__</strong> - This is an init method</li>
-    <li><strong><font color="477fef">func</font></strong> <code>__str__</code> - </li>
+    <li><span style="color:#477fef;"><strong>func</strong></span> <code>__str__</code> - </li>
     <li><code>func</code> <strong>__iter__</strong> - This method allows you to iterate over a data set in a loop. I.e. makes it iterative</li>
     <li><code>func</code> <strong>__reversed__</strong> - This method return a reversed copy of self-class</li>
     <li><code>func</code> <strong>__instancecheck__</strong> - This method checks is instance type is DataSet</li>
