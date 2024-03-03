@@ -27,7 +27,6 @@ class DataSet(object):
         This is an init method
         :param dataset_name: User nickname of dataset
         :param show: Do I need to show what is happening
-        :return None
         """
         self.__dataset_name = dataset_name
         self.__delimiter = ","
@@ -67,7 +66,6 @@ class DataSet(object):
     def __iter__(self) -> Dict[str, Any]:
         """
         This method allows you to iterate over a data set in a loop. I.e. makes it iterative
-        :return: Dict[str, Any]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -77,7 +75,6 @@ class DataSet(object):
     def __reversed__(self):
         """
         This method return a reversed copy of self-class
-        :return: DataSet
         """
         copied_class = copy.copy(self)
         copied_class.reverse()
@@ -87,14 +84,12 @@ class DataSet(object):
         """
         This method checks is instance type is DataSet
         :param instance: Checked value
-        :return: bool
         """
         return isinstance(instance, type(self))
 
     def __len__(self) -> int:
         """
         This method returns count rows in this dataset
-        :return: int
         """
         return len(self.__dataset) if self.__dataset is not None else 0
 
@@ -102,7 +97,6 @@ class DataSet(object):
     def name(self) -> str:
         """
         This method returns the dataset name of the current DataSet
-        :return: str
         """
         return self.__dataset_name
 
@@ -119,7 +113,6 @@ class DataSet(object):
     def is_loaded(self) -> bool:
         """
         This property returns the state of this DataSet
-        :return: bool
         """
         return self.__is_dataset_loaded
 
@@ -127,7 +120,6 @@ class DataSet(object):
     def delimiter(self) -> str:
         """
         This property returns a delimiter character
-        :return Symbol-split in a .csv file
         """
         return self.__delimiter
 
@@ -143,7 +135,6 @@ class DataSet(object):
     def columns_name(self) -> List[str]:
         """
         This property return column names of dataset pd.DataFrame
-        :return: List[str]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -153,7 +144,6 @@ class DataSet(object):
     def columns_count(self) -> int:
         """
         This method return count of column names of dataset pd.DataFrame
-        :return: int
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet")
@@ -163,7 +153,6 @@ class DataSet(object):
     def supported_formats(self) -> List[str]:
         """
         This property returns a list of supported files
-        :return: List[str]
         """
         return [".xls", ".xlsx", ".xlsm", ".xlt", ".xltx", ".xlsb", '.ots', '.ods']
 
@@ -172,7 +161,6 @@ class DataSet(object):
         This method prints the first n rows
         :param full_view:
         :param n: Count of lines
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -201,7 +189,6 @@ class DataSet(object):
         This method prints the last n rows
         :param full_view:
         :param n: Count of lines
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -229,7 +216,6 @@ class DataSet(object):
         """
         This method sets the project_name of the DataSet
         :param dataset_name: Name of this
-        :return None
         """
         if not isinstance(dataset_name, str):
             raise Exception("The name must be a string!")
@@ -241,7 +227,6 @@ class DataSet(object):
         """
         This method removes the column from the dataset
         :param path: The path to save the "DataSet" project
-        :return: None
         """
         self.__dataset_save_path = path
 
@@ -249,7 +234,6 @@ class DataSet(object):
         """
         This method sets the delimiter character
         :param delimiter: Symbol-split in a .csv file
-        :return None
         """
         if not isinstance(delimiter, str):
             raise Exception("The delimiter must be a one-symbol string!")
@@ -261,7 +245,6 @@ class DataSet(object):
         """
         This method sets the encoding for the future export of the dataset
         :param encoding: Encoding for the dataset. Example: 'utf-8', 'windows1232'
-        :return None
         """
         if not isinstance(encoding, str):
             raise Exception("The encoding must be a string!")
@@ -275,7 +258,6 @@ class DataSet(object):
         :param column: The name of the dataset column
         :param index: Index of the dataset string
         :param value: The value that we want to write
-        :return None
         """
         if index < 0:
             raise Exception("The string value must be greater than 0!")
@@ -292,7 +274,6 @@ class DataSet(object):
         This method gets the value from the dataset cell
         :param column: The name of the dataset column
         :param index: Index of the dataset string
-        :return: Any
         """
         if index < 0:
             raise Exception("The string value must be greater than 0!")
@@ -307,7 +288,6 @@ class DataSet(object):
         This method adds a new row to the dataset
         :param new_row: The string to be added to the dataset. In dictionary format,
         where the key is the column name and the value is a list of values
-        :return: None
         """
         if not self.__is_dataset_loaded:
             warnings.warn(f'The dataset was not loaded. '
@@ -332,7 +312,6 @@ class DataSet(object):
         This method returns a row of the dataset in dictionary format, where the keys are the column names and the
         values are the values in the columns
         :param index: Index of the dataset string
-        :return: Dict[str, Any]
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -351,7 +330,6 @@ class DataSet(object):
         """
         This method delete row from dataset
         :param index: Index of the dataset string
-        :return None
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -369,7 +347,6 @@ class DataSet(object):
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column_name: Name of DataSet column
-        :return: list
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -387,7 +364,6 @@ class DataSet(object):
         :param column_name: String name of the column to be added
         :param values: List of column values
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
-        :return: None
         """
         if not self.__is_dataset_loaded:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
@@ -405,7 +381,6 @@ class DataSet(object):
         """
         This method summarizes the values from the columns of the dataset and returns them as a list of tuples
         :param column_name: Name of DataSet column
-        :return: list
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -418,7 +393,6 @@ class DataSet(object):
         This method renames the column in the dataset
         :param column_name: The name of the column that we are renaming
         :param new_column_name: New name for the "column" column
-        :return: None
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -438,7 +412,6 @@ class DataSet(object):
         """
         This method removes the column from the dataset
         :param column_name: List of column names
-        :return: None
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -455,7 +428,6 @@ class DataSet(object):
         This method converts column types
         :param new_column_types: New type of dataset columns (excluding exceptions)
         :param exception: Fields that have a different type from the main dataset type
-        :return None
         """
         for field in self.__dataset:
             if exception is None:
@@ -471,7 +443,6 @@ class DataSet(object):
         This method converts column type
         :param column_name: The name of the column in which we want to change the type
         :param new_column_type: Field type
-        :return None
         """
         if new_column_type != str and new_column_type != int and new_column_type != float and new_column_type != bool:
             raise Exception(f"'{new_column_type}' is an invalid data type for conversion. "
@@ -506,7 +477,6 @@ class DataSet(object):
         This method returns statistical analytics for a given column
         :param column_name: The name of the dataset column for which we output statistics
         :param extended: Responsible for calculating additional parameters
-        :return: DataSetColumn
         """
         if not self.__is_dataset_loaded:
             raise Exception("The dataset has not been loaded yet!")
@@ -529,7 +499,6 @@ class DataSet(object):
     def get_columns_stat(self, extended: bool) -> Dict[str, ColumnNumStat]:
         """
         This method returns DataSet columns stat info
-        :return: Dict["column_name", <DataSetColumn> class]
         """
         for key in self.__dataset_columns_name:
             if key in self.__dataset_analytics:
@@ -542,7 +511,6 @@ class DataSet(object):
     def reverse(self) -> None:
         """
         This method expands the order of rows in the dataset
-        :return: None
         """
         self.__dataset = self.__dataset.reindex(index=self.__dataset.index[::-1])
         self.__dataset = self.__dataset.reset_index(level=0, drop=True)
@@ -553,7 +521,6 @@ class DataSet(object):
          For "int" -> 0.
          For "float" -> 0.0.
          For "str" -> "-".
-        :return: None
         """
         for key in self.__dataset_columns_name:
             column_type = self.get_column_stat(column_name=key, extended=False).get_type()
@@ -597,7 +564,6 @@ class DataSet(object):
         """
         This method automatically divides the DataSet into a list of DataSets with a maximum of "count" rows in each
         :param count: Maximal count of rows in new DataSets
-        :return: List[DataSet]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -619,7 +585,6 @@ class DataSet(object):
         This method sorts the dataset by column "column_name"
         :param column_name: The name of the column by which the sorting will take place
         :param reverse: The parameter responsible for the sorting order (ascending/descending)
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -647,7 +612,6 @@ class DataSet(object):
     def get_correlations(self) -> CorrelationMatrix:
         """
         This method calculate correlations between columns
-        :return: Dict[str, Dict[str, float]]
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -669,7 +633,6 @@ class DataSet(object):
     def get_DataFrame(self) -> pd.DataFrame:
         """
         This method return dataset as pd.DataFrame
-        :return: pd.DataFrame
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been uploaded yet!")
@@ -680,7 +643,6 @@ class DataSet(object):
         This method attaches a new dataset to the current one (at right)
         :param dataframe: The pd.DataFrame to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
-        :return None
         """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
@@ -702,7 +664,6 @@ class DataSet(object):
         This method attaches a new dataset to the current one(at right)
         :param dataset: The DataSet object to be attached to the current one
         :param dif_len: The switch is responsible for maintaining the dimensionality of datasets
-        :return None
         """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
@@ -724,7 +685,6 @@ class DataSet(object):
         """
         This method attaches a new dataset to the current one (at bottom)
         :param dataframe: The pd.DataFrame to be attached to the current one
-        :return None
         """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
@@ -743,7 +703,6 @@ class DataSet(object):
         """
         This method attaches a new dataset to the current one (at bottom)
         :param dataset: The DataSet object to be attached to the current one
-        :return None
         """
         if self.__dataset is None:
             warnings.warn(f'The dataset was not loaded. An empty dataset was created!', UserWarning)
@@ -761,7 +720,6 @@ class DataSet(object):
     def update_dataset_info(self) -> None:
         """
         This method updates, the analitic-statistics data about already precalculated columns
-        :return: None
         """
         self.__update_dataset_base_info()
         for key in self.__dataset_columns_name:
@@ -778,7 +736,6 @@ class DataSet(object):
                                                               values=self.__dataset[key],
                                                               extended=is_extended)
 
-    # CREATE-LOAD-EXPORT DATASET
     def create_empty_dataset(self,
                              columns_names: list = None,
                              delimiter: str = ",",
@@ -788,7 +745,6 @@ class DataSet(object):
         :param columns_names: List of column names
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return:
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -817,7 +773,6 @@ class DataSet(object):
         :param columns: List of column names
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return: None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -837,7 +792,6 @@ class DataSet(object):
         """
         This method loads the dataset into the DataSet class
         :param dataframe: Explicitly specifying pd. DataFrame as a dataset
-        :return None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -855,7 +809,6 @@ class DataSet(object):
         :param csv_file: The name of the .csv file
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return: None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -879,7 +832,6 @@ class DataSet(object):
         This method loads the dataset into the DataSet class
         :param sheet_name: Name of sheet in excel file
         :param excel_file: The name of the excel file
-        :return: None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -901,7 +853,6 @@ class DataSet(object):
         This method loads the dataset into the DataSet class
         :param dataset_project_folder: The path to the .csv file
         :param json_config_filename:
-        :return None
         """
         if self.__is_dataset_loaded:
             raise Exception("The dataset is already loaded!")
@@ -937,7 +888,6 @@ class DataSet(object):
         :param dataset_folder: The folder to place the dataset files in
         :param including_json: Responsible for the export the .json config file together with the dataset
         :param including_plots: Responsible for the export the plots config file together with the dataset
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -1017,7 +967,6 @@ class DataSet(object):
         :param path_to_saving_folder: The path to the folder where the file will be saved
         :param delimeter: Symbol-split in a .csv/.tsv file
         :param encoding: Explicit indication of the .csv/.tsv file encoding
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -1045,7 +994,6 @@ class DataSet(object):
         :param file_name: File name
         :param path_to_saving_folder: The path to the folder where the file will be saved
         :param sheet_name: Name of sheet in excel file
-        :return: None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -1065,7 +1013,7 @@ class DataSet(object):
                                               index=False,
                                               sheet_name=sheet_name)
 
-    # CREATE-LOAD-EXPORT DATASET
+
 
     # def __save_plots(self, path: str, column: DataSetNumColumn):
     #     if column.get_is_num_stat():
@@ -1133,7 +1081,6 @@ class DataSet(object):
         """
         This method learns the column type
         :param column_name: Name of DataSet column
-        :return: str
         """
         types = []
         for i in range(len(self.__dataset)):
@@ -1157,7 +1104,6 @@ class DataSet(object):
         """
         This method reads config and statistics info from .json file
         :param data: json data
-        :return None
         """
         self.__dataset_file = data["dataset_filename"]
         self.__dataset_columns_name = data["columns_names"]
@@ -1173,7 +1119,6 @@ class DataSet(object):
     def __update_dataset_base_info(self) -> None:
         """
         This method updates the basic information about the dataset
-        :return None
         """
         if self.__dataset is None:
             raise Exception("The dataset has not been loaded yet!")
@@ -1199,7 +1144,6 @@ class DataSet(object):
         :param filename: The name of the .csv file
         :param delimiter: Symbol-split in a .csv file
         :param encoding: Explicit indication of the .csv file encoding
-        :return: pd.DataFrame
         """
         return pd.read_csv(filename,
                            encoding=encoding,
@@ -1211,7 +1155,6 @@ class DataSet(object):
         """
         This method reads the dataset from a .csv file
         :param filename: The name of the .csv file
-        :return: pd.DataFrame
         """
         for engine in ["xlrd", "openpyxl", "odf", "pyxlsb"]:
             try:
@@ -1224,7 +1167,6 @@ class DataSet(object):
         """
         This method loads the dataset into the DataSet class
         :param excel_file: The name of the excel file
-        :return: List[str]
         """
         if excel_file is not None:  # Checking that the uploaded file has the .csv format
             if not excel_file.endswith(tuple(DataSet.supported_formats)):
