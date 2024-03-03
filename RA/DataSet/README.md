@@ -1,5 +1,5 @@
 <details><summary> class DataSet </summary>
-* `func` __init__ - This is an init method 
+* `func` __init__ - This is an init method  
 * `func` __str__ - 
 * `func` __iter__ - This method allows you to iterate over a data set in a loop. I.e. makes it iterative
 * `func` __reversed__ - This method return a reversed copy of self-class
