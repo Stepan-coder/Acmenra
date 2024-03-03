@@ -1,24 +1,4 @@
 <details>
-  <summary><strong>class DataSet</strong></summary>
-  <ul>
-    <li><code>func</code> <strong>__init__</strong> - This is an init method</li>
-    <li><strong>func</strong> <code>__str__</code> - </li>
-    <li><code>func</code> <strong>__iter__</strong> - This method allows you to iterate over a data set in a loop. I.e. makes it iterative</li>
-    <li><code>func</code> <strong>__reversed__</strong> - This method return a reversed copy of self-class</li>
-    <li><code>func</code> <strong>__instancecheck__</strong> - This method checks is instance type is DataSet</li>
-    <li><code>func</code> <strong>__len__</strong> - This method returns count rows in this dataset</li>
-    <li><code>property</code> <strong>name</strong> - This property returns the dataset name of the current DataSet</li>
-    <li><code>property</code> <strong>status</strong> - </li>
-    <li><code>property</code> <strong>is_loaded</strong> - This property returns the current state of this DataSet</li>
-    <!-- Добавьте остальные элементы списка с необходимыми выделениями -->
-  </ul>
-</details>
-
-<ul>
-  <li><code>func</code> <strong>merge_two_dicts</strong> - This method merge two dicts</li>
-</ul>
-
-<details>
   <summary> class DataSet </summary>
   <ul>
     <li><strong>func</strong> <code>__init__</code> - This is an init method<br></li>
