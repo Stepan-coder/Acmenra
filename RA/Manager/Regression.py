@@ -71,7 +71,6 @@ class Regression:
     def get_models_names(self) -> List[str]:
         """
         This method return the list of models names
-        :return: list of models names
         """
         return list(self.__models.keys())
 
@@ -89,7 +88,6 @@ class Regression:
         :param prefit: Responsible for pre-training models based on blocked parameters
         :param n_jobs: The number of jobs to run in parallel.
         :param show: The parameter responsible for displaying the progress of work
-        :return: list of models
         """
         standard_scaler = StandardScaler()
         min_max_scaler = MinMaxScaler()
