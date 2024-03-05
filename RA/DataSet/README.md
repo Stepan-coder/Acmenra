@@ -64,5 +64,37 @@
     <li><strong>static</strong> <code>get_excel_sheet_names</code> -</li>
 </ul>
 </details>
-
 * `func` merge_two_dicts - This method merge two dicts
+
+<details>
+  <summary>class ColumnNum</summary>
+  <ul>
+    <li><strong>func</strong> <code>__init__</code> - This method init a class work</li>
+    <li><strong>func</strong> <code>__add__</code> - This method adds a value to a number (+) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__sub__</code> - This method subtracts the value from the number (-) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__mul__</code> - This method multiplies the value by a number (*) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__floordiv__</code> - This method divides the value by a number (//)  [For each cell in column]</li>
+    <li><strong>func</strong> <code>__div__</code> - This method divides the value by a number (/) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__mod__</code> - This method gets the remainder from dividing the value by a number (%) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__pow__</code> - This method is to raise values to the power of a number (**) [For each cell in column]</li>
+    <li><strong>func</strong> <code>__round__</code> - This method rounds the value to the specified precision [For each cell in column]</li>
+    <li><strong>func</strong> <code>__floor__</code> - This method rounds the value to the nearest smaller integer [For each cell in column]</li>
+    <li><strong>func</strong> <code>__ceil__</code> - This method rounds the value to the nearest bigger integer [For each cell in column]</li>
+    <li><strong>func</strong> <code>__trunc__</code> - This method truncates the value to an integer [For each cell in column]</li>
+    <li><strong>func</strong> <code>__instancecheck__</code> - This method checks is instance type is DataSet</li>
+    <li><strong>func</strong> <code>__len__</code> - This method returns count of elements in column</li>
+    <li><strong>property</strong> <code>type</code> - This property returns a type of column</li>
+    <li><strong>func</strong> <code>values</code> - This method returns column values as a list</li>
+    <li><strong>func</strong> <code>add</code> - This method adds a value to a number (+) [For each cell in column]</li>
+    <li><strong>func</strong> <code>sub</code> - This method subtracts the value from the number (-) [For each cell in column]</li>
+    <li><strong>func</strong> <code>mul</code> - This method multiplies the value by a number (*) [For each cell in column]</li>
+    <li><strong>func</strong> <code>floordiv</code> - This method divides the value by a number (//) [For each cell in column]</li>
+    <li><strong>func</strong> <code>div</code> - This method divides the value by a number (/) [For each cell in column]</li>
+    <li><strong>func</strong> <code>mod</code> - This method gets the remainder from dividing the value by a number (%) [For each cell in column]</li>
+    <li><strong>func</strong> <code>pow</code> - This method is to raise others to the value of a number (**) [For each cell in column]</li>
+    <li><strong>func</strong> <code>round</code> - This method rounds the value to the specified precision [For each cell in column]</li>
+    <li><strong>func</strong> <code>floor</code> - This method rounds the value to the nearest smaller integer [For each cell in column]</li>
+    <li><strong>func</strong> <code>ceil</code> - This method rounds the value to the nearest bigger integer [For each cell in column]</li>
+    <li><strong>func</strong> <code>trunc</code> - This method truncates the value to an integer [For each cell in column]</li>
+</ul>
+</details>
