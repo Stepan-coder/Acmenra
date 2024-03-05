@@ -100,7 +100,6 @@ class NumericalStatistics:
         """
         This method load class fields from json
         :param data: Input json object
-        :return: None
         """
         required_fields = ["Math mode", "Math mode", "Math dispersion", "Math sigma"]
         for rf in required_fields:
@@ -115,7 +114,6 @@ class NumericalStatistics:
     def to_json(self):
         """
         This method export class NormalDistribution to json object
-        :return: json object
         """
         if not self.__is_numerical_statistics:
             raise Exception("The values were not loaded!")
@@ -134,7 +132,6 @@ class NumericalStatistics:
         """
         This method calculated extended satatistisc params
         :param values:
-        :return: None
         """
         if not self.__is_numerical_statistics:
             if values is not None:
@@ -151,7 +148,6 @@ class NumericalStatistics:
     def __get_values_distribution(values: list) -> Dict[bool or int or float or bool, float]:
         """
         This method calculates the frequency of list values as a percentage
-        :return: Dict[bool or int or float or bool, float]
         """
         math_rasp = {}
         for value in values:
@@ -166,7 +162,6 @@ class NumericalStatistics:
         """
         This method calculates the mathematical variance
         :param math_rasp_dict: Dictionary of the frequency of values
-        :return: int or float
         """
         math_wait = NumericalStatistics.__get_math_expectation(math_rasp_dict)
         math_wait_x2 = math_wait * math_wait
@@ -178,7 +173,6 @@ class NumericalStatistics:
         """
         This method calculates the mathematical mode (the most frequent value)
         :param math_rasp_dict: Dictionary of the frequency of values
-        :return:
         """
         moda = -10000000000
         moda_key = -1
@@ -193,7 +187,6 @@ class NumericalStatistics:
         """
         This method calculates the mathematical expectation
         :param math_rasp_dict: Dictionary of the frequency of values
-        :return: float
         """
         math_wait = 0
         for md in math_rasp_dict:
@@ -205,7 +198,6 @@ class NumericalStatistics:
         """
         This method calculates the mathematical expectation squared
         :param math_rasp_dict: Dictionary of the frequency of values
-        :return: float
         """
         math_wait_2 = 0
         for md in math_rasp_dict:
@@ -219,7 +211,6 @@ class NumericalIndicators:
         This method init work of class
         :param values: Values from column
         :param extended: Param switched brtween simple or extended statistics
-        :return None
         """
         values = [val if not math.isnan(val) else 0 for val in values]
         self.__min = min(values)
@@ -239,7 +230,6 @@ class NumericalIndicators:
     def __str__(self) -> str:
         """
         This method shows the column base info
-        :return: str
         """
         table = PrettyTable()
         table.title = f"\"NumericalIndicators\""
@@ -253,28 +243,24 @@ class NumericalIndicators:
     def get_min(self) -> int or float:
         """
         This method return minimal value of column
-        :return int or float
         """
         return self.__min
 
     def get_max(self) -> int or float:
         """
         This method return maximal value of column
-        :return Maximal value of column
         """
         return self.__max
 
     def get_mean(self) -> int or float:
         """
         This method return mean value of column
-        :return Mean value of column
         """
         return self.__mean
 
     def get_median(self) -> int or float:
         """
         This method return median value of column
-        :return Median value of column
         """
         return self.__median
 
@@ -289,7 +275,6 @@ class NumericalIndicators:
         """
         This method load NumericalIndicators indicators from json
         :param data: Incoming data in json format
-        :return: None
         """
         required_fields = ["Minimal value", "Maximal value", "Mean value", "Median value"]
         for rf in required_fields:
@@ -307,7 +292,6 @@ class NumericalIndicators:
     def to_json(self):
         """
         This method export class NormalDistribution to json object
-        :return: json data
         """
         data = {"Minimal value": self.__min,
                 "Maximal value": self.__max,
