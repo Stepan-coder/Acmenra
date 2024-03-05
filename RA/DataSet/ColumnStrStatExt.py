@@ -44,7 +44,6 @@ class StringStatistics:
         """
         This method load class fields from json
         :param data: Input json object
-        :return: None
         """
         self.__letters_distribution = data
         self.__is_string_statistics = True
@@ -52,7 +51,6 @@ class StringStatistics:
     def to_json(self):
         """
         This method export class NormalDistribution to json object
-        :return: json object
         """
         if not self.__is_string_statistics:
             raise Exception("The values were not loaded!")
@@ -62,7 +60,6 @@ class StringStatistics:
         """
         This method set values to the LetterDistribution class
         :param values:
-        :return: None
         """
         if not self.__is_string_statistics:
             if values is not None:
@@ -72,7 +69,6 @@ class StringStatistics:
         """
         This method fill LetterCounter class when we use values
         :param values: list of column values
-        :return None
         """
         self.__letters_distribution = {}
         self.__strings_distribution = {}
@@ -131,35 +127,30 @@ class StringIndicators:
     def min(self) -> int:
         """
         This method return minimal len of string in column
-        :return int
         """
         return self.__min_len
 
     def min_value(self):
         """
         This method return minimal string in column
-        :return Minimal value of column
         """
         return self.__min_val
 
     def max(self):
         """
         This method return maximal value of column
-        :return Maximal value of column
         """
         return self.__max_len
 
     def max_value(self):
         """
         This method return maximal string in column
-        :return Maximal value of column
         """
         return self.__max_val
 
     def mean(self):
         """
         This method return mean value of column
-        :return Mean value of column
         """
         return self.__mean_len
 
@@ -171,7 +162,6 @@ class StringIndicators:
         """
         This method load NumericalIndicators indicators from json
         :param data: Incoming data in json format
-        :return: None
         """
         required_fields = ["Minimal string",
                            "Minimal string length",
@@ -196,7 +186,6 @@ class StringIndicators:
     def to_json(self) -> dict:
         """
         This method export class NormalDistribution to json object
-        :return: json data
         """
         if not self.__is_string_indicators:
             raise Exception("The values were not loaded!")
