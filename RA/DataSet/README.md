@@ -62,13 +62,9 @@
     <li><strong>static</strong> <code>__read_from_csv</code> - </li>
     <li><strong>static</strong> <code>__read_from_xlsx</code> - </li>
     <li><strong>static</strong> <code>get_excel_sheet_names</code> -</li>
-</ul>
-</details>
-* `func` merge_two_dicts - This method merge two dicts
-
-<details>
-  <summary>class ColumnNum</summary>
-  <ul>
+    <li><strong>func</strong> <code>merge_two_dicts</code> - This method merge two dicts</li>
+    <summary>class ColumnNum</summary>
+    <ul>
     <li><strong>func</strong> <code>__init__</code> - This method init a class work</li>
     <li><strong>func</strong> <code>__add__</code> - This method adds a value to a number (+) [For each cell in column]</li>
     <li><strong>func</strong> <code>__sub__</code> - This method subtracts the value from the number (-) [For each cell in column]</li>
@@ -96,6 +92,7 @@
     <li><strong>func</strong> <code>floor</code> - This method rounds the value to the nearest smaller integer [For each cell in column]</li>
     <li><strong>func</strong> <code>ceil</code> - This method rounds the value to the nearest bigger integer [For each cell in column]</li>
     <li><strong>func</strong> <code>trunc</code> - This method truncates the value to an integer [For each cell in column]</li>
+  </ul>
 </ul>
 </details>
 
