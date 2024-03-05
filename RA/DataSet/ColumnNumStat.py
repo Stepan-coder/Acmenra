@@ -46,7 +46,6 @@ class ColumnNumStat:
     def __len__(self) -> int:
         """
         This method returns the len[count] of values in this column
-        :return: int
         """
         return self.__count
 
@@ -54,7 +53,6 @@ class ColumnNumStat:
     def column_name(self) -> str:
         """
         This method return the name of current column
-        :return: Name of column
         """
         return self.__column_name
 
@@ -62,7 +60,6 @@ class ColumnNumStat:
     def type(self) -> ColumnType:
         """
         This method returns type of column
-        :return: Type of column
         """
         if self.__field_type is None:
             raise Exception("The values were not loaded!")
@@ -72,7 +69,6 @@ class ColumnNumStat:
     def dtype(self):
         """
         This method returns the real type of column
-        :return: Real type of column
         """
         return self.__field_dtype
 
@@ -80,7 +76,6 @@ class ColumnNumStat:
     def count(self) -> int:
         """"
         This method returns count of values in this column
-        :return: Count of values
         """
         return self.__count
 
@@ -88,7 +83,6 @@ class ColumnNumStat:
     def unique_count(self) -> int:
         """
         This method returns count of unique values in this column
-        :return: Count of unique values
         """
         return self.__count_unique
 
@@ -96,7 +90,6 @@ class ColumnNumStat:
     def nan_count(self) -> int:
         """
         This method returns count of NaN values in this column
-        :return: Count of NaN values
         """
         return self.__nan_count
 
@@ -110,35 +103,30 @@ class ColumnNumStat:
     def min(self) -> int or float:
         """
         This method return minimal value of column
-        :return Minimal value of column
         """
         return self.__num_stat.get_min()
 
     def max(self) -> int or float:
         """
         This method return maximal value of column
-        :return Maximal value of column
         """
         return self.__num_stat.get_max()
 
     def mean(self) -> int or float:
         """
         This method return maximal value of column
-        :return Mean value of column
         """
         return self.__num_stat.get_mean()
 
     def median(self) -> int or float:
         """
         This method return maximal value of column
-        :return Median value of column
         """
         return self.__num_stat.get_median()
 
     def get_values_distribution(self) -> Dict[float or int, float]:
         """
         This method returns the percentage of values in the column
-        :return Dict[bool or float or int or str, float]
         """
         if not self.get_num_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
@@ -202,7 +190,6 @@ class ColumnNumStat:
     def __get_column_type(self, values: list) -> ColumnType:
         """
         This method learns the column type
-        :return: str
         """
         types = []
         for i in range(len(values)):
@@ -283,7 +270,6 @@ class ColumnNumStat:
     def __get_nan_count(values: list) -> int:
         """
         This method calculate count of NaN values
-        :return: int
         """
         nan_cnt = 0
         for value in values:
