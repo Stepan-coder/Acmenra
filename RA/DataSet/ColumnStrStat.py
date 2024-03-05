@@ -39,7 +39,6 @@ class ColumnStrStat():
     def __len__(self) -> int:
         """
         This method returns the len[count] of values in this column
-        :return: int
         """
         return self.__count
 
@@ -47,7 +46,6 @@ class ColumnStrStat():
     def column_name(self) -> str:
         """
         This method return the name of current column
-        :return: Name of column
         """
         return self.__column_name
 
@@ -55,7 +53,6 @@ class ColumnStrStat():
     def type(self) -> ColumnType:
         """
         This method returns type of column
-        :return: Type of column
         """
         if self.__field_type is None:
             raise Exception("The values were not loaded!")
@@ -65,7 +62,6 @@ class ColumnStrStat():
     def dtype(self):
         """
         This method returns the real type of column
-        :return: Real type of column
         """
         return self.__field_dtype
 
@@ -73,7 +69,6 @@ class ColumnStrStat():
     def count(self) -> int:
         """"
         This method returns count of values in this column
-        :return: Count of values
         """
         return self.__count
 
@@ -81,7 +76,6 @@ class ColumnStrStat():
     def unique_count(self) -> int:
         """
         This method returns count of unique values in this column
-        :return: Count of unique values
         """
         return self.__count_unique
 
@@ -89,7 +83,6 @@ class ColumnStrStat():
     def nan_count(self) -> int:
         """
         This method returns count of NaN values in this column
-        :return: Count of NaN values
         """
         return self.__nan_count
 
@@ -103,42 +96,36 @@ class ColumnStrStat():
     def min(self) -> int or float or bool:
         """
         This method return minimal str len in column
-        :return Minimal value of column
         """
         return self.__str_stat.get_min()
 
     def min_value(self) -> int or float or bool:
         """
         This method return minimal value of column
-        :return Minimal value of column
         """
         return self.__str_stat.get_min_value()
 
     def max(self) -> int or float or bool:
         """
         This method return maximal str len of column
-        :return Maximal value of column
         """
         return self.__str_stat.get_max()
 
     def max_value(self) -> int or float or bool:
         """
         This method return maximal value of column
-        :return Maximal value of column
         """
         return self.__str_stat.get_max_value()
 
     def mean(self) -> int or float:
         """
         This method return maximal value of column
-        :return Mean value of column
         """
         return self.__str_stat.get_mean()
 
     def get_values_distribution(self) -> Dict[str, float]:
         """
         This method returns the percentage of values in the column
-        :return Dict[bool or float or int or str, float]
         """
         if not self.get_str_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
@@ -148,7 +135,6 @@ class ColumnStrStat():
     def get_letters_distribution(self) -> Dict[str, float]:
         """
         This method returns the percentage of values in the column
-        :return Dict[bool or float or int or str, float]
         """
         if not self.get_str_stat().get_is_extended():
             raise Exception(f"Statistics have not been calculated for column '{self.__column_name}' yet! "
@@ -159,7 +145,6 @@ class ColumnStrStat():
         """
         This method learns the column type
         :param column_name: Name of DataSet column
-        :return: str
         """
         types = []
         for i in range(len(values)):
@@ -184,7 +169,6 @@ class ColumnStrStat():
     #     This method load DataSet indicators from json
     #     :param data:
     #     :param values:
-    #     :return: None
     #     """
     #     required_fields = ["column_name", "type", "count", "count_unique", "count_NaN"]
     #     for rf in required_fields:
@@ -240,7 +224,6 @@ class ColumnStrStat():
     def __get_nan_count(values: list) -> int:
         """
         This method calculate count of NaN values
-        :return: int
         """
         nan_cnt = 0
         for value in values:
