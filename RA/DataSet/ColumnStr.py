@@ -12,7 +12,6 @@ class ColumnStr:
         """
         This method adds a other value to each column cell
         :param other: What needs to be added
-        :return: List[str]
         """
         if not isinstance(other, str):
             raise Exception("The type of \'other\' must be \'str\'")
@@ -25,7 +24,6 @@ class ColumnStr:
         """
         This method repeats the value of each cell other count
         :param other: What needs to be added
-        :return: List[str]
         """
         if not isinstance(other, int or float):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -38,14 +36,12 @@ class ColumnStr:
         """
         This method checks is instance type is DataSet
         :param instance: Checked value
-        :return: bool
         """
         return isinstance(instance, type(self))
 
     def __len__(self) -> int:
         """
         This method returns count of elements in column
-        :return: int
         """
         return len(self.__column)
 
@@ -53,14 +49,12 @@ class ColumnStr:
     def type(self) -> ColumnType:
         """
         This property returns a type of column
-        :return: ColumnType
         """
         return self.__column_type
 
     def values(self) -> List[bool or int or float]:
         """
         This method returns column values as a list
-        :return: list
         """
         return self.__column.to_list()
 
@@ -68,7 +62,6 @@ class ColumnStr:
         """
         This method adds a other value to each column cell
         :param other: What needs to be added
-        :return:
         """
         if not isinstance(other, str):
             raise Exception("The type of \'other\' must be \'str\'")
@@ -79,71 +72,63 @@ class ColumnStr:
         """
         This method repeats the value of each cell other count
         :param other: What needs to be added
-        :return:
         """
         if not isinstance(other, int or float):
             raise Exception("Error")
         for i in range(len(self.__column)):
             self.__column[i] *= int(other)
 
-    def capitalize(self):
+    def capitalize(self) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a capitalized version of String, i.e. make the first character
         have upper case and the rest lower case.
-        :return: DataSetColumnStr
         """
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).capitalize()
         return self
 
-    def title(self):
+    def title(self) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return True if S is a titlecased string and there is at least one
         character in S, i.e. upper- and titlecase characters may only
         follow uncased characters and lowercase characters only cased ones.
         Return False otherwise.
-        :return:
         """
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).title()
         return self
 
-    def upper(self):
+    def upper(self) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a copy of S converted to uppercase.
-        :return:
         """
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).upper()
         return self
 
-    def lower(self):
+    def lower(self) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a copy of B with all ASCII characters converted to lowercase.
-        :return:
         """
         for i in range(len(self.__column)):
             self.__column[i] = str(self.__column[i]).lower()
         return self
 
-    def replace(self, old_string: str, new_string: str):
+    def replace(self, old_string: str, new_string: str) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a copy with all occurrences of substring old replaced by new.
-
           count
             Maximum number of occurrences to replace.
             -1 (the default value) means replace all occurrences.
-
         If the optional argument count is given, only the first count occurrences are
         replaced.
         :param old_string: Substring in the string to be replaced
         :param new_string: The substring to be replaced by
-        :return:
         """
         if old_string is not None and not isinstance(old_string, str):
             raise Exception("The type of \'old_string\' must be \'str\'")
@@ -153,13 +138,12 @@ class ColumnStr:
             self.__column[i] = str(self.__column[i]).replace(old_string, new_string)
         return self
 
-    def strip(self, chars: str = None):
+    def strip(self, chars: str = None) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Strip leading and trailing bytes contained in the argument.
         If the argument is omitted or None, strip leading and trailing ASCII whitespace.
         :param chars: The string to be removed from the beginning and end of the string
-        :return:
         """
         if chars is not None and not isinstance(chars, str):
             raise Exception("The type of \'chars\' must be \'str\'")
@@ -167,13 +151,12 @@ class ColumnStr:
             self.__column[i] = str(self.__column[i]).strip(chars)
         return self
 
-    def lstrip(self, chars: str = None):
+    def lstrip(self, chars: str = None) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a copy of the string S with trailing whitespace removed.
         If chars is given and not None, remove characters in chars instead.
         :param chars: The string to be removed from the beginning of the string
-        :return:
         """
         if chars is not None and not isinstance(chars, str):
             raise Exception("The type of \'chars\' must be \'str\'")
@@ -181,13 +164,12 @@ class ColumnStr:
             self.__column[i] = str(self.__column[i]).lstrip(chars)
         return self
 
-    def rstrip(self, chars: str = None):
+    def rstrip(self, chars: str = None) -> 'DataSetColumnStr':
         """
         (For each cell in column)
         Return a copy of the string S with trailing whitespace removed.
         If chars is given and not None, remove characters in chars instead.
         :param chars: The string to be removed from the end of the string
-        :return:
         """
         if chars is not None and not isinstance(chars, str):
             raise Exception("The type of \'chars\' must be \'str\'")
