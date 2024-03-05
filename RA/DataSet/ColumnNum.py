@@ -19,7 +19,6 @@ class ColumnNum:
         (For each cell in column)
         This method adds a value to a number (+)
         :param other: What needs to be added
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -33,7 +32,6 @@ class ColumnNum:
         (For each cell in column)
         This method subtracts the value from the number (-)
         :param other: What needs to be subtracted
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -47,7 +45,6 @@ class ColumnNum:
         (For each cell in column)
         This method multiplies the value by a number (*)
         :param other: What should be multiplied
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -61,7 +58,6 @@ class ColumnNum:
         (For each cell in column)
         This method divides the value by a number (//)
         :param other: What should be divided
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -75,7 +71,6 @@ class ColumnNum:
         (For each cell in column)
         This method divides the value by a number (/)
         :param other: What should be divided
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -89,7 +84,6 @@ class ColumnNum:
         (For each cell in column)
         This method gets the remainder from dividing the value by a number (%)
         :param other: What should be divided
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -103,7 +97,6 @@ class ColumnNum:
         (For each cell in column)
         This method is to raise values to the power of a number (**)
         :param other: To what extent should it be raised
-        :return: List[str]
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -117,7 +110,6 @@ class ColumnNum:
         (For each cell in column)
         This method rounds the value to the specified precision
         :param n: Count of characters
-        :return: List[str]
         """
         if not isinstance(n, int):
             raise Exception("The type \'n\' must be \'int\'")
@@ -130,7 +122,6 @@ class ColumnNum:
         """
         (For each cell in column)
         This method rounds the value to the nearest smaller integer
-        :return: List[str]
         """
         new_some = self.__column.copy()
         for i in range(len(self.__column)):
@@ -141,7 +132,6 @@ class ColumnNum:
         """
         (For each cell in column)
         This method rounds the value to the nearest bigger integer
-        :return: List[str]
         """
         new_some = self.__column.copy()
         for i in range(len(self.__column)):
@@ -152,7 +142,6 @@ class ColumnNum:
         """
         (For each cell in column)
         This method truncates the value to an integer
-        :return: List[str]
         """
         new_some = self.__column.copy()
         for i in range(len(self.__column)):
@@ -163,14 +152,12 @@ class ColumnNum:
         """
         This method checks is instance type is DataSet
         :param instance: Checked value
-        :return: bool
         """
         return isinstance(instance, type(self))
 
     def __len__(self) -> int:
         """
         This method returns count of elements in column
-        :return: int
         """
         return len(self.__column)
 
@@ -178,23 +165,20 @@ class ColumnNum:
     def type(self) -> ColumnType:
         """
         This property returns a type of column
-        :return: ColumnType
         """
         return self.__column_type
 
     def values(self) -> List[bool or int or float]:
         """
         This method returns column values as a list
-        :return: list
         """
         return self.__column.to_list()
 
-    def add(self, other: int or float):
+    def add(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method adds a value to a number (+)
         :param other: What needs to be added
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -202,12 +186,11 @@ class ColumnNum:
             self.__column[i] += other
         return self
 
-    def sub(self, other: int or float):
+    def sub(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method subtracts the value from the number (-)
         :param other: What needs to be subtracted
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -215,12 +198,11 @@ class ColumnNum:
             self.__column[i] -= other
         return self
 
-    def mul(self, other: int or float):
+    def mul(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method multiplies the value by a number (*)
         :param other: What should be multiplied
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -228,12 +210,11 @@ class ColumnNum:
             self.__column[i] *= int(other)
         return self
 
-    def floordiv(self, other: int or float):
+    def floordiv(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method divides the value by a number (//)
         :param other: What should be divided
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -243,12 +224,11 @@ class ColumnNum:
             self.__column[i] //= other
         return self
 
-    def div(self, other: int or float):
+    def div(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method divides the value by a number (/)
         :param other: What should be divided
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -258,12 +238,11 @@ class ColumnNum:
             self.__column[i] /= other
         return self
 
-    def mod(self, other: int or float):
+    def mod(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method gets the remainder from dividing the value by a number (%)
         :param other: What should be divided
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -273,12 +252,11 @@ class ColumnNum:
             self.__column[i] %= other
         return self
 
-    def pow(self, other: int or float):
+    def pow(self, other: int or float) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method is to raise others to the value of a number (**)
         :param other: To what extent should it be raised
-        :return: DataSetColumnNum
         """
         if not (isinstance(other, int) or isinstance(other, float)):
             raise Exception("The type of \'other\' must be \'int\' or \'float\'")
@@ -286,12 +264,11 @@ class ColumnNum:
             self.__column[i] **= other
         return self
 
-    def round(self, n: int = None):
+    def round(self, n: int = None) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method rounds the value to the specified precision
         :param n: Count of characters
-        :return: DataSetColumnNum
         """
         if not isinstance(n, int):
             raise Exception("The type \'n\' must be \'int\'")
@@ -299,31 +276,28 @@ class ColumnNum:
             self.__column[i] = round(self.__column[i], ndigits=int(n))
         return self
 
-    def floor(self):
+    def floor(self) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method rounds the value to the nearest smaller integer
-        :return: DataSetColumnNum
         """
         for i in range(len(self.__column)):
             self.__column[i] = math.floor(self.__column[i])
         return self
 
-    def ceil(self):
+    def ceil(self) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method rounds the value to the nearest bigger integer
-        :return: DataSetColumnNum
         """
         for i in range(len(self.__column)):
             self.__column[i] = math.ceil(self.__column[i])
         return self
 
-    def trunc(self):
+    def trunc(self) -> 'DataSetColumnNum':
         """
         (For each cell in column)
         This method truncates the value to an integer
-        :return: DataSetColumnNum
         """
         for i in range(len(self.__column)):
             self.__column[i] = math.trunc(self.__column[i])
