@@ -98,3 +98,34 @@
     <li><strong>func</strong> <code>trunc</code> - This method truncates the value to an integer [For each cell in column]</li>
 </ul>
 </details>
+
+
+<details>
+  <summary>class ColumnNumStat</summary>
+  <ul>
+    <li><strong>func</strong> <code>__init__</code> - 
+    <li><strong>func</strong> <code>__str__</code> - 
+    <li><strong>func</strong> <code>__len__</code> - This method returns the len[count] of values in this column
+    <li><strong>property</strong> <code>column_name</code> - This method return the name of current column 
+    <li><strong>property</strong> <code>type</code> - This method returns type of column 
+    <li><strong>property</strong> <code>dtype</code> - This method returns the real type of column 
+    <li><strong>property</strong> <code>count</code> - This method returns count of values in this column 
+    <li><strong>property</strong> <code>unique_count</code> - This method returns count of unique values in this column 
+    <li><strong>property</strong> <code>nan_count</code> - This method returns count of NaN values in this column 
+    <li><strong>property</strong> <code>is_extended</code> - 
+    <li><strong>func</strong> <code>get_num_stat</code> - 
+    <li><strong>func</strong> <code>min</code> - This method return minimal value of column
+    <li><strong>func</strong> <code>max</code> - This method return maximal value of column
+    <li><strong>func</strong> <code>mean</code> - This method return maximal value of column
+    <li><strong>func</strong> <code>median</code> - This method return maximal value of column
+    <li><strong>func</strong> <code>get_values_distribution</code> - This method returns the percentage of values in the column 
+    <li><strong>func</strong> <code>get_math_mode</code> - This method return mathematical mode
+    <li><strong>func</strong> <code>get_math_expectation</code> - This method return mathematical expectation
+    <li><strong>func</strong> <code>get_math_dispersion</code> - This method return mathematical dispersion
+    <li><strong>func</strong> <code>get_math_sigma</code> - get_math_sigma
+    <li><strong>func</strong> <code>get_coef_of_variation</code> - get_coef_of_variation
+    <li><strong>func</strong> <code>get_Z_score</code> - This method return mathematical sigma
+    <li><strong>func</strong> <code>__get_column_type</code> - This method learns the column type
+    <li><strong>staticmethod</strong> <code>__get_nan_count</code> - This method calculate count of NaN values
+</ul>
+</details>
