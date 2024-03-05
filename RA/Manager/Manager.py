@@ -11,7 +11,6 @@ class Manager:
         This method initializes the manager's work
         :param path: The path to the project folder
         :param project_name: The name of this project
-        :return None
         """
         self.set_project_name(project_name)
         self.__path = path
@@ -41,7 +40,6 @@ class Manager:
         """
         This method checks is instance type is Manager
         :param instance: Checked value
-        :return: bool
         """
         return isinstance(instance, type(self))
 
@@ -52,7 +50,6 @@ class Manager:
         """
         Creates a folder where all project files will be "stacked"
         :param path: The path to the project folder
-        :return: str
         """
         if not isinstance(path, str):
             raise Exception("The path must be a string!")
@@ -68,7 +65,6 @@ class Manager:
         """
         This method sets the new name of this project
         :param new_project_name: The new name of this project
-        :return: None
         """
         if not isinstance(new_project_name, str):
             raise Exception("The new_project_name must be a string!")
@@ -79,7 +75,6 @@ class Manager:
     def get_project_name(self) -> str:
         """
         This method return the name of this project
-        :return: str
         """
         return self.__project_name
 
@@ -87,14 +82,12 @@ class Manager:
         """
         This method sets a new path of this project
         :param new_path: new path of project
-        :return: None
         """
         self.__project_path = self.__create_project_folder(path=new_path)
 
     def get_path(self) -> str:
         """
         This method returns the project path
-        :return: str
         """
         return self.__project_path
 
@@ -102,7 +95,6 @@ class Manager:
         """
         This method returns DataSet from manager
         :param dataset_name: The DataSet class name
-        :return: DataSet
         """
         if dataset_name not in self.__datasets:
             raise Exception("There is no DataSet with this name!")
@@ -112,7 +104,6 @@ class Manager:
         """
         This method creates a new DataSet in manager
         :param dataset_name: The name of new DataSet
-        :return: None
         """
         if dataset_name in self.__datasets:
             raise Exception("A dataset with this name already exists!")
@@ -123,7 +114,6 @@ class Manager:
         """
         This method adds a DataSet to the manager
         :param dataset: The DataSet class that we want to add
-        :return: None
         """
         if str(dataset.get_name()) in self.__datasets:
             raise Exception("A dataset with this name already exists!")
@@ -134,7 +124,6 @@ class Manager:
         """
         This method delete a DataSet from manager
         :param dataset_name: The DataSet class that we want delete
-        :return: None
         """
         if dataset_name not in self.__datasets:
             raise Exception("There is no dataset with this name!")
@@ -147,7 +136,6 @@ class Manager:
         :param count: Maximal count of rows in new DataSets
         :param delete_original_DataSet: This switch is responsible for auto-deleting the original dataset
         after splitting it
-        :return: List[str]
         """
         if dataset_name not in self.__datasets:
             raise Exception("There is no DataSet with this name!")
@@ -172,7 +160,6 @@ class Manager:
         This method is the reverse of "split_DataSet".
         It connects all the manager's DataSets sequentially, into a new, large DataSet
         :param only_new_dataset:
-        :return: None
         """
         if len(self.__datasets) == 0:
             raise Exception("No dataset has been added to the manager yet!")
@@ -200,21 +187,18 @@ class Manager:
     def get_DataSets(self) -> Dict[str, DataSet]:
         """
         This method returns all DataSets from manager
-        :return: Dict[str, DataSet]
         """
         return self.__datasets
 
     def get_datasets_names(self) -> List[str]:
         """
         This method returns the names of all models added to the RA system
-        :return: List[str]
         """
         return list(self.__datasets.keys())
 
     def get_models_names(self) -> List[str]:
         """
         This method returns the names of all models added to the RA system
-        :return: Names of models
         """
         return self.__regression.get_models_names() + self.__classification.get_models_names()
 
@@ -222,7 +206,6 @@ class Manager:
         """
 
         :param model_name: Model Name
-        :return: RA.Model
         """
         if model_name in self.__regression.get_models_names():
             return self.__regression.get_model(model_name=model_name)
@@ -246,7 +229,6 @@ class Manager:
         :param prefit: Responsible for pre-training models based on blocked parameters
         :param n_jobs: The number of jobs to run in parallel.
         :param show: The parameter responsible for displaying the progress of work
-        :return: list of models
         """
         return self.__regression.blitz_test(task=task,
                                             target=target,
@@ -270,7 +252,6 @@ class Manager:
         :param prefit: Responsible for pre-training models based on blocked parameters
         :param n_jobs: The number of jobs to run in parallel.
         :param show: The parameter responsible for displaying the progress of work
-        :return: list of models
         """
         return self.__classification.blitz_test(task=task,
                                                 target=target,
