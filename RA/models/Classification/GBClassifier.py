@@ -81,7 +81,6 @@ class GBClassifier:
         """
         This method sets the parameters for the training grid
         :param count: The number of elements in the grid
-        :return: None
         """
         self.__default = {"loss": Param(ptype=[str],
                                         def_val='deviance',
@@ -314,13 +313,11 @@ class GBClassifier:
 
     def get_text_name(self) -> str:
         """
-        :return: This method returns the text-name of current model
         """
         return self.__text_name
 
     def get_grid_locked_params(self) -> dict:
         """
-        :return: This method returns a dictionary of "locked" parameters
         """
         if not self.__is_grid_fit:
             raise Exception('At first you need to learn grid')
@@ -332,19 +329,16 @@ class GBClassifier:
 
     def get_locked_params_names(self) -> List[str]:
         """
-        :return: This method return the list of locked params
         """
         return [p for p in self.__default if self.__default[p].is_locked]
 
     def get_non_locked_params_names(self) -> List[str]:
         """
-        :return: This method return the list of non locked params
         """
         return [p for p in self.__default if not self.__default[p].is_locked]
 
     def get_default_param_types(self) -> dict:
         """
-        :return: This method return default model param types
         """
         default_param_types = {}
         for default in self.__default:
@@ -353,7 +347,6 @@ class GBClassifier:
 
     def get_default_param_values(self) -> dict:
         """
-        :return: This method return default model param values
         """
         default_param_values = {}
         for default in self.__default:
@@ -362,7 +355,6 @@ class GBClassifier:
 
     def get_default_grid_param_values(self) -> dict:
         """
-        :return: This method return default model param values for grid search
         """
         default_param_values = {}
         for default in self.__default:
@@ -372,28 +364,24 @@ class GBClassifier:
     def get_is_model_fit(self) -> bool:
         """
         This method return flag is_model_fit
-        :return: is_model_fit
         """
         return self.__is_model_fit
 
     def get_is_grid_fit(self) -> bool:
         """
         This method return flag get_is_grid_fit
-        :return: get_is_grid_fit
         """
         return self.__is_grid_fit
 
     def get_is_dataset_set(self) -> bool:
         """
         This method return flag is_dataset_set
-        :return: is_dataset_set
         """
         return self.__is_dataset_set
 
     def get_grid_best_params(self) -> dict:
         """
         This method return the dict of best params for this model
-        :return: dict of best params for this model
         """
         if self.__is_grid_fit:
             return self.__grid_best_params
@@ -404,7 +392,6 @@ class GBClassifier:
         """
         This method return dict of feature importance where key is the column of input dataset, and value is importance
         of this column
-        :return: dict of column importance
         """
         if not self.__is_model_fit:
             raise Exception(f"You haven't trained the {self.__text_name} yet!")
@@ -415,14 +402,12 @@ class GBClassifier:
     def copy(self):
         """
         This method return copy of this class
-        :return: copy of this class
         """
         return copy.copy(self)
 
     def get_roc_auc_score(self) -> float:
         """
         This method calculates the "ROC AUC score" for the {self.__text_name} on the test data
-        :return: ROC AUC Score
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -436,7 +421,6 @@ class GBClassifier:
     def get_r_squared_error(self) -> float:
         """
         This method calculates the "R-Squared_error" for the on the test data
-        :return: R-Squared_error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -450,7 +434,6 @@ class GBClassifier:
     def get_mean_absolute_error(self) -> float:
         """
         This method calculates the "mean_absolute_error" for the {self.text_name} on the test data
-        :return: Mean Absolute Error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -464,7 +447,6 @@ class GBClassifier:
     def get_mean_squared_error(self) -> float:
         """
         This method calculates the "mean_squared_error" for the {self.text_name} on the test data
-        :return: Mean Squared Error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -478,7 +460,6 @@ class GBClassifier:
     def get_root_mean_squared_error(self) -> float:
         """
         This method calculates the "root_mean_squared_error" for the {self.text_name} on the test data
-        :return: Root Mean Squared Error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -492,7 +473,6 @@ class GBClassifier:
     def get_median_absolute_error(self) -> float:
         """
         This method calculates the "mean_squared_error" for the {self.text_name} on the test data
-        :return: Median Absolute Error
         """
         error = float("inf")
         if not self.__is_model_fit:
@@ -533,7 +513,6 @@ class GBClassifier:
         :param Y_train: Training value sample
         :param x_test: Test data sample
         :param y_test: Test value sample
-        :return: None
         """
         self.__X_train, self.__x_test, self.__Y_train, self.__y_test = X_train, x_test, Y_train, y_test
         self.__is_dataset_set = True
@@ -541,7 +520,6 @@ class GBClassifier:
     def __get_default_model_fit_time(self) -> float:
         """
         This method return time of fit model with defualt params
-        :return: time of fit model with defualt params
         """
         time_start = time.time()
         model = GradientBoostingClassifier(verbose=0,
