@@ -1,6 +1,6 @@
 from prettytable import PrettyTable
-
 from RA.DataSet.DataSet import *
+from RA.DataSet.enum_dataset_status import *
 from RA.Manager.Regression import *
 from RA.Manager.Classification import *
 
@@ -12,7 +12,7 @@ class Manager:
         :param path: The path to the project folder
         :param project_name: The name of this project
         """
-        self.set_project_name(project_name)
+        self.__project_name = project_name
         self.__path = path
         self.__project_path = self.__create_project_folder(path=path)
         self.__datasets = {}
@@ -46,6 +46,40 @@ class Manager:
     def __len__(self) -> int:
         return len(self.__datasets) + len(self.__models)
 
+    @property
+    def project_name(self) -> str:
+        """
+        This property return the name of this project
+        """
+        return self.__project_name
+
+    @project_name.setter
+    def project_name(self, new_project_name: str) -> None:
+        """
+        This property sets the new name of this project
+        :param new_project_name: The new name of this project
+        """
+        if not isinstance(new_project_name, str):
+            raise Exception("The new_project_name must be a string!")
+        if len(new_project_name) == 0:
+            raise Exception("The 'new_project_name' must be longer than 0 characters!")
+        self.__project_name = new_project_name
+
+    @property
+    def path(self) -> str:
+        """
+        This method returns the project path
+        """
+        return self.__project_path
+
+    @path.setter
+    def path(self, new_path: str) -> None:
+        """
+        This property sets a new path of this project
+        :param new_path: new path of project
+        """
+        self.__project_path = self.__create_project_folder(path=new_path)
+
     def __create_project_folder(self, path: str) -> str:
         """
         Creates a folder where all project files will be "stacked"
@@ -61,35 +95,6 @@ class Manager:
             os.makedirs(os.path.join(path, self.__project_name))
         return os.path.join(path, self.__project_name)
 
-    def set_project_name(self, new_project_name: str) -> None:
-        """
-        This method sets the new name of this project
-        :param new_project_name: The new name of this project
-        """
-        if not isinstance(new_project_name, str):
-            raise Exception("The new_project_name must be a string!")
-        if len(new_project_name) == 0:
-            raise Exception("The 'new_project_name' must be longer than 0 characters!")
-        self.__project_name = new_project_name
-
-    def get_project_name(self) -> str:
-        """
-        This method return the name of this project
-        """
-        return self.__project_name
-
-    def set_path(self, new_path: str) -> None:
-        """
-        This method sets a new path of this project
-        :param new_path: new path of project
-        """
-        self.__project_path = self.__create_project_folder(path=new_path)
-
-    def get_path(self) -> str:
-        """
-        This method returns the project path
-        """
-        return self.__project_path
 
     def DataSet(self, dataset_name: str) -> DataSet:
         """
